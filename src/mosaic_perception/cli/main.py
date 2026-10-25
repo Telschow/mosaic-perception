@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -16,9 +17,23 @@ import numpy as np
 import typer
 from rich.console import Console
 from rich.table import Table
+from scipy.stats import chi2
 
 from .. import __version__
 from ..domain.models import EvaluationResult
+from ..evaluation.registry import (
+    DUPLICATE_SENSITIVITY_GATES_M,
+    POOLED_CHI_SQUARES,
+    POOLED_RATIOS,
+    RESULT_METRICS,
+    MetricSpec,
+    PooledChiSquare,
+    PooledRatio,
+    duplicate_gate_metric,
+    gate_label,
+    metric_names,
+    metric_value,
+)
 from ..evaluation.statistics import paired_difference
 from ..experiment import (
     METHODS,
@@ -32,48 +47,6 @@ from ..scenarios import available_scenarios, resolve_scenario
 
 app = typer.Typer(help="Mosaic: multi-sensor perception tracking workbench")
 console = Console()
-
-_RESULT_FIELDS = [
-    "position_rmse",
-    "velocity_rmse",
-    "precision",
-    "recall",
-    "identity_switches",
-    "track_fragmentation",
-    "matched_samples",
-    "ground_truth_samples",
-    "confirmed_track_samples",
-    "unmatched_ground_truth_samples",
-    "unmatched_track_samples",
-    "coverage_samples",
-    "position_coverage_95",
-    "position_coverage_68",
-    "num_tracks",
-    "num_confirmed_tracks",
-    "num_unmatched_confirmed_tracks",
-    "num_duplicate_tracks",
-    "class_classified_samples",
-    "class_correct_samples",
-    "class_accuracy",
-    "num_duplicate_tracks_gate_1m",
-    "num_duplicate_tracks_gate_2m",
-    "num_duplicate_tracks_gate_3m",
-    "duplicate_track_samples",
-    "mean_age_of_information",
-    "rejected_observations",
-    "rejected_out_of_sequence",
-    "rejected_invalid",
-    "delivered_observations",
-    "pending_observations",
-    "age_samples",
-    "vision_generated",
-    "vision_delivered",
-    "vision_gate_rejected",
-    "vision_lost_competition",
-    "vision_unassigned_other",
-    "vision_invalid_or_stale",
-    "vision_applied",
-]
 
 
 def _parse_seeds(value: str) -> list[int]:
@@ -116,6 +89,11 @@ def _scenario_names(value: str) -> list[str]:
 def _result_payload(result: EvaluationResult, include_frames: bool = False) -> dict[str, Any]:
     """Serialise deterministic scalar metrics without volatile environment data."""
     payload = result.model_dump(mode="json")
+    # Flatten the per-gate duplicate counts into the declared metric names.
+    by_gate = payload.pop("num_duplicate_tracks_by_gate", {})
+    for gate in DUPLICATE_SENSITIVITY_GATES_M:
+        label = gate_label(gate)
+        payload[duplicate_gate_metric(gate)] = by_gate.get(label)
     payload.pop("config", None)
     payload.pop("git_commit", None)
     if not include_frames:
@@ -153,30 +131,59 @@ def _print_pair(pair: PairedRun) -> None:
     console.print(table)
 
 
-def _aggregate(results: list[EvaluationResult]) -> dict[str, Any]:
-    """Aggregate deterministic metrics over seeds (mean and sample std)."""
+def _aggregate(
+    results: list[EvaluationResult],
+    metrics: Sequence[MetricSpec] = RESULT_METRICS,
+    pooled: Sequence[PooledRatio] = POOLED_RATIOS,
+    chi_squares: Sequence[PooledChiSquare] = POOLED_CHI_SQUARES,
+) -> dict[str, Any]:
+    """Aggregate the declared metrics over seeds (mean and sample std, plus pooled ratios)."""
     aggregate: dict[str, Any] = {"num_seeds": len(results)}
-    for field in _RESULT_FIELDS:
+    for spec in metrics:
         values = [
-            float(value) for result in results if (value := getattr(result, field)) is not None
+            value for result in results if (value := metric_value(result, spec.name)) is not None
         ]
         if not values:
-            aggregate[field] = None
-            aggregate[f"{field}_std"] = None
+            aggregate[spec.name] = None
+            aggregate[f"{spec.name}_std"] = None
             continue
-        aggregate[field] = float(np.mean(values))
-        aggregate[f"{field}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
-    classified = sum(result.class_classified_samples for result in results)
-    matched = sum(result.matched_samples for result in results)
-    correct = sum(result.class_correct_samples for result in results)
-    # Pooled over seeds so a seed with very few classified samples cannot dominate.
-    aggregate["class_accuracy_pooled"] = correct / classified if classified else None
-    aggregate["class_classified_fraction_pooled"] = classified / matched if matched else None
+        aggregate[spec.name] = float(np.mean(values))
+        aggregate[f"{spec.name}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+    for ratio in pooled:
+        # Pooled over seeds so a seed with very few samples cannot dominate.
+        numerator = sum(metric_value(result, ratio.numerator) or 0.0 for result in results)
+        denominator = sum(metric_value(result, ratio.denominator) or 0.0 for result in results)
+        aggregate[ratio.name] = numerator / denominator if denominator else None
+    for stat in chi_squares:
+        total = sum(metric_value(result, stat.total) or 0.0 for result in results)
+        if stat.dof_metric is not None:
+            dof = int(sum(metric_value(result, stat.dof_metric) or 0.0 for result in results))
+        else:
+            assert stat.samples is not None
+            samples = sum(metric_value(result, stat.samples) or 0.0 for result in results)
+            dof = int(samples) * stat.dof_per_sample
+        if dof > 0:
+            aggregate[stat.name] = total / dof
+            aggregate[f"{stat.name}_low"] = float(chi2.ppf(0.025, dof)) / dof
+            aggregate[f"{stat.name}_high"] = float(chi2.ppf(0.975, dof)) / dof
+            aggregate[f"{stat.name}_dof"] = dof
+        else:
+            for suffix in ("", "_low", "_high", "_dof"):
+                aggregate[f"{stat.name}{suffix}"] = None
     return aggregate
 
 
 _BASELINE, _TREATMENT = METHODS  # paired comparison: treatment minus baseline
-_PAIRED_METRICS = ("position_rmse", "recall", "precision", "position_coverage_95")
+_PAIRED_METRICS = (
+    "position_rmse",
+    "position_rmse_distance_only",
+    "recall",
+    "precision",
+    "position_coverage_95",
+    "mota",
+    "idf1",
+    "gospa_p1",
+)
 
 
 def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -196,8 +203,10 @@ def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
     return summary
 
 
-def _write_per_seed_csv(path: Path, rows: list[dict[str, Any]]) -> None:
-    columns = ["scenario", "seed", "method", *_RESULT_FIELDS]
+def _write_per_seed_csv(
+    path: Path, rows: list[dict[str, Any]], metrics: Sequence[MetricSpec] = RESULT_METRICS
+) -> None:
+    columns = ["scenario", "seed", "method", *metric_names(metrics)]
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
@@ -217,6 +226,7 @@ def _run_experiment(
 ) -> dict[str, Any]:
     commit = current_git_commit()
     scenario_reports: list[dict[str, Any]] = []
+    all_results: list[list[EvaluationResult]] = []
     csv_rows: list[dict[str, Any]] = []
     for scenario_name in scenarios:
         runs: list[dict[str, Any]] = []
@@ -252,6 +262,7 @@ def _run_experiment(
                     }
                 )
             runs.append(run_payload)
+        all_results.extend(results_by_method.values())
         scenario_reports.append(
             {
                 "scenario": first_config,
@@ -261,12 +272,20 @@ def _run_experiment(
             }
         )
 
+    gates = {r.matching_gate_m for rs in all_results for r in rs}
+    continuities = {r.matching_continuity for rs in all_results for r in rs}
+    if len(gates) != 1 or len(continuities) != 1:
+        raise RuntimeError("results were evaluated with inconsistent matching settings")
+    matching_gate_m = gates.pop()
+    matching_continuity = continuities.pop()
+
     payload: dict[str, Any] = {
         "schema_version": 2,
         "command": command,
         "code": {"package_version": __version__, "git_commit": commit},
         "protocol": {
-            "matching_gate_m": 2.0,
+            "matching_gate_m": matching_gate_m,
+            "matching_continuity": matching_continuity,
             "position_coverage_95_threshold": 5.991,
             "seed_group": ("development" if max(seeds) <= 24 else "custom_or_held_out"),
             "seeds": seeds,

@@ -310,10 +310,10 @@ def test_duplicate_counts_depend_on_matching_gate():
         make_snapshot(0.0, "track_far_dup", (2.5, 0.0)),  # inside 3 m only
     ]
     result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
-    assert result.num_duplicate_tracks_gate_1m == 0
-    assert result.num_duplicate_tracks_gate_2m == 1
-    assert result.num_duplicate_tracks_gate_3m == 2
-    assert result.num_duplicate_tracks == result.num_duplicate_tracks_gate_2m
+    assert result.num_duplicate_tracks_by_gate["1m"] == 0
+    assert result.num_duplicate_tracks_by_gate["2m"] == 1
+    assert result.num_duplicate_tracks_by_gate["3m"] == 2
+    assert result.num_duplicate_tracks == result.num_duplicate_tracks_by_gate["2m"]
 
 
 def test_sensitivity_fields_are_independent_of_the_headline_gate():
@@ -325,9 +325,9 @@ def test_sensitivity_fields_are_independent_of_the_headline_gate():
     headline_1m = TrackingEvaluator(match_gate_m=1.0).evaluate(snapshots, [world])
     headline_3m = TrackingEvaluator(match_gate_m=3.0).evaluate(snapshots, [world])
     for result in (headline_1m, headline_3m):
-        assert result.num_duplicate_tracks_gate_1m == 0
-        assert result.num_duplicate_tracks_gate_2m == 1
-        assert result.num_duplicate_tracks_gate_3m == 1
+        assert result.num_duplicate_tracks_by_gate["1m"] == 0
+        assert result.num_duplicate_tracks_by_gate["2m"] == 1
+        assert result.num_duplicate_tracks_by_gate["3m"] == 1
 
 
 def _class_world(true_classes):
@@ -419,3 +419,70 @@ def test_aggregate_pooled_class_accuracy_is_undefined_without_classified_samples
     )
     assert aggregate["class_accuracy_pooled"] is None
     assert aggregate["class_classified_fraction_pooled"] == 0.0
+
+
+def test_evaluate_reports_perfect_scores_for_exact_tracking():
+    worlds = [
+        make_world_state(round(0.1 * i, 6), {"a": ((float(i), 0.0), (1.0, 0.0))}) for i in range(4)
+    ]
+    snapshots = [
+        make_snapshot(round(0.1 * i, 6), "t1", (float(i), 0.0), (1.0, 0.0)) for i in range(4)
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.mota == pytest.approx(1.0)
+    assert result.idf1 == pytest.approx(1.0)
+    assert result.idp == pytest.approx(1.0) and result.idr == pytest.approx(1.0)
+    assert result.gospa_p1 == pytest.approx(0.0)
+    assert result.gospa_p2 == pytest.approx(0.0)
+
+
+def test_evaluate_scores_a_duplicate_track_in_idf1_and_mota():
+    world = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "t_main", (0.1, 0.0)),
+        make_snapshot(0.0, "t_dup", (0.9, 0.0)),
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.mota == pytest.approx(0.0)  # 1 - (0 + 1 FP + 0)/1
+    assert result.idp == pytest.approx(0.5)
+    assert result.idr == pytest.approx(1.0)
+    assert result.idf1 == pytest.approx(2 / 3)
+
+
+def _flip_inputs():
+    worlds = [make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0))}) for i in range(2)]
+    snapshots = [
+        make_snapshot(0.0, "t1", (0.1, 0.0)),
+        make_snapshot(0.0, "t2", (0.5, 0.0)),
+        make_snapshot(0.1, "t1", (0.6, 0.0)),
+        make_snapshot(0.1, "t2", (0.5, 0.0)),
+    ]
+    return snapshots, worlds
+
+
+def test_headline_matching_prefers_the_previous_track_and_reports_distance_only_switches():
+    snapshots, worlds = _flip_inputs()
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.matching_continuity is True
+    assert result.identity_switches == 0
+    assert result.identity_switches_distance_only == 1
+
+
+def test_distance_only_matching_can_be_selected_explicitly():
+    snapshots, worlds = _flip_inputs()
+    result = TrackingEvaluator(match_gate_m=2.0, continuity=False).evaluate(snapshots, worlds)
+    assert result.matching_continuity is False
+    assert result.identity_switches == 1
+    assert result.identity_switches_distance_only == 1
+
+
+def test_distance_only_rmse_is_reported_next_to_the_headline_rmse():
+    snapshots, worlds = _flip_inputs()
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    # Continuity pairs t1 in both frames (errors 0.1, 0.6); distance-only pairs t1 then t2
+    # (errors 0.1, 0.5).
+    assert result.position_rmse == pytest.approx(((0.1**2 + 0.6**2) / 2) ** 0.5)
+    assert result.position_rmse_distance_only == pytest.approx(((0.1**2 + 0.5**2) / 2) ** 0.5)
+
+    plain = TrackingEvaluator(match_gate_m=2.0, continuity=False).evaluate(snapshots, worlds)
+    assert plain.position_rmse == pytest.approx(plain.position_rmse_distance_only)

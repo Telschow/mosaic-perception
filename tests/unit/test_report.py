@@ -142,3 +142,35 @@ def test_seed_prose_follows_the_seed_group():
     text = render_report(other)
     assert "includes seeds outside the development range" in text
     assert "no held-out claim is made" not in text
+
+
+def test_consistency_table_shows_pooled_values_intervals_and_position():
+    payload = _payload()
+    fused = payload["scenarios"][0]["aggregate"]["fused"]
+    fused.update(
+        anees_position_per_dof_pooled=1.02,
+        anees_position_per_dof_pooled_low=0.95,
+        anees_position_per_dof_pooled_high=1.05,
+        anees_velocity_per_dof_pooled=1.80,
+        anees_velocity_per_dof_pooled_low=0.90,
+        anees_velocity_per_dof_pooled_high=1.10,
+        anis_pooled=0.70,
+        anis_pooled_low=0.90,
+        anis_pooled_high=1.10,
+        nees_samples=40.0,
+        nis_updates=55.0,
+        unmatched_ground_truth_samples=3.0,
+    )
+    text = render_report(payload)
+    assert "## Estimator consistency (NEES and NIS)" in text
+    assert "1.020 [0.950, 1.050] within" in text
+    assert "1.800 [0.900, 1.100] above" in text
+    assert "0.700 [0.900, 1.100] below" in text
+    # The range-only row has no pooled values: N/A, not zero.
+    assert "| toy | range_only | N/A | N/A | N/A |" in text
+
+
+def test_paired_section_states_which_direction_favours_fusion():
+    text = render_report(_payload())
+    assert "Lower is" in text and "better for the RMSE metrics and GOSPA" in text
+    assert "MOTA, IDF1 and GOSPA (interval excludes zero)" in text

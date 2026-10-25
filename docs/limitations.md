@@ -31,18 +31,18 @@
   when no object is ever matched and says nothing about identity (see
   `identity_switches`).
 - Duplicate-track counts depend on the matching gate. In the development
-  benchmark the fused count in `uncertainty_miscalibration` was 22.8, 26.1 and
-  26.3 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 0.5 and
-  1.4, so the choice of gate changes both the size and the ranking of the
+  benchmark the fused count in `uncertainty_miscalibration` was 34.2, 38.9 and
+  39.3 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 1.8 and
+  5.7, so the choice of gate changes both the size and the ranking of the
   effect. None of the gates is validated as the right one.
 - Class accuracy is evaluated over matched samples with a known estimate and a
   known true class only. Classes come from a synthetic confusion model, so the
   number says nothing about real classifiers; range-only runs have no class
   information (`N/A`). The scenario value is an unweighted mean of per-seed
   accuracies and can rest on very few samples: in
-  `sensor_disagreement_large_bias` only 12.0 samples per seed are classified
-  (7 of 25 seeds have any, 4.0% of matched samples), so its unweighted 0.429 is
-  not a precise estimate; the pooled value is 0.298. The report shows the
+  `sensor_disagreement_large_bias` only 12.8 samples per seed are classified
+  (7 of 25 seeds have any, 4.3% of matched samples), so its unweighted 0.429 is
+  not a precise estimate; the pooled value is 0.320. The report shows the
   unweighted mean, the pooled accuracy and the classified fraction side by side.
 
 ## Timing and delivery
@@ -90,6 +90,18 @@
 - The checked-in benchmark uses **development seeds 0–24 only**. Seeds 25–49 are
   reserved and have not been run, so no held-out or generalization claim is
   made.
+- Position RMSE also depends on the matcher: the continuity preference can keep an
+  object paired with a farther duplicate track, which raises RMSE, while a
+  distance-only matcher picks the nearest track and flatters accuracy when
+  duplicates exist. Both are reported (`position_rmse`,
+  `position_rmse_distance_only`) with paired differences, and neither matcher
+  is ground truth.
+- Identity switches depend on the matcher: a distance-only matcher flipped between
+  nearby tracks and reported about 38% more switches than the continuity-preferring
+  matcher adopted as the headline (351.6 vs 217.6, summed per-seed means over the 15
+  development scenarios and both methods), and it reversed the fused-versus-range
+  ordering in some scenarios. Both counts are reported; neither is ground truth
+  about the tracker's identity behaviour.
 - Matching uses a 2.0 m Euclidean gate at each timestamp. Different gates can
   change precision, recall and the set of matched samples.
 - Precision is defined per confirmed/coasting track sample, not per track
@@ -106,6 +118,11 @@
   vision acceptance table). `sensor_disagreement_within_gate` (0.015 rad) was
   fixed in advance, not tuned, and measures the effect of fusing accepted
   biased observations. Neither generalizes to real sensors.
+- Estimator consistency is reported as NEES (matched samples only, so conditioned
+  on the 2 m gate) and NIS (every applied update, truncated by gating), each per
+  degree of freedom with a chi-square interval. The intervals treat samples as
+  independent although samples within a track are correlated, so they are
+  optimistic; the report shows how many ground-truth samples the gate excludes.
 - Coverage is empirical and only defined over matched samples. It is not a
   detection or association calibration metric.
 - Reported covariance can be badly miscalibrated. In the checked-in

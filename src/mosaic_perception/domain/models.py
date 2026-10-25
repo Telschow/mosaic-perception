@@ -352,6 +352,10 @@ class ObservationStatistics(BaseModel):
     vision_applied: int = 0
     # Delivered but rejected before/after association (stale, invalid, update failure)
     vision_invalid_or_stale: int = 0
+    # Normalised innovation squared over applied updates
+    nis_sum: float = 0.0
+    nis_dof_sum: int = 0
+    nis_updates: int = 0
 
 
 class EvaluationResult(BaseModel):
@@ -385,6 +389,7 @@ class EvaluationResult(BaseModel):
     coverage_samples: int = 0
     evaluated_frames: int = 0
     matching_gate_m: float = 2.0
+    matching_continuity: bool = True
 
     # Timing
     mean_age_of_information: float | None = None
@@ -404,6 +409,16 @@ class EvaluationResult(BaseModel):
     vision_applied: int = 0
     # Delivered but rejected before/after association (stale, invalid, update failure)
     vision_invalid_or_stale: int = 0
+    # Estimator consistency: NIS from filter innovations, NEES over matched samples
+    nis_sum: float = 0.0
+    nis_dof_sum: int = 0
+    nis_updates: int = 0
+    anis: float | None = None
+    nees_samples: int = 0
+    nees_position_sum: float = 0.0
+    nees_velocity_sum: float = 0.0
+    anees_position: float | None = None
+    anees_velocity: float | None = None
 
     # Uncertainty calibration
     position_coverage_95: float | None = None
@@ -414,14 +429,21 @@ class EvaluationResult(BaseModel):
     num_confirmed_tracks: int = 0
     num_unmatched_confirmed_tracks: int = 0
     num_duplicate_tracks: int = 0
+    # Standard aggregate tracking scores (CLEAR-MOT, identity, GOSPA)
+    identity_switches_distance_only: int | None = None
+    position_rmse_distance_only: float | None = None
+    mota: float | None = None
+    idf1: float | None = None
+    idp: float | None = None
+    idr: float | None = None
+    gospa_p1: float | None = None
+    gospa_p2: float | None = None
     # Class estimate accuracy over matched samples with a known estimate and known truth
     class_classified_samples: int = 0
     class_correct_samples: int = 0
     class_accuracy: float | None = None
     # Duplicate-track sensitivity to the matching gate (fixed, preregistered gates)
-    num_duplicate_tracks_gate_1m: int = 0
-    num_duplicate_tracks_gate_2m: int = 0
-    num_duplicate_tracks_gate_3m: int = 0
+    num_duplicate_tracks_by_gate: dict[str, int] = Field(default_factory=dict)
     duplicate_track_samples: int = 0
 
     # Raw data for detailed analysis

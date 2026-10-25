@@ -44,13 +44,26 @@ def index_snapshots(snapshots: list[TrackSnapshot]) -> dict[float, dict[str, Tra
     return by_time
 
 
+# Cost reduction for re-using last frame's pairing. Larger than any in-gate distance, so a
+# still-valid previous pairing always beats a closer alternative (as in TrackEval's CLEAR).
+_CONTINUITY_BONUS = 1_000.0
+
+
 def match_frames(
     snapshots_by_time: dict[float, dict[str, TrackSnapshot]],
     world_states: list[WorldState],
     gate_m: float,
+    continuity: bool = True,
 ) -> list[FrameMatch]:
-    """Match evaluated tracks to ground truth in every frame."""
+    """Match evaluated tracks to ground truth in every frame.
+
+    With ``continuity`` (the headline setting, as in TrackEval's CLEAR matching) the
+    matcher prefers each object's track from the immediately preceding frame while
+    that pairing remains inside the gate; an object that was unmatched in the
+    preceding frame has no preference. Otherwise matching is distance-only.
+    """
     frames: list[FrameMatch] = []
+    previous: dict[str, str] = {}
     for index, world_state in enumerate(world_states):
         key = round(float(world_state.time), 9)
         tracks = [
@@ -59,7 +72,17 @@ def match_frames(
             if snapshot.status in EVALUATED_STATUSES
         ]
         objects = list(world_state.objects.values())
-        frames.append(match_frame(index, float(world_state.time), tracks, objects, gate_m))
+        frame = match_frame(
+            index,
+            float(world_state.time),
+            tracks,
+            objects,
+            gate_m,
+            previous if continuity else None,
+        )
+        frames.append(frame)
+        # Only the immediately preceding frame's pairing carries a preference.
+        previous = {obj.object_id: snapshot.track_id for snapshot, obj in frame.matched_pairs}
     return frames
 
 
@@ -69,6 +92,7 @@ def match_frame(
     tracks: list[TrackSnapshot],
     objects: list[ObjectState],
     gate_m: float,
+    previous: dict[str, str] | None = None,
 ) -> FrameMatch:
     """One-to-one gated Hungarian matching for a single frame."""
     if not tracks or not objects:
@@ -81,7 +105,13 @@ def match_frame(
     if not np.any(finite):
         return FrameMatch(index, time, tracks, objects, [], len(tracks), len(objects))
 
-    assignment_cost = np.where(finite, distances, 1e9)
+    cost = distances.copy()
+    if previous:
+        for track_index, track in enumerate(tracks):
+            for object_index, obj in enumerate(objects):
+                if previous.get(obj.object_id) == track.track_id:
+                    cost[track_index, object_index] -= _CONTINUITY_BONUS
+    assignment_cost = np.where(finite, cost, 1e9)
     rows, columns = linear_sum_assignment(assignment_cost)
     paired_rows: set[int] = set()
     paired_columns: set[int] = set()

@@ -10,7 +10,13 @@ At each ground-truth timestamp:
 - Candidate tracks are snapshots with status `CONFIRMED` or `COASTING`.
   `TENTATIVE` and `DELETED` snapshots are excluded.
 - Candidate objects are all ground-truth objects at that timestamp.
-- Matching is a one-to-one Hungarian assignment on Euclidean position distance.
+- Matching is a one-to-one Hungarian assignment on Euclidean position distance,
+  preferring each object's track from the immediately preceding frame while that
+  pairing stays inside the gate (the continuity preference of TrackEval's CLEAR
+  matching; an object unmatched in the preceding frame has no preference). A distance-only
+  matcher flips between nearby tracks, which inflates identity switches without
+  changing which samples are matched; `identity_switches_distance_only` reports
+  the count under distance-only matching (issue #17).
 - A pair is admissible only if the distance is at most the matching gate
   (`2.0 m` by default). No object and no track can be matched more than once in
   a frame.
@@ -22,6 +28,7 @@ At each ground-truth timestamp:
 | Metric | Definition | Denominator |
 |---|---|---|
 | `position_rmse` | `sqrt(mean(||p_est - p_true||^2))` over matched samples, metres | matched samples |
+| `position_rmse_distance_only` | `position_rmse` recomputed under a distance-only matcher (each object paired with its nearest in-gate track). It differs from `position_rmse` because the continuity preference can keep a farther track; a gap between the two means the accuracy conclusion depends on the matcher | matched samples (distance-only pairing) |
 | `velocity_rmse` | `sqrt(mean(||v_est - v_true||^2))` over matched samples, m/s | matched samples |
 
 `None`/`N/A` means there were no matched samples. It is not reported as zero.
@@ -32,16 +39,27 @@ At each ground-truth timestamp:
 |---|---|---|
 | `recall` | matched samples / all ground-truth object samples | `ground_truth_samples` |
 | `precision` | matched samples / all confirmed-or-coasting track samples | `confirmed_track_samples` |
-| `identity_switches` | for each object, number of changes in matched track ID between consecutive matched frames | none; `None` if nothing matched |
+| `identity_switches` | for each object, number of changes in matched track ID between consecutive matched frames, under the continuity-preferring matcher | none; `None` if nothing matched |
+| `identity_switches_distance_only` | the same count under a distance-only matcher; the gap to `identity_switches` shows how much the continuity preference matters | none; `None` if nothing matched |
 | `num_unmatched_confirmed_tracks` | confirmed/coasting track IDs that were never matched in any frame. Formerly `num_false_tracks`; renamed because many are duplicates, not spurious objects | count of track IDs |
 | `num_duplicate_tracks` | unmatched confirmed track IDs that, in at least one frame, were unmatched while a ground-truth object lay within the matching gate | count of track IDs |
 | `duplicate_track_samples` | evaluated track snapshots left unmatched in a frame while a ground-truth object lay within the matching gate (the object was claimed by another track) | count of track samples, a subset of `unmatched_track_samples` |
 | `num_duplicate_tracks_gate_1m`, `_2m`, `_3m` | `num_duplicate_tracks` recomputed with a 1.0, 2.0 or 3.0 m matching gate (fixed in advance); the 2 m value equals the headline when the headline gate is 2.0 m | count of track IDs |
 | `class_accuracy` | `class_correct_samples / class_classified_samples` | matched samples where the track's class estimate and the true class are both known (not `UNKNOWN`); `None` if there are none |
 | `class_classified_samples`, `class_correct_samples` | numerator and denominator of `class_accuracy` | count of matched samples |
+| `nees_samples`, `nees_position_sum`, `nees_velocity_sum` | Matched samples with a valid covariance and the sums of their 2-DOF position and velocity normalised estimation error squared (NEES, `e' P^-1 e` with the position or velocity covariance block). Conditioned on the matching gate | matched samples |
+| `anees_position`, `anees_velocity` | Mean NEES per matched sample (`sum / samples`); nominal value 2 for a consistent filter. `None` without samples | `nees_samples` |
+| `nis_updates`, `nis_sum`, `nis_dof_sum` | Applied filter updates, the sum of their normalised innovation squared (`v' S^-1 v`, from the filter's own innovation and covariance) and the sum of their measurement dimensions. No ground truth. Only updates that passed the gate are applied, so NIS is truncated | applied updates |
+| `anis` | `nis_sum / nis_dof_sum`, mean NIS per degree of freedom (nominal 1.0, slightly below under gating). `None` without updates | `nis_dof_sum` |
+| `anees_position_per_dof_pooled`, `anees_velocity_per_dof_pooled`, `anis_pooled` | Pooled over all seeds of a scenario: total NEES (or NIS) divided by the total degrees of freedom (`2 x samples` for NEES, `nis_dof_sum` for NIS). Reported with a two-sided 95% interval from the chi-square quantiles at those degrees of freedom divided by them (`_low`, `_high`, `_dof` in the aggregate). Samples within a track are correlated, so the interval is optimistic | pooled degrees of freedom |
+| `class_accuracy_pooled` | total `class_correct_samples` / total `class_classified_samples` over all seeds of a scenario (a pooled aggregate, not a per-run value) | matched samples with known estimate and truth, summed over seeds; `None` if none |
+| `class_classified_fraction_pooled` | total `class_classified_samples` / total `matched_samples` over all seeds (a pooled aggregate) | matched samples, summed over seeds; `None` if none |
 | `num_tracks` | unique track IDs that appear in any snapshot, including tentative/deleted | count of track IDs |
 | `num_confirmed_tracks` | unique track IDs that were ever confirmed or coasting | count of track IDs |
 | `track_fragmentation` | total interruptions: frames where a matched object goes unmatched and is matched again later, summed over objects; `None` if no object is ever matched | count of interruptions, over objects matched at least once |
+| `mota` | CLEAR-MOT accuracy: `1 - (misses + false positives + identity switches) / ground-truth samples`. Misses are unmatched ground-truth samples, false positives are unmatched evaluated track samples (duplicates included), switches are `identity_switches`. Can be negative; `None` without ground truth. Follows Bernardin and Stiefelhagen's definition as implemented in TrackEval's CLEAR metrics | ground-truth samples |
+| `idf1`, `idp`, `idr` | Trajectory-level identity scores (Ristani et al., 2016): the best global pairing of tracks to objects by co-occurrence within the matching gate gives `IDTP`; `IDP = IDTP/(IDTP+IDFP)`, `IDR = IDTP/(IDTP+IDFN)`, `IDF1 = 2*IDTP/(2*IDTP+IDFP+IDFN)`. A duplicate track adds identity false positives that per-frame matching forgives. IDF1 uses its own global pairing and is independent of the per-frame matcher (and its continuity preference) that `mota`, `identity_switches` and the RMSE metrics use. `None` when the denominator is zero | object and track detections (samples) |
+| `gospa_p1`, `gospa_p2` | Mean per-frame GOSPA distance (Rahmathullah et al., 2017), alpha = 2, cut-off 2.0 m (fixed in advance, equal to the matching gate), `p` = 1 or 2. Per frame `(sum over optimally assigned pairs of min(d, c)^p + c^p/2 * (m + n - 2k))^(1/p)` with `k = min(m, n)`; each missed object or false track costs `c^p/2`. Frames without objects or tracks contribute 0; metres | frames |
 
 The explicit count fields `matched_samples`, `ground_truth_samples`,
 `confirmed_track_samples`, `unmatched_ground_truth_samples`,

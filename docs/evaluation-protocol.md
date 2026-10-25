@@ -60,7 +60,8 @@ identical between methods.
 
 - Candidate tracks: `CONFIRMED` and `COASTING` snapshots only.
 - Matching: one-to-one Hungarian assignment per timestamp with a 2.0 m
-  Euclidean gate.
+  Euclidean gate, preferring each object's previous track while it stays inside
+  the gate. Distance-only identity switches are reported alongside.
 - Accuracy: position and velocity RMSE over matched samples.
 - Association: recall over all ground-truth object samples; precision over all
   confirmed/coasting track samples; identity switches and unmatched confirmed tracks.
