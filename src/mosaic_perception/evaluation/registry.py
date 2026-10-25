@@ -46,6 +46,26 @@ class PooledRatio:
     digits: int = 3
 
 
+@dataclass(frozen=True)
+class PooledChiSquare:
+    """A chi-square consistency statistic pooled over seeds, with a 95% interval.
+
+    ``total`` is summed over seeds; the degrees of freedom are either
+    ``dof_per_sample`` times the summed ``samples`` metric or the summed
+    ``dof_metric``. The pooled value is ``total / dof``, i.e. the statistic per
+    degree of freedom (nominally 1.0), with the two-sided 95% interval from the
+    chi-square quantiles at ``dof`` degrees of freedom divided by ``dof``. Samples are treated as independent, which they are not within a
+    track, so the interval is optimistic.
+    """
+
+    name: str
+    total: str
+    samples: str | None = None
+    dof_per_sample: int = 1
+    dof_metric: str | None = None
+    digits: int = 3
+
+
 # CSV column order follows this tuple.
 RESULT_METRICS: tuple[MetricSpec, ...] = (
     MetricSpec("position_rmse"),
@@ -77,6 +97,15 @@ RESULT_METRICS: tuple[MetricSpec, ...] = (
     MetricSpec("class_accuracy"),
     *(MetricSpec(duplicate_gate_metric(g), 1) for g in DUPLICATE_SENSITIVITY_GATES_M),
     MetricSpec("duplicate_track_samples", 1),
+    MetricSpec("nees_samples", 0),
+    MetricSpec("nees_position_sum", 1),
+    MetricSpec("nees_velocity_sum", 1),
+    MetricSpec("anees_position"),
+    MetricSpec("anees_velocity"),
+    MetricSpec("nis_updates", 1),
+    MetricSpec("nis_sum", 1),
+    MetricSpec("nis_dof_sum", 1),
+    MetricSpec("anis"),
     MetricSpec("mean_age_of_information"),
     MetricSpec("rejected_observations", 1),
     MetricSpec("rejected_out_of_sequence", 1),
@@ -98,9 +127,16 @@ POOLED_RATIOS: tuple[PooledRatio, ...] = (
     PooledRatio("class_classified_fraction_pooled", "class_classified_samples", "matched_samples"),
 )
 
+POOLED_CHI_SQUARES: tuple[PooledChiSquare, ...] = (
+    PooledChiSquare("anees_position_per_dof_pooled", "nees_position_sum", "nees_samples", 2),
+    PooledChiSquare("anees_velocity_per_dof_pooled", "nees_velocity_sum", "nees_samples", 2),
+    PooledChiSquare("anis_pooled", "nis_sum", dof_metric="nis_dof_sum"),
+)
+
 METRIC_DIGITS: dict[str, int] = {
     **{spec.name: spec.digits for spec in RESULT_METRICS},
     **{ratio.name: ratio.digits for ratio in POOLED_RATIOS},
+    **{stat.name: stat.digits for stat in POOLED_CHI_SQUARES},
 }
 
 

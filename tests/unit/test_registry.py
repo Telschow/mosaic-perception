@@ -112,3 +112,65 @@ def test_metric_digits_cover_every_declared_metric_and_ratio():
         assert METRIC_DIGITS[spec.name] == spec.digits
     for ratio in POOLED_RATIOS:
         assert ratio.name in METRIC_DIGITS
+
+
+def test_pooled_chi_square_interval_matches_the_chi_square_quantiles():
+    from scipy.stats import chi2
+
+    results = [
+        EvaluationResult(
+            scenario_name="x",
+            seed=seed,
+            method_name="fused",
+            nees_samples=n,
+            nees_position_sum=total,
+            nees_velocity_sum=total,
+        )
+        for seed, (n, total) in enumerate([(10, 18.0), (30, 66.0)])
+    ]
+    aggregate = _aggregate(results)
+    samples, total = 40, 84.0
+    dof = 2 * samples
+    assert aggregate["anees_position_per_dof_pooled"] == pytest.approx(total / dof)
+    assert aggregate["anees_position_per_dof_pooled_low"] == pytest.approx(
+        chi2.ppf(0.025, dof) / dof
+    )
+    assert aggregate["anees_position_per_dof_pooled_high"] == pytest.approx(
+        chi2.ppf(0.975, dof) / dof
+    )
+    assert aggregate["anees_position_per_dof_pooled_dof"] == dof
+
+
+def test_pooled_nis_uses_the_summed_degrees_of_freedom():
+    from scipy.stats import chi2
+
+    results = [
+        EvaluationResult(
+            scenario_name="x",
+            seed=1,
+            method_name="fused",
+            nis_sum=30.0,
+            nis_dof_sum=25,
+            nis_updates=10,
+        ),
+        EvaluationResult(
+            scenario_name="x",
+            seed=2,
+            method_name="fused",
+            nis_sum=20.0,
+            nis_dof_sum=15,
+            nis_updates=8,
+        ),
+    ]
+    aggregate = _aggregate(results)
+    assert aggregate["anis_pooled"] == pytest.approx(50.0 / 40)
+    assert aggregate["anis_pooled_low"] == pytest.approx(chi2.ppf(0.025, 40) / 40)
+    assert aggregate["anis_pooled_high"] == pytest.approx(chi2.ppf(0.975, 40) / 40)
+
+
+def test_pooled_chi_square_is_undefined_without_samples():
+    result = EvaluationResult(scenario_name="x", seed=1, method_name="fused")
+    aggregate = _aggregate([result])
+    assert aggregate["anees_position_per_dof_pooled"] is None
+    assert aggregate["anees_position_per_dof_pooled_low"] is None
+    assert aggregate["anis_pooled"] is None

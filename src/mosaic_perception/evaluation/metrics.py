@@ -265,6 +265,48 @@ def gospa(frames: list[FrameMatch], cutoff_m: float, p: int, alpha: int = 2) -> 
     return float(np.mean(values))
 
 
+@dataclass(frozen=True)
+class NeesSums:
+    """Sums of normalised estimation error squared over matched samples."""
+
+    samples: int
+    position: float  # sum of 2-DOF position NEES
+    velocity: float  # sum of 2-DOF velocity NEES
+
+
+def nees_sums(frames: list[FrameMatch]) -> NeesSums:
+    """NEES of matched samples, position and velocity from their own covariance blocks.
+
+    Only matched samples contribute (those inside the matching gate), so the
+    statistic is conditioned on that gate; samples with a singular or non-finite
+    covariance are skipped. Samples within one track are correlated.
+    """
+    samples = 0
+    position_sum = velocity_sum = 0.0
+    for frame in frames:
+        for snapshot, truth in frame.matched_pairs:
+            error = snapshot.position() - truth.position.to_array()
+            velocity_error = snapshot.velocity() - truth.velocity.to_array()
+            covariance = np.asarray(snapshot.covariance, dtype=float)
+            try:
+                position_nees = float(error @ np.linalg.solve(covariance[:2, :2], error))
+                velocity_nees = float(
+                    velocity_error @ np.linalg.solve(covariance[2:4, 2:4], velocity_error)
+                )
+            except np.linalg.LinAlgError:
+                continue
+            if (
+                np.isfinite(position_nees)
+                and np.isfinite(velocity_nees)
+                and position_nees >= 0.0
+                and velocity_nees >= 0.0
+            ):
+                samples += 1
+                position_sum += position_nees
+                velocity_sum += velocity_nees
+    return NeesSums(samples, position_sum, velocity_sum)
+
+
 def per_frame_metrics(frames: list[FrameMatch]) -> list[dict]:
     rows: list[dict] = []
     for frame in frames:
@@ -354,6 +396,13 @@ class TrackingEvaluator:
         if classes.classified:
             result.class_accuracy = classes.correct / classes.classified
 
+        nees = nees_sums(frames)
+        result.nees_samples = nees.samples
+        result.nees_position_sum = nees.position
+        result.nees_velocity_sum = nees.velocity
+        if nees.samples:
+            result.anees_position = nees.position / nees.samples
+            result.anees_velocity = nees.velocity / nees.samples
         result.identity_switches = identity_switches(frames)
         result.mota = mota(frames)
         ids = idf1_scores(frames, self.match_gate_m)
@@ -441,3 +490,8 @@ def _copy_observation_statistics(
     result.vision_unassigned_other = statistics.vision_unassigned_other
     result.vision_applied = statistics.vision_applied
     result.vision_invalid_or_stale = statistics.vision_invalid_or_stale
+    result.nis_sum = statistics.nis_sum
+    result.nis_dof_sum = statistics.nis_dof_sum
+    result.nis_updates = statistics.nis_updates
+    if statistics.nis_dof_sum:
+        result.anis = statistics.nis_sum / statistics.nis_dof_sum

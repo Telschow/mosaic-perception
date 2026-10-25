@@ -352,6 +352,10 @@ class ObservationStatistics(BaseModel):
     vision_applied: int = 0
     # Delivered but rejected before/after association (stale, invalid, update failure)
     vision_invalid_or_stale: int = 0
+    # Normalised innovation squared over applied updates
+    nis_sum: float = 0.0
+    nis_dof_sum: int = 0
+    nis_updates: int = 0
 
 
 class EvaluationResult(BaseModel):
@@ -404,6 +408,16 @@ class EvaluationResult(BaseModel):
     vision_applied: int = 0
     # Delivered but rejected before/after association (stale, invalid, update failure)
     vision_invalid_or_stale: int = 0
+    # Estimator consistency: NIS from filter innovations, NEES over matched samples
+    nis_sum: float = 0.0
+    nis_dof_sum: int = 0
+    nis_updates: int = 0
+    anis: float | None = None
+    nees_samples: int = 0
+    nees_position_sum: float = 0.0
+    nees_velocity_sum: float = 0.0
+    anees_position: float | None = None
+    anees_velocity: float | None = None
 
     # Uncertainty calibration
     position_coverage_95: float | None = None

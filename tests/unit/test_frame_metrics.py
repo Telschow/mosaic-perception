@@ -232,3 +232,41 @@ def test_gospa_of_an_empty_frame_is_zero_and_no_frames_is_undefined():
     empty = FrameMatch(0, 0.0, [], [], [], 0, 0)
     assert gospa([empty], 2.0, 1) == 0.0
     assert gospa([], 2.0, 1) is None
+
+
+# --- NEES ------------------------------------------------------------------
+
+from mosaic_perception.evaluation.metrics import nees_sums  # noqa: E402
+
+
+def _nees_frame(position, velocity, covariance, truth_velocity=(0.0, 0.0)):
+    truth = ObjectState(
+        object_id="a",
+        position=Vector2(x=0.0, y=0.0),
+        velocity=Vector2(x=truth_velocity[0], y=truth_velocity[1]),
+    )
+    snapshot = make_snapshot(0.0, "t1", position, velocity, covariance=covariance)
+    return FrameMatch(0, 0.0, [snapshot], [truth], [(snapshot, truth)], 0, 0)
+
+
+def test_nees_position_and_velocity_use_their_own_covariance_blocks():
+    import numpy as np
+
+    frame = _nees_frame(
+        position=(1.0, 0.0),
+        velocity=(2.0, 0.0),
+        covariance=np.diag([4.0, 4.0, 1.0, 1.0]),
+    )
+    sums = nees_sums([frame])
+    assert sums.samples == 1
+    assert sums.position == pytest.approx(0.25)  # 1^2 / 4
+    assert sums.velocity == pytest.approx(4.0)  # 2^2 / 1
+
+
+def test_nees_skips_samples_with_a_singular_covariance():
+    import numpy as np
+
+    frame = _nees_frame((1.0, 0.0), (0.0, 0.0), np.zeros((4, 4)))
+    sums = nees_sums([frame])
+    assert sums.samples == 0
+    assert sums.position == 0.0 and sums.velocity == 0.0

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from mosaic_perception.domain.models import TrackStatus
 from mosaic_perception.tracking import MultiSensorTracker
@@ -413,3 +414,42 @@ def test_gate_lookup_has_no_dimensionless_fallback():
         associator.gate_for("range_bearing", 1)
     with pytest.raises(ValueError):
         associator.gate_for("range_bearing", None)  # type: ignore[arg-type]
+
+
+def test_tracker_records_nis_for_applied_updates():
+    import numpy as np
+
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True)
+    track = _confirmed_track("t0", (10.0, 0.0), 0.01)
+    tracker.tracks[track.track_id] = track
+    state, cov = track.state_array().copy(), track.cov_array().copy()
+
+    obs = vision_observation("v", bearing=0.004)
+    tracker.process_observations([obs], 0.0)
+
+    ekf = ExtendedKalmanFilter(dt=0.1)
+    pose = obs.observer_pose
+    residual, innovation_cov = ekf.innovation(
+        state,
+        cov,
+        np.array([0.004]),
+        ekf.measurement_bearing(state, pose),
+        ekf.jacobian_bearing(state, pose),
+        obs.get_measurement_cov(),
+        (0,),
+    )
+    expected = float(residual @ np.linalg.solve(innovation_cov, residual))
+    stats = tracker.statistics()
+    assert stats.nis_updates == 1
+    assert stats.nis_dof_sum == 1
+    assert stats.nis_sum == pytest.approx(expected)
+
+
+def test_rejected_observations_do_not_contribute_to_nis():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True)
+    tracker.tracks["t0"] = _confirmed_track("t0", (10.0, 0.0), 0.01)
+    tracker.process_observations([vision_observation("far", bearing=0.12)], 0.0)
+    stats = tracker.statistics()
+    assert stats.nis_updates == 0 and stats.nis_sum == 0.0

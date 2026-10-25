@@ -106,6 +106,11 @@
   vision acceptance table). `sensor_disagreement_within_gate` (0.015 rad) was
   fixed in advance, not tuned, and measures the effect of fusing accepted
   biased observations. Neither generalizes to real sensors.
+- Estimator consistency is reported as NEES (matched samples only, so conditioned
+  on the 2 m gate) and NIS (every applied update, truncated by gating), each per
+  degree of freedom with a chi-square interval. The intervals treat samples as
+  independent although samples within a track are correlated, so they are
+  optimistic; the report shows how many ground-truth samples the gate excludes.
 - Coverage is empirical and only defined over matched samples. It is not a
   detection or association calibration metric.
 - Reported covariance can be badly miscalibrated. In the checked-in

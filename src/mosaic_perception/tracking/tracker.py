@@ -91,6 +91,11 @@ class MultiSensorTracker:
         self._vision_unassigned_other = 0
         self._vision_applied = 0
 
+        # Normalised innovation squared over applied updates (consistency check)
+        self._nis_sum = 0.0
+        self._nis_dof_sum = 0
+        self._nis_updates = 0
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -223,6 +228,9 @@ class MultiSensorTracker:
             - self._vision_lost_competition
             - self._vision_unassigned_other
             - self._vision_applied,
+            nis_sum=self._nis_sum,
+            nis_dof_sum=self._nis_dof_sum,
+            nis_updates=self._nis_updates,
         )
 
     def pending_count(self) -> int:
@@ -259,6 +267,9 @@ class MultiSensorTracker:
         self._vision_lost_competition = 0
         self._vision_unassigned_other = 0
         self._vision_applied = 0
+        self._nis_sum = 0.0
+        self._nis_dof_sum = 0
+        self._nis_updates = 0
 
     # ------------------------------------------------------------------
     # Time and delivery queue
@@ -355,30 +366,40 @@ class MultiSensorTracker:
                 )
                 predicted = self.ekf.measurement_range_bearing(state, pose)[:2]
                 jacobian = self.ekf.jacobian_range_bearing(state, pose)[:2, :]
-            state, covariance = self.ekf.update(
-                state,
-                covariance,
-                measurement,
-                jacobian,
-                covariance_measurement,
-                predicted,
-                angle_indices=(1,),
-            )
+            angle_indices: tuple[int, ...] = (1,)
         elif group == "vision_bearing":
             measurement = np.array([observation.measurements["bearing"]])
             predicted = self.ekf.measurement_bearing(state, pose)
             jacobian = self.ekf.jacobian_bearing(state, pose)
-            state, covariance = self.ekf.update(
-                state,
-                covariance,
-                measurement,
-                jacobian,
-                covariance_measurement,
-                predicted,
-                angle_indices=(0,),
-            )
+            angle_indices = (0,)
         else:
             raise ValueError(f"unsupported measurement group {group!r}")
+
+        # Normalised innovation squared of the update about to be applied, computed
+        # from the filter's own quantities only (no ground truth).
+        residual, innovation_cov = self.ekf.innovation(
+            state,
+            covariance,
+            measurement,
+            predicted,
+            jacobian,
+            covariance_measurement,
+            angle_indices,
+        )
+        nis = float(residual @ np.linalg.solve(innovation_cov, residual))
+        state, covariance = self.ekf.update(
+            state,
+            covariance,
+            measurement,
+            jacobian,
+            covariance_measurement,
+            predicted,
+            angle_indices=angle_indices,
+        )
+        if np.isfinite(nis):
+            self._nis_sum += nis
+            self._nis_dof_sum += int(residual.size)
+            self._nis_updates += 1
 
         track.state = np.asarray(state, dtype=float).tolist()
         track.covariance = np.asarray(covariance, dtype=float).tolist()

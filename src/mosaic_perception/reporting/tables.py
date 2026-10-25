@@ -60,6 +60,21 @@ class TableSpec:
     primary: bool = False  # rendered before the paired-difference section
 
 
+def _pooled_interval(name: str) -> Callable[[dict[str, Any]], str]:
+    """Cell showing a pooled per-DOF statistic, its 95% interval and where it falls."""
+
+    def render(aggregate: dict[str, Any]) -> str:
+        value = aggregate.get(name)
+        low = aggregate.get(f"{name}_low")
+        high = aggregate.get(f"{name}_high")
+        if value is None or low is None or high is None:
+            return "N/A"
+        position = "below" if value < low else "above" if value > high else "within"
+        return f"{value:.3f} [{low:.3f}, {high:.3f}] {position}"
+
+    return render
+
+
 def _matched_over_ground_truth(aggregate: dict[str, Any]) -> str:
     matched = format_number(aggregate.get("matched_samples"), METRIC_DIGITS["matched_samples"])
     truth = format_number(
@@ -110,6 +125,33 @@ CLASS_TABLE = TableSpec(
         Column("Pooled", "class_accuracy_pooled"),
         Column("Classified fraction", "class_classified_fraction_pooled"),
         Column("Classified (mean)", "class_classified_samples"),
+    ),
+)
+
+CONSISTENCY_TABLE = TableSpec(
+    heading="Estimator consistency (NEES and NIS)",
+    intro=(
+        "Statistics per degree of freedom, pooled over seeds; the nominal value for a",
+        "consistent filter is 1.0 and the bracket is the two-sided 95% chi-square interval",
+        "for the pooled degrees of freedom. `within`, `above` or `below` says where the value",
+        "falls: above means overconfident, below means underconfident.",
+        "",
+        "- NEES (position and velocity, 2 DOF each) uses only samples matched to a ground-truth",
+        "  object inside the 2 m matching gate, so it is conditioned on that gate;",
+        "  `GT samples outside gate` is the mean number of ground-truth samples excluded.",
+        "- NIS uses the filter's own innovations for every applied update, with no ground",
+        "  truth. Updates exist only after gating, so NIS is truncated and sits slightly",
+        "  below 1.0 even for a correct filter.",
+        "- Samples within one track are correlated and seeds share the scenario, so the",
+        "  intervals assume more independence than there is and are optimistic.",
+    ),
+    columns=(
+        Column("Position NEES per DOF", render=_pooled_interval("anees_position_per_dof_pooled")),
+        Column("Velocity NEES per DOF", render=_pooled_interval("anees_velocity_per_dof_pooled")),
+        Column("NIS per DOF", render=_pooled_interval("anis_pooled")),
+        Column("NEES samples (mean)", "nees_samples"),
+        Column("NIS updates (mean)", "nis_updates"),
+        Column("GT samples outside gate", "unmatched_ground_truth_samples"),
     ),
 )
 
@@ -174,6 +216,7 @@ DELIVERY_TABLE = TableSpec(
 TABLES: tuple[TableSpec, ...] = (
     RESULTS_TABLE,
     CLASS_TABLE,
+    CONSISTENCY_TABLE,
     DUPLICATE_GATE_TABLE,
     VISION_TABLE,
     DELIVERY_TABLE,

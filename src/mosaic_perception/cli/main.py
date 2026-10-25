@@ -17,14 +17,17 @@ import numpy as np
 import typer
 from rich.console import Console
 from rich.table import Table
+from scipy.stats import chi2
 
 from .. import __version__
 from ..domain.models import EvaluationResult
 from ..evaluation.registry import (
     DUPLICATE_SENSITIVITY_GATES_M,
+    POOLED_CHI_SQUARES,
     POOLED_RATIOS,
     RESULT_METRICS,
     MetricSpec,
+    PooledChiSquare,
     PooledRatio,
     duplicate_gate_metric,
     gate_label,
@@ -132,6 +135,7 @@ def _aggregate(
     results: list[EvaluationResult],
     metrics: Sequence[MetricSpec] = RESULT_METRICS,
     pooled: Sequence[PooledRatio] = POOLED_RATIOS,
+    chi_squares: Sequence[PooledChiSquare] = POOLED_CHI_SQUARES,
 ) -> dict[str, Any]:
     """Aggregate the declared metrics over seeds (mean and sample std, plus pooled ratios)."""
     aggregate: dict[str, Any] = {"num_seeds": len(results)}
@@ -150,6 +154,22 @@ def _aggregate(
         numerator = sum(metric_value(result, ratio.numerator) or 0.0 for result in results)
         denominator = sum(metric_value(result, ratio.denominator) or 0.0 for result in results)
         aggregate[ratio.name] = numerator / denominator if denominator else None
+    for stat in chi_squares:
+        total = sum(metric_value(result, stat.total) or 0.0 for result in results)
+        if stat.dof_metric is not None:
+            dof = int(sum(metric_value(result, stat.dof_metric) or 0.0 for result in results))
+        else:
+            assert stat.samples is not None
+            samples = sum(metric_value(result, stat.samples) or 0.0 for result in results)
+            dof = int(samples) * stat.dof_per_sample
+        if dof > 0:
+            aggregate[stat.name] = total / dof
+            aggregate[f"{stat.name}_low"] = float(chi2.ppf(0.025, dof)) / dof
+            aggregate[f"{stat.name}_high"] = float(chi2.ppf(0.975, dof)) / dof
+            aggregate[f"{stat.name}_dof"] = dof
+        else:
+            for suffix in ("", "_low", "_high", "_dof"):
+                aggregate[f"{stat.name}{suffix}"] = None
     return aggregate
 
 

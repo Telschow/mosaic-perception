@@ -63,6 +63,12 @@ _Avoid_: Identity accuracy
 **GOSPA**:
 A per-frame distance between the set of ground-truth objects and the set of tracks that charges localisation error, missed objects and false tracks in one number.
 
+**NEES**:
+Normalised estimation error squared: a track's error against ground truth weighted by its own reported covariance; nominally equal to the number of dimensions.
+
+**NIS**:
+Normalised innovation squared: a measurement residual weighted by the filter's own innovation covariance, computed without ground truth.
+
 **Interruption**:
 A gap of one or more evaluated frames between two frames in which a true object is matched; summed over objects it is track fragmentation.
 _Avoid_: Break, dropout (a sensor concept)
