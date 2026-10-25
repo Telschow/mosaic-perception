@@ -117,10 +117,11 @@ In particular, this project does **not** claim:
 
 ## Type checking and CI
 
-- Supported CI (`.github/workflows/ci.yml`) runs `ruff check src tests`,
-  `ruff format --check src tests`, `pytest` and the `mosaic run` / `mosaic
-  evaluate` smoke tests on Python 3.12. It does **not** run `mypy`.
-- `uv run mypy src` currently reports 9 errors in 5 files. They predate the
-  audit-conditions work and have not been fixed or suppressed; `mypy` is
-  therefore a known-failing local check, not a CI gate.
-
+- Supported CI (`.github/workflows/ci.yml`) runs, on Python 3.12:
+  `ruff check src tests`, `ruff format --check .` (full tree), `mypy src`,
+  `pytest`, and smoke tests of `mosaic run`, `evaluate`, `compare` and
+  `benchmark` (the last two also check that the three canonical artifacts are
+  written).
+- Type checking uses `scipy-stubs` from the dev dependencies; no
+  `type: ignore` comments or config-level suppressions are used for the source
+  package.
