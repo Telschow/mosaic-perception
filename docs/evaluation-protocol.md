@@ -54,7 +54,7 @@ identical between methods.
   Euclidean gate.
 - Accuracy: position and velocity RMSE over matched samples.
 - Association: recall over all ground-truth object samples; precision over all
-  confirmed/coasting track samples; identity switches and false tracks.
+  confirmed/coasting track samples; identity switches and unmatched confirmed tracks.
 - Calibration: 95% and 68% empirical coverage using χ²(2, ·) thresholds.
 - Delivery: delivered, rejected, out-of-sequence, invalid, pending and mean AoI.
 

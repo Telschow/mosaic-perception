@@ -28,7 +28,7 @@ uv run mosaic run --scenario nominal --seed 1 --duration 10.0
 
 "Both methods see the same world and the same range stream. The fused run adds
 vision bearings only. The table reports position/velocity RMSE, recall,
-precision, coverage, matched samples and false tracks."
+precision, coverage, matched samples and unmatched confirmed tracks."
 
 ### 3) Multi-seed evidence (30–40 s)
 

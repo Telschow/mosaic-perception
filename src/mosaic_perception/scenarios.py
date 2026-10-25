@@ -124,7 +124,7 @@ PRESETS: dict[str, ScenarioPreset] = {
             "False alarms create spurious tentative tracks and can steal "
             "associations; precision and false-track counts should worsen."
         ),
-        relevant_metrics=["position_rmse", "precision", "num_false_tracks"],
+        relevant_metrics=["position_rmse", "precision", "num_unmatched_confirmed_tracks"],
         range_overrides={"false_alarm_rate": 1.0},
         vision_overrides={"false_alarm_rate": 3.0},
     ),
@@ -170,7 +170,7 @@ PRESETS: dict[str, ScenarioPreset] = {
             "coverage",
             "precision",
             "recall",
-            "num_false_tracks",
+            "num_unmatched_confirmed_tracks",
             "vision_generated",
             "vision_delivered",
             "vision_gate_rejected",

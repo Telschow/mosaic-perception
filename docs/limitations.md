@@ -114,3 +114,13 @@ In particular, this project does **not** claim:
 - that the tracker is calibrated;
 - that results transfer to real sensors;
 - that held-out performance has been measured.
+
+## Type checking and CI
+
+- Supported CI (`.github/workflows/ci.yml`) runs `ruff check src tests`,
+  `ruff format --check src tests`, `pytest` and the `mosaic run` / `mosaic
+  evaluate` smoke tests on Python 3.12. It does **not** run `mypy`.
+- `uv run mypy src` currently reports 9 errors in 5 files. They predate the
+  audit-conditions work and have not been fixed or suppressed; `mypy` is
+  therefore a known-failing local check, not a CI gate.
+

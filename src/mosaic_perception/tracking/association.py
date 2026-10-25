@@ -45,18 +45,13 @@ class GroupAssociation:
 
 # 95% chi-square gates with degrees of freedom equal to the measurement
 # dimension: bearing-only is 1-DOF, range/bearing is 2-DOF,
-# range/bearing/range-rate is 3-DOF.
-# Keys are "group:dimension" (e.g., "range_bearing:2", "range_bearing:3").
-# A plain group name without dimension falls back to the maximum dimension
-# for that group (for backward compatibility with explicit gate configs).
+# range/bearing/range-rate is 3-DOF. Keys are "group:dimension". There is
+# deliberately no dimension-less fallback: a measurement whose dimension has no
+# configured gate raises instead of silently using a different DOF.
 DEFAULT_GATES: dict[str, float] = {
-    "range_bearing:1": float(chi2.ppf(0.95, 1)),
     "range_bearing:2": float(chi2.ppf(0.95, 2)),
     "range_bearing:3": float(chi2.ppf(0.95, 3)),
     "vision_bearing:1": float(chi2.ppf(0.95, 1)),
-    # Legacy keys without dimension (deprecated, for config compatibility)
-    "range_bearing": float(chi2.ppf(0.95, 3)),
-    "vision_bearing": float(chi2.ppf(0.95, 1)),
 }
 
 
@@ -68,21 +63,12 @@ class GatedHungarianAssociator:
         if gates:
             self.gates.update({key: float(value) for key, value in gates.items()})
 
-    def gate_for(self, measurement_group: str, dimension: int | None = None) -> float:
-        """Return the gate threshold for a measurement group and dimension.
-
-        If ``dimension`` is provided, the method looks up the dimension-specific
-        key (e.g., ``"range_bearing:2"``). If not found, it falls back to the
-        plain group key. If ``dimension`` is None, the plain group key is used
-        directly (legacy behavior).
-        """
-        if dimension is not None:
-            dim_key = f"{measurement_group}:{dimension}"
-            if dim_key in self.gates:
-                return self.gates[dim_key]
-        if measurement_group not in self.gates:
-            raise ValueError(f"no association gate configured for {measurement_group!r}")
-        return self.gates[measurement_group]
+    def gate_for(self, measurement_group: str, dimension: int) -> float:
+        """Return the gate for a measurement group and measurement dimension."""
+        key = f"{measurement_group}:{dimension}"
+        if key not in self.gates:
+            raise ValueError(f"no association gate configured for {key!r}")
+        return self.gates[key]
 
     @staticmethod
     def _measurement(

@@ -398,3 +398,18 @@ def test_cross_modal_observation_not_forced_onto_wrong_track():
     assert obs.associated_track_id is None
     assert tracker.statistics().vision_gate_rejected == 1
     assert tracker.tracks["near_off"].hits == 0
+
+
+def test_gate_lookup_has_no_dimensionless_fallback():
+    import pytest
+
+    from mosaic_perception.tracking.association import GatedHungarianAssociator
+
+    associator = GatedHungarianAssociator()
+    assert associator.gate_for("range_bearing", 2) == pytest.approx(5.9915, abs=1e-3)
+    assert associator.gate_for("range_bearing", 3) == pytest.approx(7.8147, abs=1e-3)
+    assert associator.gate_for("vision_bearing", 1) == pytest.approx(3.8415, abs=1e-3)
+    with pytest.raises(ValueError):
+        associator.gate_for("range_bearing", 1)
+    with pytest.raises(ValueError):
+        associator.gate_for("range_bearing", None)  # type: ignore[arg-type]

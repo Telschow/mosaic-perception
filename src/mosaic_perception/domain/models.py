@@ -410,7 +410,7 @@ class EvaluationResult(BaseModel):
     # Track statistics
     num_tracks: int = 0
     num_confirmed_tracks: int = 0
-    num_false_tracks: int = 0
+    num_unmatched_confirmed_tracks: int = 0
 
     # Raw data for detailed analysis
     per_frame_metrics: list[dict[str, Any]] = Field(default_factory=list)

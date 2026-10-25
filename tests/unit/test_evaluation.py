@@ -40,7 +40,7 @@ def test_exact_rmse_matching_and_coverage():
     assert result.identity_switches == 0
     assert result.num_tracks == 2
     assert result.num_confirmed_tracks == 2
-    assert result.num_false_tracks == 0
+    assert result.num_unmatched_confirmed_tracks == 0
     assert result.track_fragmentation is None
     assert result.per_frame_metrics[0]["matched"] == 2
 
@@ -75,7 +75,7 @@ def test_false_track_is_reported_without_inflating_recall():
     assert result.confirmed_track_samples == 2
     assert result.precision == pytest.approx(0.5)
     assert result.recall == pytest.approx(1.0)
-    assert result.num_false_tracks == 1
+    assert result.num_unmatched_confirmed_tracks == 1
     assert result.unmatched_track_samples == 1
     assert result.identity_switches == 0
 
@@ -91,7 +91,7 @@ def test_duplicate_tracks_are_matched_one_to_one():
     assert result.confirmed_track_samples == 2
     assert result.precision == pytest.approx(0.5)
     assert result.recall == pytest.approx(1.0)
-    assert result.num_false_tracks == 1
+    assert result.num_unmatched_confirmed_tracks == 1
     assert result.unmatched_track_samples == 1
 
 
@@ -108,7 +108,7 @@ def test_no_valid_matches_reports_none_for_undefined_rmse_and_coverage():
     assert result.recall == pytest.approx(0.0)
     assert result.precision == pytest.approx(0.0)
     assert result.identity_switches is None
-    assert result.num_false_tracks == 1
+    assert result.num_unmatched_confirmed_tracks == 1
 
 
 def test_coverage_uses_chi_square_threshold_not_fixed_value():

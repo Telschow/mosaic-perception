@@ -57,7 +57,7 @@ trade-off in a controlled synthetic setting with paired comparisons.
   per timestamp with a 2.0 m Euclidean gate.
 - **Metrics**: position/velocity RMSE over matched samples; recall over all
   ground-truth object samples; precision over all confirmed/coasting track
-  samples; identity switches; false tracks; 95%/68% coverage with χ²(2, ·)
+  samples; identity switches; unmatched confirmed tracks; 95%/68% coverage with χ²(2, ·)
   thresholds; delivery statistics and mean AoI.
 - **Honesty**: `track_fragmentation` is `None`/`N/A`; undefined metrics are not
   fabricated zeros; the development-versus-held-out distinction is recorded.
@@ -71,7 +71,7 @@ From `artifacts/benchmark/report.md` (all 11 scenarios, development seeds 1–5,
   within 0.01 m in 3, and worse in 1 (`sensor_disagreement_within_gate`).
   Differences are small.
 - Fused precision is lower in every scenario with defined precision. The
-  metric is sample-based, and the extra false tracks are confirmed tracks never
+  metric is sample-based, and the extra unmatched confirmed tracks are confirmed tracks never
   matched to a true object, all of which an ad hoc check found near true
   objects (consistent with duplicates).
 - **Large bias, rejected by the gate vs. smaller bias, fused.**

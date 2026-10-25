@@ -47,7 +47,7 @@ _RESULT_FIELDS = [
     "position_coverage_68",
     "num_tracks",
     "num_confirmed_tracks",
-    "num_false_tracks",
+    "num_unmatched_confirmed_tracks",
     "mean_age_of_information",
     "rejected_observations",
     "rejected_out_of_sequence",
@@ -127,7 +127,7 @@ def _print_pair(pair: PairedRun) -> None:
         "Cov95",
         "Matched",
         "Tracks",
-        "False tracks",
+        "Unmatched confirmed tracks",
     ):
         table.add_column(column)
     for method in METHODS:
@@ -141,7 +141,7 @@ def _print_pair(pair: PairedRun) -> None:
             _fmt(result.position_coverage_95),
             f"{result.matched_samples}/{result.ground_truth_samples}",
             f"{result.num_confirmed_tracks}/{result.num_tracks}",
-            str(result.num_false_tracks),
+            str(result.num_unmatched_confirmed_tracks),
         )
     console.print(table)
 
@@ -290,7 +290,7 @@ def _render_report(payload: dict[str, Any]) -> str:
         "metric was not defined for any seed (for example, no matched tracks); it is",
         "never a fabricated zero.",
         "",
-        "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | False tracks |",
+        "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks |",
         "|---|---|---|---|---|---|---|---|---|",
     ]
     for scenario_report in payload["scenarios"]:
@@ -308,7 +308,7 @@ def _render_report(payload: dict[str, Any]) -> str:
             )
             lines.append(
                 "| {scenario} | {method} | {rmse} | {vel} | {recall} | {precision} | "
-                "{coverage} | {matched}/{gt} | {false_tracks} |".format(
+                "{coverage} | {matched}/{gt} | {unmatched} |".format(
                     scenario=scenario_name,
                     method=method,
                     rmse=rmse_text,
@@ -318,7 +318,7 @@ def _render_report(payload: dict[str, Any]) -> str:
                     coverage=_fmt(aggregate.get("position_coverage_95")),
                     matched=_fmt(aggregate.get("matched_samples"), 0),
                     gt=_fmt(aggregate.get("ground_truth_samples"), 0),
-                    false_tracks=_fmt(aggregate.get("num_false_tracks"), 1),
+                    unmatched=_fmt(aggregate.get("num_unmatched_confirmed_tracks"), 1),
                 )
             )
 
@@ -467,7 +467,7 @@ def _render_report(payload: dict[str, Any]) -> str:
             "  association errors can all reverse the comparison.",
             "- Precision is sample-based: matched samples over all confirmed/coasting",
             "  track samples. A second confirmed track near a true object (a duplicate)",
-            "  counts against precision and appears in `False tracks` (confirmed track",
+            "  counts against precision and appears in `Unmatched confirmed tracks` (confirmed track",
             "  IDs never matched to a ground-truth object). An ad hoc check of the",
             "  development seeds found every such track within 5 m (median) of a true",
             "  object, consistent with duplicates rather than distant clutter; that",

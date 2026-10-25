@@ -185,7 +185,7 @@ class TrackingEvaluator:
 
         result.num_tracks = len(all_track_ids)
         result.num_confirmed_tracks = len(ever_confirmed)
-        result.num_false_tracks = len(ever_confirmed - matched_track_ids)
+        result.num_unmatched_confirmed_tracks = len(ever_confirmed - matched_track_ids)
 
         result.notes.extend(
             [

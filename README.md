@@ -93,7 +93,7 @@ Metrics and denominators:
 - **Precision**: matched samples / all confirmed-or-coasting track samples.
 - **Identity switches**: changes of matched track ID for the same object
   between consecutive matched frames.
-- **False tracks**: confirmed tracks that were never matched.
+- **Unmatched confirmed tracks** (`num_unmatched_confirmed_tracks`): confirmed tracks that were never matched to a true object. Many appear to be duplicates near true objects, so this is not a count of spurious objects.
 - **95% / 68% coverage**: matched position errors against the reported 2×2
   position covariance, using χ²(2, 0.95) = 5.991 and χ²(2, 0.68) ≈ 2.279.
 - **Age of information**: mean processing age of observations admitted by the
@@ -124,7 +124,7 @@ Headline observations from the current development benchmark:
   precision 0.821 vs 0.643 (n=10).
 - Fused **precision is lower in every scenario with defined precision**.
   Precision is sample-based (matched samples / all confirmed-or-coasting track
-  samples), and the extra "false tracks" are confirmed tracks never matched to
+  samples), and the extra "unmatched confirmed tracks" are confirmed tracks never matched to
   a true object. An ad hoc check found all of them within 5 m (median) of a
   true object, consistent with duplicate confirmed tracks rather than distant
   clutter (not part of the canonical artifacts).

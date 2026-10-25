@@ -33,7 +33,7 @@ At each ground-truth timestamp:
 | `recall` | matched samples / all ground-truth object samples | `ground_truth_samples` |
 | `precision` | matched samples / all confirmed-or-coasting track samples | `confirmed_track_samples` |
 | `identity_switches` | for each object, number of changes in matched track ID between consecutive matched frames | none; `None` if nothing matched |
-| `num_false_tracks` | confirmed/coasting track IDs that were never matched in any frame | count of track IDs |
+| `num_unmatched_confirmed_tracks` | confirmed/coasting track IDs that were never matched in any frame. Formerly `num_false_tracks`; renamed because an ad hoc check found these tracks near true objects, consistent with duplicates rather than spurious objects | count of track IDs |
 | `num_tracks` | unique track IDs that appear in any snapshot, including tentative/deleted | count of track IDs |
 | `num_confirmed_tracks` | unique track IDs that were ever confirmed or coasting | count of track IDs |
 | `track_fragmentation` | **not implemented**; always `None`/`N/A` | not defined |

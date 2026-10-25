@@ -18,7 +18,7 @@ uv run mosaic run --scenario nominal --seed 42 --duration 10.0
 ```
 
 You will see both methods on the same world and range stream, with position and
-velocity RMSE, recall, precision, coverage, matched samples and false tracks.
+velocity RMSE, recall, precision, coverage, matched samples and unmatched confirmed tracks.
 The fused method adds vision observations only.
 
 ## Step 2: Multi-seed comparison (45 seconds)

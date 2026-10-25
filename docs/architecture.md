@@ -73,7 +73,7 @@ Key properties:
 - Snapshot-based, not final-state-based.
 - One-to-one gated Hungarian matching per timestamp; confirmed/coasting only.
 - Accuracy, recall/precision with explicit denominators, identity switches,
-  false tracks, coverage with χ²(2, 0.95) = 5.991 and χ²(2, 0.68), delivery
+  unmatched confirmed tracks, coverage with χ²(2, 0.95) = 5.991 and χ²(2, 0.68), delivery
   statistics and per-frame diagnostics.
 - `track_fragmentation` is explicitly unsupported.
 
