@@ -44,6 +44,40 @@ _VISION_DEFAULTS: dict[str, Any] = {
     "false_alarm_rate": 0.02,
 }
 
+
+def _within_gate_preset(name: str, bearing_bias: float) -> ScenarioPreset:
+    """Within-gate vision bias preset; the three values were preregistered (issue #6).
+
+    0.010, 0.015 and 0.020 rad are fixed and must not be changed or extended
+    after seeing results.
+    """
+    return ScenarioPreset(
+        name=name,
+        description=(
+            f"Moderate vision bearing bias of {bearing_bias:.3f} rad (intended to pass the "
+            "1-DOF gate often) while range-bearing is unbiased."
+        ),
+        hypothesis=(
+            "A bias that passes the association gate will be fused and may "
+            "degrade accuracy. This measures the trade-off between accepting "
+            "more vision observations and introducing systematic error."
+        ),
+        relevant_metrics=[
+            "position_rmse",
+            "coverage",
+            "precision",
+            "recall",
+            "num_unmatched_confirmed_tracks",
+            "num_duplicate_tracks",
+            "vision_generated",
+            "vision_delivered",
+            "vision_gate_rejected",
+            "vision_applied",
+        ],
+        vision_overrides={"bias": {"bearing": bearing_bias}},
+    )
+
+
 PRESETS: dict[str, ScenarioPreset] = {
     "nominal": ScenarioPreset(
         name="nominal",
@@ -157,26 +191,14 @@ PRESETS: dict[str, ScenarioPreset] = {
         ],
         vision_overrides={"bias": {"bearing": 0.12}},
     ),
-    "sensor_disagreement_within_gate": ScenarioPreset(
-        name="sensor_disagreement_within_gate",
-        description="Moderate vision bearing bias of 0.015 rad (within 1-DOF gate) while range-bearing is unbiased.",
-        hypothesis=(
-            "A bias that passes the association gate will be fused and may "
-            "degrade accuracy. This measures the trade-off between accepting "
-            "more vision observations and introducing systematic error."
-        ),
-        relevant_metrics=[
-            "position_rmse",
-            "coverage",
-            "precision",
-            "recall",
-            "num_unmatched_confirmed_tracks",
-            "vision_generated",
-            "vision_delivered",
-            "vision_gate_rejected",
-            "vision_applied",
-        ],
-        vision_overrides={"bias": {"bearing": 0.015}},
+    "sensor_disagreement_within_gate_low": _within_gate_preset(
+        "sensor_disagreement_within_gate_low", 0.010
+    ),
+    "sensor_disagreement_within_gate": _within_gate_preset(
+        "sensor_disagreement_within_gate", 0.015
+    ),
+    "sensor_disagreement_within_gate_high": _within_gate_preset(
+        "sensor_disagreement_within_gate_high", 0.020
     ),
     "moving_observer": ScenarioPreset(
         name="moving_observer",

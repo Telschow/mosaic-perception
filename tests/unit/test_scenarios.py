@@ -81,3 +81,25 @@ def test_sensor_disagreement_scenarios_pin_acceptance_behaviour():
     # Within-gate bias: most are actually fused.
     assert within.vision_applied > 0.5 * within.vision_delivered
     assert within.vision_applied > large.vision_applied
+
+
+def test_within_gate_bias_sweep_uses_only_the_preregistered_values():
+    biases = {
+        name: next(
+            sensor.bias["bearing"]
+            for sensor in resolve_scenario(
+                name, seed=1, duration=1.0, dt=0.1, num_objects=1
+            ).sensors.values()
+            if sensor.sensor_type == "vision_bearing"
+        )
+        for name in (
+            "sensor_disagreement_within_gate_low",
+            "sensor_disagreement_within_gate",
+            "sensor_disagreement_within_gate_high",
+        )
+    }
+    assert biases == {
+        "sensor_disagreement_within_gate_low": 0.010,
+        "sensor_disagreement_within_gate": 0.015,
+        "sensor_disagreement_within_gate_high": 0.020,
+    }
