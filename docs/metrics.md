@@ -11,8 +11,9 @@ At each ground-truth timestamp:
   `TENTATIVE` and `DELETED` snapshots are excluded.
 - Candidate objects are all ground-truth objects at that timestamp.
 - Matching is a one-to-one Hungarian assignment on Euclidean position distance,
-  preferring each object's previous track while that pairing stays inside the
-  gate (the continuity preference of TrackEval's CLEAR matching). A distance-only
+  preferring each object's track from the immediately preceding frame while that
+  pairing stays inside the gate (the continuity preference of TrackEval's CLEAR
+  matching; an object unmatched in the preceding frame has no preference). A distance-only
   matcher flips between nearby tracks, which inflates identity switches without
   changing which samples are matched; `identity_switches_distance_only` reports
   the count under distance-only matching (issue #17).
@@ -57,7 +58,7 @@ At each ground-truth timestamp:
 | `num_confirmed_tracks` | unique track IDs that were ever confirmed or coasting | count of track IDs |
 | `track_fragmentation` | total interruptions: frames where a matched object goes unmatched and is matched again later, summed over objects; `None` if no object is ever matched | count of interruptions, over objects matched at least once |
 | `mota` | CLEAR-MOT accuracy: `1 - (misses + false positives + identity switches) / ground-truth samples`. Misses are unmatched ground-truth samples, false positives are unmatched evaluated track samples (duplicates included), switches are `identity_switches`. Can be negative; `None` without ground truth. Follows Bernardin and Stiefelhagen's definition as implemented in TrackEval's CLEAR metrics | ground-truth samples |
-| `idf1`, `idp`, `idr` | Trajectory-level identity scores (Ristani et al., 2016): the best global pairing of tracks to objects by co-occurrence within the matching gate gives `IDTP`; `IDP = IDTP/(IDTP+IDFP)`, `IDR = IDTP/(IDTP+IDFN)`, `IDF1 = 2*IDTP/(2*IDTP+IDFP+IDFN)`. A duplicate track adds identity false positives that per-frame matching forgives. `None` when the denominator is zero | object and track detections (samples) |
+| `idf1`, `idp`, `idr` | Trajectory-level identity scores (Ristani et al., 2016): the best global pairing of tracks to objects by co-occurrence within the matching gate gives `IDTP`; `IDP = IDTP/(IDTP+IDFP)`, `IDR = IDTP/(IDTP+IDFN)`, `IDF1 = 2*IDTP/(2*IDTP+IDFP+IDFN)`. A duplicate track adds identity false positives that per-frame matching forgives. IDF1 uses its own global pairing and is independent of the per-frame matcher (and its continuity preference) that `mota`, `identity_switches` and the RMSE metrics use. `None` when the denominator is zero | object and track detections (samples) |
 | `gospa_p1`, `gospa_p2` | Mean per-frame GOSPA distance (Rahmathullah et al., 2017), alpha = 2, cut-off 2.0 m (fixed in advance, equal to the matching gate), `p` = 1 or 2. Per frame `(sum over optimally assigned pairs of min(d, c)^p + c^p/2 * (m + n - 2k))^(1/p)` with `k = min(m, n)`; each missed object or false track costs `c^p/2`. Frames without objects or tracks contribute 0; metres | frames |
 
 The explicit count fields `matched_samples`, `ground_truth_samples`,

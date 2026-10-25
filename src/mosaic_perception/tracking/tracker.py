@@ -386,7 +386,10 @@ class MultiSensorTracker:
             covariance_measurement,
             angle_indices,
         )
-        nis = float(residual @ np.linalg.solve(innovation_cov, residual))
+        try:
+            nis = float(residual @ np.linalg.solve(innovation_cov, residual))
+        except np.linalg.LinAlgError:
+            nis = float("nan")  # diagnostic only: never let it break the update
         state, covariance = self.ekf.update(
             state,
             covariance,

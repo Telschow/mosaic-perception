@@ -168,3 +168,9 @@ def test_consistency_table_shows_pooled_values_intervals_and_position():
     assert "0.700 [0.900, 1.100] below" in text
     # The range-only row has no pooled values: N/A, not zero.
     assert "| toy | range_only | N/A | N/A | N/A |" in text
+
+
+def test_paired_section_states_which_direction_favours_fusion():
+    text = render_report(_payload())
+    assert "Lower is" in text and "better for the RMSE metrics and GOSPA" in text
+    assert "MOTA, IDF1 and GOSPA (interval excludes zero)" in text

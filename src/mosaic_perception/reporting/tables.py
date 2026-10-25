@@ -141,7 +141,9 @@ CONSISTENCY_TABLE = TableSpec(
         "",
         "- NEES (position and velocity, 2 DOF each) uses only samples matched to a ground-truth",
         "  object inside the 2 m matching gate, so it is conditioned on that gate;",
-        "  `GT samples outside gate` is the mean number of ground-truth samples excluded.",
+        "  `Unmatched GT samples` is the mean number of ground-truth samples with no matched",
+        "  track (no track inside the gate, or its tracks matched other objects), which are",
+        "  therefore absent from NEES.",
         "- NIS uses the filter's own innovations for every applied update, with no ground",
         "  truth. Updates exist only after gating, so NIS is truncated and sits slightly",
         "  below 1.0 even for a correct filter.",
@@ -154,7 +156,7 @@ CONSISTENCY_TABLE = TableSpec(
         Column("NIS per DOF", render=_pooled_interval("anis_pooled")),
         Column("NEES samples (mean)", "nees_samples"),
         Column("NIS updates (mean)", "nis_updates"),
-        Column("GT samples outside gate", "unmatched_ground_truth_samples"),
+        Column("Unmatched GT samples", "unmatched_ground_truth_samples"),
     ),
 )
 

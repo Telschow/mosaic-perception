@@ -53,12 +53,14 @@ def match_frames(
     snapshots_by_time: dict[float, dict[str, TrackSnapshot]],
     world_states: list[WorldState],
     gate_m: float,
-    continuity: bool = False,
+    continuity: bool = True,
 ) -> list[FrameMatch]:
     """Match evaluated tracks to ground truth in every frame.
 
-    With ``continuity`` the matcher prefers each object's previous track while
-    that pairing remains inside the gate; otherwise matching is distance-only.
+    With ``continuity`` (the headline setting, as in TrackEval's CLEAR matching) the
+    matcher prefers each object's track from the immediately preceding frame while
+    that pairing remains inside the gate; an object that was unmatched in the
+    preceding frame has no preference. Otherwise matching is distance-only.
     """
     frames: list[FrameMatch] = []
     previous: dict[str, str] = {}
@@ -79,8 +81,8 @@ def match_frames(
             previous if continuity else None,
         )
         frames.append(frame)
-        for snapshot, obj in frame.matched_pairs:
-            previous[obj.object_id] = snapshot.track_id
+        # Only the immediately preceding frame's pairing carries a preference.
+        previous = {obj.object_id: snapshot.track_id for snapshot, obj in frame.matched_pairs}
     return frames
 
 

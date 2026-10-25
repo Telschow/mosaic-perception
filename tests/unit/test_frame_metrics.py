@@ -292,7 +292,7 @@ def _flip_scenario():
 
 def test_distance_only_matching_flips_to_the_nearer_track():
     by_time, worlds = _flip_scenario()
-    frames = match_frames(by_time, worlds, gate_m=2.0)
+    frames = match_frames(by_time, worlds, gate_m=2.0, continuity=False)
     assert [pair[0].track_id for f in frames for pair in f.matched_pairs] == ["t1", "t2"]
     assert identity_switches(frames) == 1
 
@@ -320,6 +320,26 @@ def test_continuity_does_not_change_matching_without_ambiguity():
     worlds = [make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0))}) for i in range(3)]
     snapshots = [make_snapshot(0.1 * i, "t1", (0.2, 0.0)) for i in range(3)]
     by_time = index_snapshots(snapshots)
-    plain = match_frames(by_time, worlds, gate_m=2.0)
+    plain = match_frames(by_time, worlds, gate_m=2.0, continuity=False)
     sticky = match_frames(by_time, worlds, gate_m=2.0, continuity=True)
     assert [len(f.matched_pairs) for f in plain] == [len(f.matched_pairs) for f in sticky]
+
+
+def test_continuity_preference_expires_after_an_unmatched_frame():
+    """TrackEval prefers only the previous timestep's pairing, not an old one."""
+    worlds = [make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0))}) for i in range(3)]
+    snapshots = [
+        make_snapshot(0.0, "t_old", (0.1, 0.0)),  # frame 0: matched
+        # frame 1: no tracks at all (object unmatched)
+        make_snapshot(0.2, "t_old", (0.9, 0.0)),  # frame 2: old track farther ...
+        make_snapshot(0.2, "t_new", (0.2, 0.0)),  # ... a new one nearer
+    ]
+    frames = match_frames(index_snapshots(snapshots), worlds, gate_m=2.0, continuity=True)
+    assert [len(f.matched_pairs) for f in frames] == [1, 0, 1]
+    assert frames[2].matched_pairs[0][0].track_id == "t_new"
+
+
+def test_match_frames_defaults_to_the_headline_continuity_matcher():
+    by_time, worlds = _flip_scenario()
+    default = match_frames(by_time, worlds, gate_m=2.0)
+    assert [pair[0].track_id for f in default for pair in f.matched_pairs] == ["t1", "t1"]

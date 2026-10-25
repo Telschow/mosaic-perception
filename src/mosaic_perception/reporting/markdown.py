@@ -78,10 +78,11 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             f"## Paired differences ({paired_treatment} minus {paired_baseline})",
             "",
             "Mean per-seed difference with a two-sided 95% t interval over seeds. Seeds with",
-            "an undefined value on either side are dropped (`n` is the number kept). A",
-            "negative RMSE difference favours fusion; for recall, precision and coverage a",
-            "positive one does. The interval describes seed-to-seed variation in this",
-            "synthetic setup and is not a claim about other worlds.",
+            "an undefined value on either side are dropped (`n` is the number kept). Lower is",
+            "better for the RMSE metrics and GOSPA, so a negative difference favours fusion;",
+            "higher is better for recall, precision, coverage, MOTA and IDF1, so a positive one",
+            "does. The interval describes seed-to-seed variation in this synthetic setup and is",
+            "not a claim about other worlds.",
             "",
             "| Scenario | Metric | n | Mean diff | 95% interval |",
             "|---|---|---|---|---|",
@@ -134,6 +135,12 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
     rmse_better, rmse_worse, rmse_inconclusive = _tally(payload, "position_rmse", True)
     precision_better, precision_worse, _ = _tally(payload, "precision", False)
     coverage_better, coverage_worse, _ = _tally(payload, "position_coverage_95", False)
+    plain_better, plain_worse, plain_inconclusive = _tally(
+        payload, "position_rmse_distance_only", True
+    )
+    mota_better, mota_worse, _ = _tally(payload, "mota", False)
+    idf1_better, idf1_worse, _ = _tally(payload, "idf1", False)
+    gospa_better, gospa_worse, _ = _tally(payload, "gospa_p1", True)
     seed_group = protocol.get("seed_group", "unknown")
     if seed_group == "development":
         seed_note = (
@@ -164,6 +171,8 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             "## Findings",
             "",
             f"- Position RMSE: the paired interval excludes zero in favour of fusion in {rmse_better} scenario(s) and against fusion in {rmse_worse} scenario(s); it includes zero (or has fewer than two seeds) in {rmse_inconclusive} scenario(s).",
+            f"- The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in {plain_better} scenario(s), against fusion in {plain_worse}, and includes zero in {plain_inconclusive}.",
+            f"- MOTA, IDF1 and GOSPA (interval excludes zero): fusion better in {mota_better}, {idf1_better} and {gospa_better} scenario(s) and worse in {mota_worse}, {idf1_worse} and {gospa_worse}, respectively.",
             f"- Fused precision is lower (interval excludes zero) in {precision_worse} scenario(s) and higher in {precision_better}; fused 95% coverage is lower in {coverage_worse} and higher in {coverage_better}. Accuracy alone does not establish that fusion improved association or calibration.",
             "- Fusion is not guaranteed to improve accuracy. Systematic sensor bias,",
             "  miscalibrated uncertainty, missed detections, false observations and",

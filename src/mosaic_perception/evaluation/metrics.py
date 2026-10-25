@@ -413,7 +413,9 @@ class TrackingEvaluator:
             result.anees_velocity = nees.velocity / nees.samples
         result.identity_switches = identity_switches(frames)
         if self.continuity:
-            distance_only = match_frames(snapshots_by_time, world_states, self.match_gate_m)
+            distance_only = match_frames(
+                snapshots_by_time, world_states, self.match_gate_m, continuity=False
+            )
             result.identity_switches_distance_only = identity_switches(distance_only)
             plain_errors = matched_errors(distance_only)
             if plain_errors.position_squared:

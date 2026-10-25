@@ -226,6 +226,7 @@ def _run_experiment(
 ) -> dict[str, Any]:
     commit = current_git_commit()
     scenario_reports: list[dict[str, Any]] = []
+    all_results: list[list[EvaluationResult]] = []
     csv_rows: list[dict[str, Any]] = []
     for scenario_name in scenarios:
         runs: list[dict[str, Any]] = []
@@ -261,6 +262,7 @@ def _run_experiment(
                     }
                 )
             runs.append(run_payload)
+        all_results.extend(results_by_method.values())
         scenario_reports.append(
             {
                 "scenario": first_config,
@@ -270,13 +272,20 @@ def _run_experiment(
             }
         )
 
+    gates = {r.matching_gate_m for rs in all_results for r in rs}
+    continuities = {r.matching_continuity for rs in all_results for r in rs}
+    if len(gates) != 1 or len(continuities) != 1:
+        raise RuntimeError("results were evaluated with inconsistent matching settings")
+    matching_gate_m = gates.pop()
+    matching_continuity = continuities.pop()
+
     payload: dict[str, Any] = {
         "schema_version": 2,
         "command": command,
         "code": {"package_version": __version__, "git_commit": commit},
         "protocol": {
-            "matching_gate_m": 2.0,
-            "matching_continuity": True,
+            "matching_gate_m": matching_gate_m,
+            "matching_continuity": matching_continuity,
             "position_coverage_95_threshold": 5.991,
             "seed_group": ("development" if max(seeds) <= 24 else "custom_or_held_out"),
             "seeds": seeds,
