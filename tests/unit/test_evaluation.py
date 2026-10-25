@@ -419,3 +419,31 @@ def test_aggregate_pooled_class_accuracy_is_undefined_without_classified_samples
     )
     assert aggregate["class_accuracy_pooled"] is None
     assert aggregate["class_classified_fraction_pooled"] == 0.0
+
+
+def test_evaluate_reports_perfect_scores_for_exact_tracking():
+    worlds = [
+        make_world_state(round(0.1 * i, 6), {"a": ((float(i), 0.0), (1.0, 0.0))}) for i in range(4)
+    ]
+    snapshots = [
+        make_snapshot(round(0.1 * i, 6), "t1", (float(i), 0.0), (1.0, 0.0)) for i in range(4)
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.mota == pytest.approx(1.0)
+    assert result.idf1 == pytest.approx(1.0)
+    assert result.idp == pytest.approx(1.0) and result.idr == pytest.approx(1.0)
+    assert result.gospa_p1 == pytest.approx(0.0)
+    assert result.gospa_p2 == pytest.approx(0.0)
+
+
+def test_evaluate_scores_a_duplicate_track_in_idf1_and_mota():
+    world = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "t_main", (0.1, 0.0)),
+        make_snapshot(0.0, "t_dup", (0.9, 0.0)),
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.mota == pytest.approx(0.0)  # 1 - (0 + 1 FP + 0)/1
+    assert result.idp == pytest.approx(0.5)
+    assert result.idr == pytest.approx(1.0)
+    assert result.idf1 == pytest.approx(2 / 3)

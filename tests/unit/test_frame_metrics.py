@@ -126,3 +126,109 @@ def test_matched_errors_and_per_frame_rows():
     rows = per_frame_metrics(frames)
     assert rows[0]["mean_position_error_m"] == pytest.approx(5.0)
     assert rows[0]["matched"] == 1
+
+
+# --- MOTA, IDF1/IDP/IDR, GOSPA -------------------------------------------------
+
+import math  # noqa: E402
+
+from mosaic_perception.evaluation.metrics import gospa, idf1_scores, mota  # noqa: E402
+
+
+def _near(track_id, object_id, index, offset=0.1):
+    """A frame with one object at the origin and one track `offset` m away."""
+    obj = _object(object_id)
+    snapshot = make_snapshot(0.1 * index, track_id, (offset, 0.0))
+    return FrameMatch(
+        index=index,
+        time=0.1 * index,
+        tracks=[snapshot],
+        objects=[obj],
+        matched_pairs=[(snapshot, obj)],
+        unmatched_tracks=0,
+        unmatched_objects=0,
+    )
+
+
+def test_mota_is_one_minus_misses_false_positives_and_switches_over_ground_truth():
+    a = _object("a")
+    spurious = make_snapshot(0.0, "t_far", (30.0, 0.0))
+    frames = [
+        _frame(0, [("t1", (0.0, 0.0), a)]),  # 1 GT, matched
+        _frame(1, [("t2", (0.0, 0.0), a)], unmatched_tracks=[spurious]),  # switch + 1 FP
+        _frame(2, objects=[a]),  # 1 miss
+        _frame(3, [("t2", (0.0, 0.0), a)]),
+    ]
+    # GT = 4, FN = 1, FP = 1, IDSW = 1  ->  1 - 3/4
+    assert mota(frames) == pytest.approx(0.25)
+
+
+def test_mota_can_be_negative_and_is_undefined_without_ground_truth():
+    spurious = [make_snapshot(0.0, f"t{i}", (30.0 + i, 0.0)) for i in range(3)]
+    noisy = _frame(0, objects=[_object("a")], unmatched_tracks=spurious)  # GT 1, FN 1, FP 3
+    assert mota([noisy]) == pytest.approx(1 - 4 / 1)
+    empty = FrameMatch(0, 0.0, [], [], [], 0, 0)
+    assert mota([empty]) is None
+
+
+def test_idf1_follows_the_longest_trajectory_pairing():
+    # Object a is covered by t1 for 3 frames and by t2 for 1 frame.
+    frames = [_near("t1", "a", 0), _near("t1", "a", 1), _near("t1", "a", 2), _near("t2", "a", 3)]
+    scores = idf1_scores(frames, gate_m=2.0)
+    # IDTP = 3, IDFN = 1, IDFP = 1
+    assert scores.idtp == 3 and scores.idfn == 1 and scores.idfp == 1
+    assert scores.idp == pytest.approx(0.75)
+    assert scores.idr == pytest.approx(0.75)
+    assert scores.idf1 == pytest.approx(6 / 8)
+
+
+def test_idf1_is_perfect_for_one_track_per_object_and_undefined_when_empty():
+    frames = [_near("t1", "a", i) for i in range(5)]
+    assert idf1_scores(frames, 2.0).idf1 == pytest.approx(1.0)
+    empty = FrameMatch(0, 0.0, [], [], [], 0, 0)
+    assert idf1_scores([empty], 2.0).idf1 is None
+
+
+def test_idf1_penalises_a_duplicate_track_that_a_per_frame_matcher_forgives():
+    # Each frame: one object, a main track and a duplicate 0.5 m away.
+    obj = _object("a")
+    frames = []
+    for index in range(4):
+        main = make_snapshot(0.1 * index, "t_main", (0.1, 0.0))
+        dup = make_snapshot(0.1 * index, "t_dup", (0.5, 0.0))
+        frames.append(
+            FrameMatch(index, 0.1 * index, [main, dup], [obj], [(main, obj)], 1, 0, [dup])
+        )
+    scores = idf1_scores(frames, 2.0)
+    # IDTP = 4, IDFN = 0, IDFP = 4 (the duplicate's detections)
+    assert (scores.idtp, scores.idfn, scores.idfp) == (4, 0, 4)
+    assert scores.idp == pytest.approx(0.5)
+    assert scores.idr == pytest.approx(1.0)
+    assert scores.idf1 == pytest.approx(8 / 12)
+
+
+def test_gospa_localisation_only():
+    frame = _near("t1", "a", 0, offset=1.0)
+    assert gospa([frame], cutoff_m=2.0, p=1) == pytest.approx(1.0)
+    assert gospa([frame], cutoff_m=2.0, p=2) == pytest.approx(1.0)
+
+
+def test_gospa_missed_object_and_false_track_cost_half_the_cutoff_power_each():
+    missed = _frame(0, objects=[_object("a")])
+    false = _frame(0, unmatched_tracks=[make_snapshot(0.0, "t", (30.0, 0.0))], objects=[])
+    for frame in (missed, false):
+        assert gospa([frame], cutoff_m=2.0, p=1) == pytest.approx(1.0)  # c^p / 2
+        assert gospa([frame], cutoff_m=2.0, p=2) == pytest.approx(math.sqrt(2.0))
+
+
+def test_gospa_caps_distant_pairs_at_the_cutoff_and_averages_over_frames():
+    far = _near("t1", "a", 0, offset=5.0)  # capped at c = 2
+    perfect = _near("t1", "a", 1, offset=0.0)
+    assert gospa([far], cutoff_m=2.0, p=1) == pytest.approx(2.0)
+    assert gospa([far, perfect], cutoff_m=2.0, p=1) == pytest.approx(1.0)
+
+
+def test_gospa_of_an_empty_frame_is_zero_and_no_frames_is_undefined():
+    empty = FrameMatch(0, 0.0, [], [], [], 0, 0)
+    assert gospa([empty], 2.0, 1) == 0.0
+    assert gospa([], 2.0, 1) is None

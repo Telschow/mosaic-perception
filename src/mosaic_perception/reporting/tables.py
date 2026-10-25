@@ -85,6 +85,9 @@ RESULTS_TABLE = TableSpec(
         Column("Unmatched confirmed tracks", "num_unmatched_confirmed_tracks"),
         Column("Duplicate tracks", "num_duplicate_tracks"),
         Column("Fragmentation", "track_fragmentation"),
+        Column("MOTA", "mota"),
+        Column("IDF1", "idf1"),
+        Column("GOSPA (p=1, m)", "gospa_p1"),
     ),
     primary=True,
 )

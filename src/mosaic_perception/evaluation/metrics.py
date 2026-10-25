@@ -15,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 from scipy.stats import chi2
 
 from ..domain.models import (
@@ -27,6 +28,9 @@ from ..domain.models import (
 from .frames import EVALUATED_STATUSES, FrameMatch, index_snapshots, match_frames
 from .registry import DUPLICATE_SENSITIVITY_GATES_M, gate_label
 
+# GOSPA parameters, fixed before any run (issue #14): cut-off equal to the matching
+# gate, alpha = 2, p in {1, 2}.
+GOSPA_CUTOFF_M = 2.0
 _COVERAGE_95 = float(chi2.ppf(0.95, 2))  # 5.991 for two-dimensional position
 _COVERAGE_68 = float(chi2.ppf(0.68, 2))
 
@@ -166,6 +170,101 @@ def interruptions(frames: list[FrameMatch]) -> float | None:
     return float(total)
 
 
+def mota(frames: list[FrameMatch]) -> float | None:
+    """CLEAR-MOT accuracy: 1 - (misses + false positives + identity switches) / ground truth.
+
+    Misses are unmatched ground-truth samples, false positives are unmatched
+    evaluated track samples (duplicates included) and identity switches are
+    counted as in :func:`identity_switches`. Can be negative; undefined without
+    ground truth.
+    """
+    counts = sample_counts(frames)
+    if counts.ground_truth == 0:
+        return None
+    switches = identity_switches(frames) or 0
+    errors = counts.unmatched_ground_truth + counts.unmatched_tracks + switches
+    return 1.0 - errors / counts.ground_truth
+
+
+@dataclass(frozen=True)
+class IdScores:
+    """Trajectory-level identity scores (Ristani et al., 2016)."""
+
+    idtp: int
+    idfn: int
+    idfp: int
+    idp: float | None
+    idr: float | None
+    idf1: float | None
+
+
+def idf1_scores(frames: list[FrameMatch], gate_m: float) -> IdScores:
+    """IDF1, IDP and IDR from the best global pairing of tracks to ground-truth objects.
+
+    A ground-truth object and a track co-occur in a frame when their distance is
+    within ``gate_m``. The global assignment maximises total co-occurrences
+    (equivalent to minimising identity false negatives plus false positives).
+    """
+    object_ids: dict[str, int] = {}
+    track_ids: dict[str, int] = {}
+    pair_counts: dict[tuple[int, int], int] = {}
+    object_detections = 0
+    track_detections = 0
+    for frame in frames:
+        object_detections += len(frame.objects)
+        track_detections += len(frame.tracks)
+        for obj in frame.objects:
+            object_ids.setdefault(obj.object_id, len(object_ids))
+        for track in frame.tracks:
+            track_ids.setdefault(track.track_id, len(track_ids))
+        for track in frame.tracks:
+            for obj in frame.objects:
+                if np.linalg.norm(track.position() - obj.position.to_array()) <= gate_m:
+                    key = (object_ids[obj.object_id], track_ids[track.track_id])
+                    pair_counts[key] = pair_counts.get(key, 0) + 1
+    idtp = 0
+    if pair_counts:
+        overlap = np.zeros((len(object_ids), len(track_ids)))
+        for (row, column), count in pair_counts.items():
+            overlap[row, column] = count
+        rows, columns = linear_sum_assignment(-overlap)
+        idtp = int(overlap[rows, columns].sum())
+    idfn = object_detections - idtp
+    idfp = track_detections - idtp
+    idp = idtp / (idtp + idfp) if (idtp + idfp) else None
+    idr = idtp / (idtp + idfn) if (idtp + idfn) else None
+    denominator = 2 * idtp + idfp + idfn
+    idf1 = 2 * idtp / denominator if denominator else None
+    return IdScores(idtp, idfn, idfp, idp, idr, idf1)
+
+
+def gospa(frames: list[FrameMatch], cutoff_m: float, p: int, alpha: int = 2) -> float | None:
+    """Mean per-frame GOSPA distance (Rahmathullah et al., 2017) with alpha = 2.
+
+    Per frame: ``(sum over assigned pairs of min(d, c)^p + c^p / 2 * (m + n - 2k))^(1/p)``
+    where ``k = min(m, n)`` pairs are assigned by the optimal assignment. Frames
+    with no objects and no tracks contribute 0. ``None`` without frames.
+    """
+    if alpha != 2:
+        raise ValueError("only alpha = 2 is implemented")
+    if not frames:
+        return None
+    values: list[float] = []
+    for frame in frames:
+        m, n = len(frame.objects), len(frame.tracks)
+        total = 0.0
+        if m and n:
+            truth = np.array([obj.position.to_array() for obj in frame.objects])
+            estimates = np.array([track.position() for track in frame.tracks])
+            distances = np.linalg.norm(truth[:, None, :] - estimates[None, :, :], axis=2)
+            cost = np.minimum(distances, cutoff_m) ** p
+            rows, columns = linear_sum_assignment(cost)
+            total += float(cost[rows, columns].sum())
+        total += (cutoff_m**p / 2.0) * abs(m - n)
+        values.append(total ** (1.0 / p))
+    return float(np.mean(values))
+
+
 def per_frame_metrics(frames: list[FrameMatch]) -> list[dict]:
     rows: list[dict] = []
     for frame in frames:
@@ -256,6 +355,11 @@ class TrackingEvaluator:
             result.class_accuracy = classes.correct / classes.classified
 
         result.identity_switches = identity_switches(frames)
+        result.mota = mota(frames)
+        ids = idf1_scores(frames, self.match_gate_m)
+        result.idf1, result.idp, result.idr = ids.idf1, ids.idp, ids.idr
+        result.gospa_p1 = gospa(frames, GOSPA_CUTOFF_M, 1)
+        result.gospa_p2 = gospa(frames, GOSPA_CUTOFF_M, 2)
         result.track_fragmentation = interruptions(frames)
 
         result.num_tracks = len(all_track_ids)
@@ -294,6 +398,12 @@ class TrackingEvaluator:
                 "sample.",
                 "Coverage: matched position errors against the reported 2x2 covariance; "
                 f"95% threshold chi2(2,0.95)={_COVERAGE_95:.3f}.",
+                "MOTA = 1 - (misses + false positives + identity switches) / ground-truth "
+                "samples (can be negative; None without ground truth). IDF1, IDP and IDR "
+                "use the best global track-to-object pairing by co-occurrence within the "
+                "matching gate. GOSPA (alpha=2, cut-off "
+                f"{GOSPA_CUTOFF_M:.1f} m, p=1 and p=2) is the mean per-frame distance over "
+                "frames, where each missed object or false track costs c^p/2.",
                 "track_fragmentation: total interruptions, i.e. frames where a matched "
                 "object goes unmatched and is matched again later, summed over objects "
                 "(None if no object was ever matched). identity_switches counts track ID "

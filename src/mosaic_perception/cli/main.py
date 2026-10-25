@@ -154,7 +154,15 @@ def _aggregate(
 
 
 _BASELINE, _TREATMENT = METHODS  # paired comparison: treatment minus baseline
-_PAIRED_METRICS = ("position_rmse", "recall", "precision", "position_coverage_95")
+_PAIRED_METRICS = (
+    "position_rmse",
+    "recall",
+    "precision",
+    "position_coverage_95",
+    "mota",
+    "idf1",
+    "gospa_p1",
+)
 
 
 def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:

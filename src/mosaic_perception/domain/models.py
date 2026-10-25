@@ -414,6 +414,13 @@ class EvaluationResult(BaseModel):
     num_confirmed_tracks: int = 0
     num_unmatched_confirmed_tracks: int = 0
     num_duplicate_tracks: int = 0
+    # Standard aggregate tracking scores (CLEAR-MOT, identity, GOSPA)
+    mota: float | None = None
+    idf1: float | None = None
+    idp: float | None = None
+    idr: float | None = None
+    gospa_p1: float | None = None
+    gospa_p2: float | None = None
     # Class estimate accuracy over matched samples with a known estimate and known truth
     class_classified_samples: int = 0
     class_correct_samples: int = 0

@@ -52,6 +52,17 @@ _Avoid_: False track, ghost track
 **Duplicate track**:
 An unmatched confirmed track that, in at least one frame, was left unmatched while a true object lay inside the matching gate because another track had claimed it.
 
+**MOTA**:
+CLEAR-MOT accuracy: one minus misses, false positives and identity switches over ground-truth samples; can be negative.
+_Avoid_: Tracking accuracy (ambiguous)
+
+**IDF1**:
+The F1 score of the best global pairing between tracks and ground-truth objects, counting co-occurrences within the matching gate.
+_Avoid_: Identity accuracy
+
+**GOSPA**:
+A per-frame distance between the set of ground-truth objects and the set of tracks that charges localisation error, missed objects and false tracks in one number.
+
 **Interruption**:
 A gap of one or more evaluated frames between two frames in which a true object is matched; summed over objects it is track fragmentation.
 _Avoid_: Break, dropout (a sensor concept)
