@@ -55,14 +55,18 @@ jobs:
           test -s /tmp/mosaic-benchmark/benchmark.json
           test -s /tmp/mosaic-benchmark/per_seed.csv
           test -s /tmp/mosaic-benchmark/report.md
-          for name in nominal sensor_disagreement_large_bias sensor_disagreement_within_gate; do
-            grep -q "| $name |" /tmp/mosaic-benchmark/report.md
-          done
+          python3 - <<'PY'
+          import json
+          names = [s["scenario"]["name"] for s in json.load(open("/tmp/mosaic-benchmark/benchmark.json"))["scenarios"]]
+          expected = ["nominal", "sensor_disagreement_large_bias", "sensor_disagreement_within_gate"]
+          assert names == expected, names
+          PY
       - name: CLI smoke test (benchmark rejects unknown scenario)
         run: |
           if uv run --python ${{ matrix.python-version }} mosaic benchmark \
             --scenario nominal,not_a_scenario --seeds 1 --duration 0.5 \
-            --output /tmp/mosaic-benchmark-bad; then
+            --output /tmp/mosaic-benchmark-bad 2> /tmp/mosaic-benchmark-bad.err; then
             echo "benchmark accepted an unknown scenario" >&2
             exit 1
           fi
+          grep -q "unknown scenario" /tmp/mosaic-benchmark-bad.err

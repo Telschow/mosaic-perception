@@ -167,6 +167,12 @@ def _aggregate(results: list[EvaluationResult]) -> dict[str, Any]:
             continue
         aggregate[field] = float(np.mean(values))
         aggregate[f"{field}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+    classified = sum(result.class_classified_samples for result in results)
+    matched = sum(result.matched_samples for result in results)
+    correct = sum(result.class_correct_samples for result in results)
+    # Pooled over seeds so a seed with very few classified samples cannot dominate.
+    aggregate["class_accuracy_pooled"] = correct / classified if classified else None
+    aggregate["class_classified_fraction_pooled"] = classified / matched if matched else None
     return aggregate
 
 
@@ -341,23 +347,26 @@ def _render_report(payload: dict[str, Any]) -> str:
             "and the ground-truth class are known. Range-only runs carry no class",
             "information, so their accuracy is `N/A`, not zero. `Classified` is the mean",
             "number of such samples per seed, out of the matched samples in the results table.",
-            "Class accuracy is an unweighted mean of per-seed accuracies; seeds with no",
-            "classified sample are excluded, so read it together with `Classified`. When few",
-            "vision observations are applied (for example under a large bias) it rests on",
-            "very few samples.",
+            "`Class accuracy` is an unweighted mean of per-seed accuracies (seeds with no",
+            "classified sample are excluded). `Pooled` is total correct / total classified",
+            "over all seeds, and `Classified fraction` is classified / matched samples, so a",
+            "method that classifies rarely cannot look accurate on its own: read the three",
+            "together.",
             "",
-            "| Scenario | Method | Class accuracy | Classified (mean) |",
-            "|---|---|---|---|",
+            "| Scenario | Method | Class accuracy | Pooled | Classified fraction | Classified (mean) |",
+            "|---|---|---|---|---|---|",
         ]
     )
     for scenario_report in payload["scenarios"]:
         for method in METHODS:
             aggregate = scenario_report["aggregate"][method]
             lines.append(
-                "| {name} | {method} | {accuracy} | {classified} |".format(
+                "| {name} | {method} | {accuracy} | {pooled} | {fraction} | {classified} |".format(
                     name=scenario_report["scenario"]["name"],
                     method=method,
                     accuracy=_fmt(aggregate.get("class_accuracy")),
+                    pooled=_fmt(aggregate.get("class_accuracy_pooled")),
+                    fraction=_fmt(aggregate.get("class_classified_fraction_pooled")),
                     classified=_fmt(aggregate.get("class_classified_samples"), 1),
                 )
             )
@@ -368,8 +377,9 @@ def _render_report(payload: dict[str, Any]) -> str:
             "## Duplicate-track sensitivity to the matching gate",
             "",
             "Mean number of duplicate tracks per seed when the evaluation matching gate is",
-            "1.0, 2.0 or 3.0 m. The gates were fixed before any run. The 2.0 m column is the",
-            "headline gate used everywhere else in this report; the others show how much the",
+            "1.0, 2.0 or 3.0 m. The three gates were chosen before running (see the project issue",
+            "tracker). The 2.0 m column is the headline gate used everywhere else in this",
+            "report when it is the evaluator gate; the others show how much the",
             "duplicate count depends on that choice, not which gate is correct.",
             "",
             "| Scenario | Method | 1.0 m | 2.0 m | 3.0 m |",

@@ -64,7 +64,6 @@ class TrackingEvaluator:
         statistics: ObservationStatistics | None = None,
         config: dict | None = None,
         git_commit: str | None = None,
-        _with_sensitivity: bool = True,
     ) -> EvaluationResult:
         """Compute accuracy, association, coverage and timing metrics."""
         result = EvaluationResult(
@@ -217,20 +216,19 @@ class TrackingEvaluator:
         unmatched_confirmed = ever_confirmed - matched_track_ids
         result.num_unmatched_confirmed_tracks = len(unmatched_confirmed)
         result.num_duplicate_tracks = len(unmatched_confirmed & duplicate_track_ids)
-        if _with_sensitivity:
-            counts: dict[float, int] = {}
-            for gate in DUPLICATE_SENSITIVITY_GATES_M:
-                if gate == self.match_gate_m:
-                    counts[gate] = result.num_duplicate_tracks
-                else:
-                    counts[gate] = (
-                        TrackingEvaluator(match_gate_m=gate)
-                        .evaluate(snapshots, world_states, _with_sensitivity=False)
-                        .num_duplicate_tracks
-                    )
-            result.num_duplicate_tracks_gate_1m = counts[1.0]
-            result.num_duplicate_tracks_gate_2m = counts[2.0]
-            result.num_duplicate_tracks_gate_3m = counts[3.0]
+        duplicate_counts = {
+            gate: (
+                result.num_duplicate_tracks
+                if gate == self.match_gate_m
+                else self._count_duplicate_tracks(
+                    gate, snapshots_by_time, world_states, ever_confirmed
+                )
+            )
+            for gate in DUPLICATE_SENSITIVITY_GATES_M
+        }
+        result.num_duplicate_tracks_gate_1m = duplicate_counts[1.0]
+        result.num_duplicate_tracks_gate_2m = duplicate_counts[2.0]
+        result.num_duplicate_tracks_gate_3m = duplicate_counts[3.0]
 
         result.notes.extend(
             [
@@ -263,6 +261,7 @@ class TrackingEvaluator:
         time: float,
         tracks: list[TrackSnapshot],
         objects: list,
+        gate_m: float | None = None,
     ) -> _FrameMatch:
         if not tracks or not objects:
             return _FrameMatch(time, [], len(tracks), len(objects))
@@ -272,7 +271,7 @@ class TrackingEvaluator:
         distances = np.linalg.norm(
             track_positions[:, None, :] - object_positions[None, :, :], axis=2
         )
-        finite = distances <= self.match_gate_m
+        finite = distances <= (self.match_gate_m if gate_m is None else gate_m)
         if not np.any(finite):
             return _FrameMatch(time, [], len(tracks), len(objects))
 
@@ -300,6 +299,30 @@ class TrackingEvaluator:
             len(objects) - len(paired_columns),
             duplicate_tracks=duplicates,
         )
+
+    def _count_duplicate_tracks(
+        self,
+        gate_m: float,
+        snapshots_by_time: dict[float, dict[str, TrackSnapshot]],
+        world_states: list[WorldState],
+        ever_confirmed: set[str],
+    ) -> int:
+        """Duplicate-track count at another matching gate, via matching only."""
+        matched_ids: set[str] = set()
+        duplicate_ids: set[str] = set()
+        for world_state in world_states:
+            key = round(float(world_state.time), 9)
+            frame_tracks = [
+                snapshot
+                for snapshot in snapshots_by_time.get(key, {}).values()
+                if snapshot.status in _EVALUATED_STATUSES
+            ]
+            frame = self._match_frame(
+                float(world_state.time), frame_tracks, list(world_state.objects.values()), gate_m
+            )
+            matched_ids.update(snapshot.track_id for snapshot, _ in frame.matched_pairs)
+            duplicate_ids.update(track.track_id for track in frame.duplicate_tracks)
+        return len((ever_confirmed - matched_ids) & duplicate_ids)
 
     @staticmethod
     def _count_interruptions(matched_frames_by_object: dict[str, list[int]]) -> float | None:

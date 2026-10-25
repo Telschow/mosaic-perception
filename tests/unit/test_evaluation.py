@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from mosaic_perception.domain.models import ObservationStatistics, TrackStatus
+from mosaic_perception.domain.models import ObjectClass, ObservationStatistics, TrackStatus
 from mosaic_perception.evaluation.metrics import TrackingEvaluator
 from tests.helpers import make_snapshot, make_world_state
 
@@ -339,8 +339,6 @@ def _class_world(true_classes):
 
 
 def test_class_accuracy_counts_correct_and_incorrect_estimates():
-    from mosaic_perception.domain.models import ObjectClass
-
     world = _class_world({"a": ObjectClass.VEHICLE, "b": ObjectClass.PEDESTRIAN})
     snapshots = [
         make_snapshot(0.0, "t_a", (0.1, 0.0), class_estimate=ObjectClass.VEHICLE),
@@ -353,8 +351,6 @@ def test_class_accuracy_counts_correct_and_incorrect_estimates():
 
 
 def test_unknown_class_estimates_are_excluded_from_the_denominator():
-    from mosaic_perception.domain.models import ObjectClass
-
     world = _class_world({"a": ObjectClass.VEHICLE, "b": ObjectClass.PEDESTRIAN})
     snapshots = [
         make_snapshot(0.0, "t_a", (0.1, 0.0), class_estimate=ObjectClass.VEHICLE),
@@ -368,8 +364,6 @@ def test_unknown_class_estimates_are_excluded_from_the_denominator():
 
 
 def test_class_accuracy_is_undefined_without_any_classified_sample():
-    from mosaic_perception.domain.models import ObjectClass
-
     world = _class_world({"a": ObjectClass.VEHICLE, "b": ObjectClass.PEDESTRIAN})
     snapshots = [make_snapshot(0.0, "t_a", (0.1, 0.0)), make_snapshot(0.0, "t_b", (10.1, 0.0))]
     result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
@@ -378,8 +372,6 @@ def test_class_accuracy_is_undefined_without_any_classified_sample():
 
 
 def test_objects_with_unknown_true_class_are_not_scored():
-    from mosaic_perception.domain.models import ObjectClass
-
     world = _class_world({"a": ObjectClass.VEHICLE})  # b has UNKNOWN true class
     snapshots = [
         make_snapshot(0.0, "t_a", (0.1, 0.0), class_estimate=ObjectClass.VEHICLE),
@@ -388,3 +380,42 @@ def test_objects_with_unknown_true_class_are_not_scored():
     result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
     assert result.class_classified_samples == 1
     assert result.class_accuracy == pytest.approx(1.0)
+
+
+def test_aggregate_pools_class_accuracy_across_seeds():
+    from mosaic_perception.cli.main import _aggregate
+    from mosaic_perception.domain.models import EvaluationResult
+
+    lucky = EvaluationResult(
+        scenario_name="x",
+        seed=1,
+        method_name="fused",
+        class_classified_samples=1,
+        class_correct_samples=1,
+        class_accuracy=1.0,
+        matched_samples=10,
+    )
+    broad = EvaluationResult(
+        scenario_name="x",
+        seed=2,
+        method_name="fused",
+        class_classified_samples=500,
+        class_correct_samples=300,
+        class_accuracy=0.6,
+        matched_samples=500,
+    )
+    aggregate = _aggregate([lucky, broad])
+    assert aggregate["class_accuracy"] == pytest.approx(0.8)  # unweighted mean of seeds
+    assert aggregate["class_accuracy_pooled"] == pytest.approx(301 / 501)
+    assert aggregate["class_classified_fraction_pooled"] == pytest.approx(501 / 510)
+
+
+def test_aggregate_pooled_class_accuracy_is_undefined_without_classified_samples():
+    from mosaic_perception.cli.main import _aggregate
+    from mosaic_perception.domain.models import EvaluationResult
+
+    aggregate = _aggregate(
+        [EvaluationResult(scenario_name="x", seed=1, method_name="fused", matched_samples=5)]
+    )
+    assert aggregate["class_accuracy_pooled"] is None
+    assert aggregate["class_classified_fraction_pooled"] == 0.0
