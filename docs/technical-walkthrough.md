@@ -69,20 +69,34 @@ From `artifacts/benchmark/report.md` (all 16 scenarios, development seeds 0–24
 
 - Accuracy depends on the matcher. Paired position-RMSE differences (fused
   minus range-only, 25 seeds, 95% t interval over seeds) under the headline
-  continuity-preferring matcher: favours fusion in 1 of 14 scenarios with defined
-  accuracy, goes against it in 5, includes zero in 8. Under a distance-only matcher
+  continuity-preferring matcher: favours fusion in 1 of 15 scenarios with defined
+  accuracy, goes against it in 6, includes zero in 8. Under a distance-only matcher
   (`position_rmse_distance_only`) it favours fusion in 7, goes against it in 3 and
-  includes zero in 4. Neither matcher settles the accuracy question.
+  includes zero in 5. Neither matcher settles the accuracy question.
 - Association quality is worse for fusion under both matchers: precision, MOTA and
-  GOSPA are worse in 13 of 14 scenarios, IDF1 favours fusion in 2, goes against it in
-  5 and is inconclusive in 8, and recall is better in 11. Unmatched confirmed tracks
+  GOSPA are worse in 14 of the scenarios with defined values (inconclusive in 1 to 2),
+  IDF1 favours fusion in 2, goes against it in 5 and is inconclusive in 9, and recall is
+  better in 12 of 16. Unmatched confirmed tracks
   are mostly duplicates (38.9 of 39.3 per seed in `uncertainty_miscalibration`), but
   not in `dense_clutter` (8.6 of 73.4).
 - Identity switches depend on the matcher: continuity cuts the summed per-seed mean
-  from 351.6 to 217.6 and changes the fused-versus-range ordering in some scenarios.
-- Position NEES per degree of freedom is above its 95% interval in all 14 scenarios
-  for both methods (overconfident); NIS per degree of freedom is below its interval in
-  13, as expected for gated updates. Intervals are optimistic (correlated samples).
+  from 388.5 to 241.8 (about 38%) and changes the fused-versus-range ordering in some scenarios.
+- Position NEES per degree of freedom is above its 95% interval in all 15 scenarios
+  with defined values for both methods (overconfident); NIS per degree of freedom is
+  below its interval in 13 (fused) and 14 (range-only), as expected for gated updates.
+  Intervals are optimistic (correlated samples).
+- Estimating the vision bias (`fused_bias_estimated`): in the three within-gate
+  scenarios the final estimate is close to the configured bias (0.0100, 0.0149, 0.0198
+  rad for 0.010, 0.015, 0.020) and, against plain fused, RMSE improves by 0.075, 0.117
+  and 0.198 m, precision by 0.056, 0.122 and 0.139 and MOTA by 0.134, 0.320 and 0.378.
+  Association quality stays below range-only (precision about 0.68 against 0.826); in
+  the other scenarios the difference is inconclusive, and for the 0.12 rad bias the gate
+  leaves about 1.4 updates per seed so nothing is learned.
+- One-step-lag retrodiction (`delivery_delay_retrodiction`): better position accuracy and
+  consistency than `delivery_delay` (position NEES per DOF 4.9 to 1.9 range-only, 11.3
+  to 3.3 fused) but worse identity switches (6.9 to 11.1 and 5.1 to 13.0) and MOTA
+  (0.708 to 0.636 and 0.437 to 0.349). The cause is not diagnosed; association still
+  gates delayed observations against the delivery-time state.
 - **Large bias, rejected by the gate vs. smaller bias, fused.**
   `sensor_disagreement_large_bias` (0.12 rad) shows the gate working: ~265 of
   ~275 delivered vision observations per seed are gate-rejected and the paired

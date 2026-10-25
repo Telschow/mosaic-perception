@@ -37,11 +37,11 @@ tables.
 
 "Across the 16 development scenarios and seeds 0–24, whether fusion improves
 accuracy depends on how matched samples are paired: with a distance-only matcher the
-paired RMSE interval favours fusion in 7 scenarios and goes against it in 3, with the
-continuity-preferring headline matcher it favours fusion in 1 and goes against it in 5.
+paired RMSE interval favours fusion in 7 scenarios and goes against it in 3 (of 15), with the
+continuity-preferring headline matcher it favours fusion in 1 and goes against it in 6.
 What does not depend on the matcher is association quality: fused precision, MOTA and
-GOSPA are worse in 13 of 14 scenarios, and consistency is poor, with position NEES
-above its interval everywhere. So the honest finding is that fusion raises recall but
+GOSPA are worse in 14 of the scenarios with defined values, and consistency is poor,
+with position NEES above its interval everywhere. So the honest finding is that fusion raises recall but
 costs association quality, not 'fusion wins'."
 
 Show the `stale_rejection` row: accuracy is `N/A` because observations older

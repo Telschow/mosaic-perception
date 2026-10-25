@@ -124,34 +124,37 @@ Headline observations from the current development benchmark:
 - **Accuracy depends on the matcher.** Paired position-RMSE differences (fused
   minus range-only, 25 seeds, 95% t interval over seeds) under the headline
   continuity-preferring matcher: the interval excludes zero in favour of fusion
-  in 1 of the 14 scenarios with defined accuracy, against fusion in 5, and
+  in 1 of the 15 scenarios with defined accuracy, against fusion in 6, and
   includes zero in 8. Under a distance-only matcher (reported alongside as
   `position_rmse_distance_only`) it favours fusion in 7, goes against it in 3
-  and includes zero in 4. The continuity preference can keep an object paired
+  and includes zero in 5. The continuity preference can keep an object paired
   with a farther duplicate track, which fused runs have more of, so neither
   matcher settles whether fusion improves accuracy. No macro mean over
   scenarios is reported.
 - **Association quality is worse for fusion under both matchers.** Fused
-  precision, MOTA and GOSPA are worse (interval excludes zero) in 13 of the 14
-  scenarios with defined values, and the remaining one or two are inconclusive.
-  Recall is better for fusion in 11 and inconclusive in 4. IDF1 favours fusion
-  in 2, goes against it in 5 and is inconclusive in 8. Precision is sample-based
-  (matched samples / all confirmed-or-coasting track samples), and the extra
-  "unmatched confirmed tracks" are confirmed tracks never matched to a true
-  object. The report's `Duplicate tracks` column counts those that were left
-  unmatched while a true object lay inside the 2 m matching gate: most are
-  duplicates in most scenarios (for example 38.9 of 39.3 per seed in
-  `uncertainty_miscalibration`), but in `dense_clutter` only 8.6 of 73.4.
+  precision is worse (interval excludes zero) in 14 of the 15 scenarios with
+  defined precision and inconclusive in the other; MOTA and GOSPA are worse in
+  14 of 16 and inconclusive in 2. Recall is better for fusion in 12 of 16 and
+  inconclusive in 4. IDF1 favours fusion in 2, goes against it in 5 and is
+  inconclusive in 9. Precision is sample-based (matched samples / all
+  confirmed-or-coasting track samples), and the extra "unmatched confirmed
+  tracks" are confirmed tracks never matched to a true object. The report's
+  `Duplicate tracks` column counts those that were left unmatched while a true
+  object lay inside the 2 m matching gate: most are duplicates in most
+  scenarios (for example 38.9 of 39.3 per seed in `uncertainty_miscalibration`),
+  but in `dense_clutter` only 8.6 of 73.4.
 - Identity switches also depend on the matcher: the continuity preference cuts
-  the summed per-seed mean from 351.6 to 217.6 (about 38%) and changes the
-  fused-versus-range ordering in some scenarios (for example `nominal`: 6.1 for
-  range-only and 4.7 for fused with continuity, 8.9 and 10.6 distance-only).
+  the summed per-seed mean from 388.5 to 241.8 (about 38%) over the 16
+  scenarios and both methods, and changes the fused-versus-range ordering in
+  some scenarios (for example `nominal`: 6.1 for range-only and 4.7 for fused
+  with continuity, 8.9 and 10.6 distance-only).
 - **Consistency.** Position NEES per degree of freedom is above its 95% interval
-  in all 14 scenarios for both methods (overconfident; for example 1.85 range-only
-  and 2.48 fused in `nominal`, 72.99 fused in `measurement_bias`); velocity NEES
-  is above in 13. NIS per degree of freedom is below its interval in 13 for both
-  methods, as expected for gated updates (0.81 and 0.77 in `nominal`). Intervals
-  assume independent samples and are optimistic.
+  in all 15 scenarios with defined values for both methods (overconfident; for
+  example 1.85 range-only and 2.48 fused in `nominal`, 72.99 fused in
+  `measurement_bias`); velocity NEES is above in 14. NIS per degree of freedom
+  is below its interval in 13 (fused) and 14 (range-only) scenarios, as expected
+  for gated updates (0.81 and 0.77 in `nominal`). Intervals assume independent
+  samples and are optimistic.
 - The sensor-disagreement scenarios test different things.
   `sensor_disagreement_large_bias` (0.12 rad) is a **gate-rejection**
   experiment: about 96% of delivered vision observations were rejected by the
@@ -165,6 +168,28 @@ Headline observations from the current development benchmark:
   +0.101, +0.148, +0.233 m; distance-only +0.042, +0.060, +0.065 m). This is a
   single synthetic world with development seeds; it does not establish
   real-world fusion performance.
+- **Estimating the vision bias** (`fused_bias_estimated`, compared with plain
+  fused). The estimator is a global scalar Kalman filter on the difference
+  between a vision bearing and the contemporaneous range-bearing bearing of the
+  same confirmed track. In the three within-gate scenarios its final estimate
+  is close to the configured bias (0.0100, 0.0149 and 0.0198 rad against 0.010,
+  0.015 and 0.020) and, against plain fused, it improves position RMSE by 0.075,
+  0.117 and 0.198 m, precision by 0.056, 0.122 and 0.139 and MOTA by 0.134,
+  0.320 and 0.378 (intervals exclude zero). It removes much but not all of the
+  harm: precision (0.673, 0.683, 0.674) and MOTA (0.467, 0.489, 0.470) stay below
+  range-only (0.826 and 0.746), while distance-only RMSE (0.200, 0.202, 0.207)
+  is slightly lower than range-only's 0.213. In the 12 other scenarios with
+  defined accuracy the RMSE difference includes zero. For the 0.12 rad bias the
+  gate leaves about 1.4 updates per seed, so nothing is learned. The estimator
+  assumes a constant bias and an unbiased range-bearing sensor.
+- **One-step-lag retrodiction** (`delivery_delay_retrodiction`, same delays as
+  `delivery_delay`): it improves position accuracy and consistency (RMSE 0.308
+  to 0.283 m range-only and 0.329 to 0.335 m fused; distance-only RMSE 0.285 to
+  0.252 and 0.268 to 0.251; position NEES per DOF 4.9 to 1.9 and 11.3 to 3.3)
+  but makes identity switches and MOTA worse (switches 6.9 to 11.1 range-only
+  and 5.1 to 13.0 fused; MOTA 0.708 to 0.636 and 0.437 to 0.349). I have not
+  diagnosed why; association still gates delayed observations against the
+  delivery-time state, which is one candidate.
 - `crossing_targets` (one crossing of three targets) and `dense_clutter` are
   tested under global-nearest-neighbour association only. In `crossing_targets`
   fused has 0.8 identity switches per seed against 1.2 for range-only with

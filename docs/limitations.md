@@ -104,6 +104,13 @@
     acceleration. It still gates the observation against the delivery-time state
     (association is not retrodicted), it is off by default, and it covers only the
     one-epoch lag, so it is not general out-of-sequence measurement fusion.
+  - Measured on the benchmark (`delivery_delay` against `delivery_delay_retrodiction`,
+    same delays): retrodiction improves position accuracy and consistency (RMSE 0.308 to
+    0.283 m range-only, distance-only RMSE 0.285 to 0.252 and 0.268 to 0.251; position
+    NEES per DOF 4.9 to 1.9 and 11.3 to 3.3) but worsens identity switches (6.9 to 11.1
+    range-only, 5.1 to 13.0 fused) and MOTA (0.708 to 0.636 and 0.437 to 0.349). The
+    cause has not been diagnosed; gating delayed observations against the delivery-time
+    state is one candidate, and nothing here shows retrodiction is better overall.
 - Processing occurs on the discrete tracker epoch grid. Mean age of information
   is quantised by `dt` and is not a sub-epoch latency measurement.
 - `delivery_delay` with a 0.05 s mean is generally applied at the next 0.1 s
@@ -124,7 +131,7 @@
   is ground truth.
 - Identity switches depend on the matcher: a distance-only matcher flipped between
   nearby tracks and reported about 38% more switches than the continuity-preferring
-  matcher adopted as the headline (351.6 vs 217.6, summed per-seed means over the 15
+  matcher adopted as the headline (388.5 vs 241.8, summed per-seed means over the 16
   development scenarios and both methods), and it reversed the fused-versus-range
   ordering in some scenarios. Both counts are reported; neither is ground truth
   about the tracker's identity behaviour.
