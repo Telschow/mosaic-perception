@@ -116,10 +116,26 @@ generated tables and [artifacts/benchmark/benchmark.json](artifacts/benchmark/be
 for the machine-readable record (protocol, per-seed metrics, git commit).
 Headline observations from the current development benchmark:
 
-- Fused position RMSE is lower in 6 of the 9 scenarios with defined accuracy,
-  within 0.01 m in 3, and worse in none. The differences are generally small.
-- Fused **precision is lower in every scenario with defined precision**
-  because vision adds more confirmed tracks than it resolves.
+- Fused position RMSE is lower in 6 of the 10 scenarios with defined accuracy,
+  within 0.01 m in 3, and worse in 1 (`sensor_disagreement_within_gate`). The
+  differences are generally small. Unweighted macro means over the scenarios
+  where the metric is defined (development seeds, descriptive only): RMSE
+  0.392 m range-only vs 0.379 m fused (n=10); recall 0.827 vs 0.881 (n=11);
+  precision 0.821 vs 0.643 (n=10).
+- Fused **precision is lower in every scenario with defined precision**.
+  Precision is sample-based (matched samples / all confirmed-or-coasting track
+  samples), and the extra "false tracks" are confirmed tracks never matched to
+  a true object. An ad hoc check found all of them within 5 m (median) of a
+  true object, consistent with duplicate confirmed tracks rather than distant
+  clutter (not part of the canonical artifacts).
+- The two sensor-disagreement scenarios test different things.
+  `sensor_disagreement_large_bias` (0.12 rad) is a **gate-rejection**
+  experiment: about 92% of delivered vision observations were rejected by the
+  gate (mean 253.8 of 276.4 per seed), and fused RMSE matched range-only
+  within noise. `sensor_disagreement_within_gate` (0.015 rad) is **actually
+  fused** (mean 252.0 of 276.4 applied) and *degraded* RMSE (0.285 m vs 0.229
+  m range-only), precision (0.524 vs 0.804) and 95% coverage (0.497 vs 0.836).
+  Neither establishes real-world fusion performance.
 - 95% coverage is not improved by fusion overall, and remains far below the
   nominal 0.95 in the miscalibration scenario.
 - The `out_of_sequence` scenario has no matched samples: observations older
@@ -154,7 +170,10 @@ been superseded; they are not preserved as a baseline for comparison.**
 - Constant-velocity motion model; turning objects are approximated.
 - Vision-only track initiation is unsupported by design.
 - Observations older than one tracker epoch are rejected, not replayed; the
-  stale-data fusion case is not evaluated.
+  stale-data fusion case is not evaluated. Admitted delayed observations are
+  applied to the delivery-time state (not rewound to capture time), an
+  approximation whose displacement scale is ~speed x age under constant
+  velocity, not a strict bound.
 - Association is gated Hungarian within each measurement group, not MHT/JPDA.
 - Track fragmentation is not implemented.
 - Only development seeds have been run; no held-out evaluation is claimed.

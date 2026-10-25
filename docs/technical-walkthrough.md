@@ -40,7 +40,10 @@ trade-off in a controlled synthetic setting with paired comparisons.
   accepted. Rejected or failed updates do not count as hits and do not reset
   misses.
 - **Timing**: bounded one-epoch staleness. Older observations are rejected,
-  logged and counted; in-flight observations are reported as pending.
+  logged and counted; in-flight observations are reported as pending. Admitted
+  delayed observations are applied to the delivery-time state using the
+  capture-time observer pose; no rewind/replay is done (displacement scale
+  ~speed x age under constant velocity, not a strict bound).
 - **Simplicity over completeness**: 2-D, point-measurement sensor models, no
   raw images, no occlusion, no MHT/JPDA, no full out-of-sequence replay.
 
@@ -61,13 +64,26 @@ trade-off in a controlled synthetic setting with paired comparisons.
 
 ## 5) Current development benchmark
 
-From `artifacts/benchmark/report.md` (all 10 scenarios, development seeds 1–5,
+From `artifacts/benchmark/report.md` (all 11 scenarios, development seeds 1–5,
 10 s; see the artifact for the exact commit):
 
-- Fused position RMSE is lower in 6 of the 9 scenarios with defined accuracy,
-  within 0.01 m in 3, and worse in none. Differences are small.
-- Fused precision is lower in every scenario with defined precision; vision
-  adds more confirmed tracks than it resolves.
+- Fused position RMSE is lower in 6 of the 10 scenarios with defined accuracy,
+  within 0.01 m in 3, and worse in 1 (`sensor_disagreement_within_gate`).
+  Differences are small.
+- Fused precision is lower in every scenario with defined precision. The
+  metric is sample-based, and the extra false tracks are confirmed tracks never
+  matched to a true object, all of which an ad hoc check found near true
+  objects (consistent with duplicates).
+- **Large bias, rejected by the gate vs. smaller bias, fused.**
+  `sensor_disagreement_large_bias` (0.12 rad) shows the gate working: ~254 of
+  ~276 delivered vision observations per seed are gate-rejected and fused
+  accuracy is essentially unchanged. `sensor_disagreement_within_gate`
+  (0.015 rad) passes the gate (~252 applied) and the fused estimate is worse
+  than range-only (RMSE 0.285 vs 0.229 m, precision 0.524 vs 0.804, coverage
+  0.497 vs 0.836). The vision acceptance table in the report separates
+  generated, delivered, gate-rejected, lost-competition, other-unassigned,
+  stale/invalid and applied observations. Neither scenario supports a claim
+  about real-world sensor-fusion performance.
 - Coverage is not improved overall and remains far below 0.95 under reported
   covariance miscalibration (χ²(2, 0.95) = 5.991).
 - The `out_of_sequence` scenario has zero matched samples because stale

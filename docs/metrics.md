@@ -77,6 +77,15 @@ small and produces coverage far below 0.95.
 | `pending_observations` | observations still queued at the end of the run |
 | `age_samples` | number of observations whose processing age contributed to mean AoI |
 | `mean_age_of_information` | mean of `processing_time - capture_time` for observations admitted by the staleness and group checks, seconds |
+| `vision_generated` | vision observations produced by vision sensors (fused method only) |
+| `vision_delivered` | vision observations removed from the pending queue (generated minus those still pending) |
+| `vision_gate_rejected` | delivered vision observations for which at least one track was evaluated and none passed the chi-square gate |
+| `vision_lost_competition` | passed the gate for some track but lost the one-to-one assignment |
+| `vision_unassigned_other` | unassigned with no evaluable candidate (e.g. no tracks existed) |
+| `vision_invalid_or_stale` | delivered but rejected outside association (stale, invalid, failed update) |
+| `vision_applied` | used in a track update |
+
+Identity: `vision_delivered = gate_rejected + lost_competition + unassigned_other + invalid_or_stale + applied`.
 
 An observation older than `dt + 1e-6` seconds at processing time is counted as
 rejected, not replayed or silently dropped. Because processing happens on the

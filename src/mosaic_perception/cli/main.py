@@ -165,7 +165,7 @@ def _aggregate(results: list[EvaluationResult]) -> dict[str, Any]:
 def _write_per_seed_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     columns = ["scenario", "seed", "method", *_RESULT_FIELDS]
     with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer = csv.DictWriter(handle, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({column: row.get(column) for column in columns})
