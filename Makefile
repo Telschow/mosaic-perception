@@ -1,19 +1,22 @@
-.PHONY: install test lint format typecheck clean run compare app
+.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app
 
 install:
-	uv sync
+	uv sync --locked --all-extras
 
 test:
-	pytest
+	uv run pytest
 
 lint:
-	ruff check src tests
+	uv run ruff check src tests
 
 format:
-	ruff format src tests
+	uv run ruff format src tests
+
+format-check:
+	uv run ruff format --check src tests
 
 typecheck:
-	mypy src
+	uv run mypy src
 
 clean:
 	rm -rf __pycache__ .pytest_cache .mypy_cache .ruff_cache dist build *.egg-info
@@ -21,10 +24,16 @@ clean:
 	find . -type f -name "*.pyc" -delete
 
 run:
-	mosaic run --scenario nominal --seed 42
+	uv run mosaic run --scenario nominal --seed 42
 
 compare:
-	mosaic compare --scenario nominal --seeds 1,2,3
+	uv run mosaic compare --scenario nominal --seeds 1,2,3
+
+evaluate:
+	uv run mosaic evaluate --scenario all --seeds 1-5 --output results/
+
+benchmark:
+	uv run mosaic benchmark --scenario all --seeds 1-5 --duration 10.0
 
 app:
-	streamlit run app/streamlit_app.py
+	uv run streamlit run app/streamlit_app.py

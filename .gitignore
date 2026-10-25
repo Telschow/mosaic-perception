@@ -30,6 +30,7 @@ outputs/
 *.png
 *.html
 *.csv
+!artifacts/benchmark/per_seed.csv
 !configs/**/*.json
 !configs/**/*.yaml
 .DS_Store
