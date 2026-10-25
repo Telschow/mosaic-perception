@@ -26,10 +26,18 @@
   frames is one interruption, regardless of which track resumes. It is `N/A`
   when no object is ever matched and says nothing about identity (see
   `identity_switches`).
+- Duplicate-track counts depend on the matching gate. In the development
+  benchmark the fused count in `uncertainty_miscalibration` was 26.8, 30.0 and
+  30.6 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 0.8 and
+  2.0, so the choice of gate changes both the size and the ranking of the
+  effect. None of the gates is validated as the right one.
 - Class accuracy is evaluated over matched samples with a known estimate and a
   known true class only. Classes come from a synthetic confusion model, so the
   number says nothing about real classifiers; range-only runs have no class
-  information (`N/A`).
+  information (`N/A`). The scenario value is an unweighted mean of per-seed
+  accuracies and can rest on very few samples: in
+  `sensor_disagreement_large_bias` only 13.8 samples per seed are classified
+  (3 of 5 seeds have any), so its 0.333 is not a precise estimate.
 
 ## Timing and delivery
 
