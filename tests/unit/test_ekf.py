@@ -1,13 +1,15 @@
 """Tests for EKF."""
+
 import numpy as np
 
 from mosaic_perception.tracking.ekf import ExtendedKalmanFilter, wrap_angle
 
 
 def test_wrap_angle():
-    assert abs(wrap_angle(np.pi + 0.1) - (-np.pi + 0.1)) < 1e-10 or abs(
-        wrap_angle(3.5) - wrap_angle(3.5 - 2 * np.pi)
-    ) < 1e-10
+    assert (
+        abs(wrap_angle(np.pi + 0.1) - (-np.pi + 0.1)) < 1e-10
+        or abs(wrap_angle(3.5) - wrap_angle(3.5 - 2 * np.pi)) < 1e-10
+    )
     assert abs(wrap_angle(-np.pi - 0.1) - (np.pi - 0.1)) < 1e-10
 
 

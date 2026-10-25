@@ -134,7 +134,12 @@ class MultiSensorTracker:
             updated_track_ids.add(track_id)
 
             # Update status
-            if track.status == TrackStatus.TENTATIVE and track.hits >= self.min_hits_confirm or track.status == TrackStatus.COASTING and track.hits >= 1:
+            if (
+                track.status == TrackStatus.TENTATIVE
+                and track.hits >= self.min_hits_confirm
+                or track.status == TrackStatus.COASTING
+                and track.hits >= 1
+            ):
                 track.status = TrackStatus.CONFIRMED
 
             obs.associated_track_id = track_id

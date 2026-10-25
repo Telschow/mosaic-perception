@@ -4,7 +4,6 @@ CLI for Mosaic.
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import typer
@@ -26,7 +25,7 @@ def run(
     scenario: str = typer.Option("nominal", help="Scenario name"),
     seed: int = typer.Option(42, help="Random seed"),
     duration: float = typer.Option(10.0, help="Simulation duration"),
-    output: Optional[Path] = typer.Option(None, help="Output directory"),
+    output: Path | None = typer.Option(None, help="Output directory"),
 ):
     """Run a single scenario."""
     console.print(f"[bold blue]Running scenario: {scenario} (seed={seed})[/bold blue]")
@@ -139,7 +138,7 @@ def compare(
     scenario: str = typer.Option("nominal", help="Scenario name"),
     seeds: str = typer.Option("1,2,3", help="Comma-separated seeds"),
     duration: float = typer.Option(10.0, help="Simulation duration"),
-    output: Optional[Path] = typer.Option(None, help="Output directory"),
+    output: Path | None = typer.Option(None, help="Output directory"),
 ):
     """Compare methods across multiple seeds."""
     seed_list = [int(s.strip()) for s in seeds.split(",")]
@@ -179,7 +178,9 @@ def compare(
                 o._true_object_id = None
             obs_pos = world_state.observer_pose.position.to_array()
             tracker_range.process_observations(obs, world_state.time, sensor_pos=obs_pos)
-        result_range = evaluator.evaluate(tracker_range.tracks, states, scenario, seed, "range_only")
+        result_range = evaluator.evaluate(
+            tracker_range.tracks, states, scenario, seed, "range_only"
+        )
 
         # Fused
         tracker_fused = MultiSensorTracker(dt=0.1, use_vision=True)
@@ -238,7 +239,9 @@ def compare(
                     delta = rf.position_rmse - rr.position_rmse
                 else:
                     delta = "nan"
-                f.write(f"{seed},{r_rmse},{f_rmse},{delta},{rr.num_confirmed_tracks},{rf.num_confirmed_tracks}\n")
+                f.write(
+                    f"{seed},{r_rmse},{f_rmse},{delta},{rr.num_confirmed_tracks},{rf.num_confirmed_tracks}\n"
+                )
         console.print(f"[green]Results saved to {output}[/green]")
 
 
@@ -288,7 +291,9 @@ def benchmark(
                 o._true_object_id = None
             obs_pos = world_state.observer_pose.position.to_array()
             tracker_range.process_observations(obs, world_state.time, sensor_pos=obs_pos)
-        result_range = evaluator.evaluate(tracker_range.tracks, states, scenario, seed, "range_only")
+        result_range = evaluator.evaluate(
+            tracker_range.tracks, states, scenario, seed, "range_only"
+        )
 
         # Fused
         tracker_fused = MultiSensorTracker(dt=0.1, use_vision=True)
@@ -346,7 +351,9 @@ def benchmark(
                 delta = rf.position_rmse - rr.position_rmse
             else:
                 delta = "nan"
-            f.write(f"{seed},{r_rmse},{f_rmse},{delta},{rr.num_confirmed_tracks},{rf.num_confirmed_tracks}\n")
+            f.write(
+                f"{seed},{r_rmse},{f_rmse},{delta},{rr.num_confirmed_tracks},{rf.num_confirmed_tracks}\n"
+            )
 
     report = f"""# Mosaic Benchmark Report
 
@@ -372,8 +379,8 @@ def benchmark(
 
     report += f"""
 ## Aggregate (mean ± std)
-- Range-only position RMSE: {f'{range_mean:.3f} ± {range_std:.3f}' if range_mean is not None else 'N/A'}
-- Fused position RMSE: {f'{fused_mean:.3f} ± {fused_std:.3f}' if fused_mean is not None else 'N/A'}
+- Range-only position RMSE: {f"{range_mean:.3f} ± {range_std:.3f}" if range_mean is not None else "N/A"}
+- Fused position RMSE: {f"{fused_mean:.3f} ± {fused_std:.3f}" if fused_mean is not None else "N/A"}
 
 ## Interpretation
 Fusion does not universally improve performance. Results depend on scenario, seed, data association, timing, and calibration. This is a synthetic educational benchmark.
