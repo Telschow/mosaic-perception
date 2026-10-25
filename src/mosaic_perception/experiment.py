@@ -130,8 +130,10 @@ def run_method(
         for sensor in range_sensors:
             observations.extend(sensor.generate_observations(world_state, world_state.time))
         vision_observations = []
-        for sensor in vision_sensors:
-            vision_observations.extend(sensor.generate_observations(world_state, world_state.time))
+        for vision_sensor in vision_sensors:
+            vision_observations.extend(
+                vision_sensor.generate_observations(world_state, world_state.time)
+            )
         # Record vision observations generated
         tracker.record_vision_generated(len(vision_observations))
         observations.extend(vision_observations)

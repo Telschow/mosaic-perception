@@ -441,9 +441,10 @@ class MultiSensorTracker:
         class_estimate = ObjectClass.UNKNOWN
         class_confidence = 0.0
         if observation.class_probs:
-            best_class = max(observation.class_probs, key=observation.class_probs.get)
+            class_probs = observation.class_probs
+            best_class = max(class_probs, key=lambda name: class_probs[name])
             class_estimate = ObjectClass(best_class)
-            class_confidence = float(observation.class_probs[best_class])
+            class_confidence = float(class_probs[best_class])
 
         track_id = self._allocate_track_id()
         track = TrackEstimate(
@@ -476,9 +477,10 @@ class MultiSensorTracker:
     def _update_class_estimate(self, track: TrackEstimate, observation: SensorObservation) -> None:
         if not observation.class_probs:
             return
-        best_class = max(observation.class_probs, key=observation.class_probs.get)
+        class_probs = observation.class_probs
+        best_class = max(class_probs, key=lambda name: class_probs[name])
         track.class_estimate = ObjectClass(best_class)
-        track.class_confidence = float(observation.class_probs[best_class])
+        track.class_confidence = float(class_probs[best_class])
 
     def _handle_invalid(self, association: GroupAssociation) -> None:
         for observation, reason in association.invalid:

@@ -218,11 +218,11 @@ class GatedHungarianAssociator:
             assignment_cost = np.where(finite, cost_matrix, 1e12)
             rows, columns = linear_sum_assignment(assignment_cost)
             assigned_columns: set[int] = set()
-            for row, column in zip(rows, columns, strict=True):
-                if finite[row, column]:
-                    track_id = tracks[row].track_id
-                    result.matches[track_id] = valid_observations[column]
-                    assigned_columns.add(int(column))
+            for assigned_row, assigned_column in zip(rows, columns, strict=True):
+                if finite[assigned_row, assigned_column]:
+                    track_id = tracks[assigned_row].track_id
+                    result.matches[track_id] = valid_observations[assigned_column]
+                    assigned_columns.add(int(assigned_column))
             for index, observation in enumerate(valid_observations):
                 if index in assigned_columns:
                     continue

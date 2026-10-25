@@ -94,7 +94,7 @@ class ExtendedKalmanFilter:
             raise ValueError("covariance contains non-finite values")
         if not np.allclose(cov, cov.T, atol=1e-9):
             raise ValueError("covariance must be symmetric")
-        return 0.5 * (cov + cov.T)
+        return np.asarray(0.5 * (cov + cov.T), dtype=float)
 
     @staticmethod
     def _ensure_positive_semidefinite(covariance: np.ndarray) -> np.ndarray:
@@ -108,7 +108,7 @@ class ExtendedKalmanFilter:
             )
         if eigenvalues[0] < 0.0:
             cov = cov + np.eye(cov.shape[0]) * (-float(eigenvalues[0]))
-        return 0.5 * (cov + cov.T)
+        return np.asarray(0.5 * (cov + cov.T), dtype=float)
 
     def predict(self, state: np.ndarray, covariance: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Predict one nominal time step."""
