@@ -1,4 +1,18 @@
-# Release Checklist (v0.1.0)
+# Release Checklist (v0.1.0, historical)
+
+> **Status: historical and superseded.**
+>
+> This checklist describes the published v0.1.0 release at `ae518f7`. It is
+> retained for context only and is **not** a current release checklist. The
+> v0.1.0 implementation contained the core defects documented in
+> [core-validity-audit.md](core-validity-audit.md); its benchmark numbers are
+> invalid and have been replaced. The current branch has not been released and
+> must not be pushed or tagged as part of the repair review.
+>
+> For current verification, see the commands recorded in
+> [core-validity-audit.md](core-validity-audit.md) and run the CI workflow
+> locally (`uv sync --locked --all-extras`, `uv run ruff check src tests`,
+> `uv run ruff format --check src tests`, `uv run pytest`).
 
 ## Verified locally
 - [x] Tests pass (14/14)

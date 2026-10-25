@@ -14,16 +14,43 @@ jobs:
         python-version: ["3.12"]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Install uv
-      uses: astral-sh/setup-uv@v1
-    - name: Set up Python ${{ matrix.python-version }}
-      run: uv python install ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: uv sync --all-extras
-    - name: Lint with ruff
-      run: uv run ruff check src tests
-    - name: Format check
-      run: uv run ruff format --check src tests
-    - name: Test with pytest
-      run: uv run pytest
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+      - name: Install locked dependencies
+        run: uv sync --locked --all-extras --python ${{ matrix.python-version }}
+      - name: Lint with ruff
+        run: uv run --python ${{ matrix.python-version }} ruff check src tests
+      - name: Format check (full tree)
+        run: uv run --python ${{ matrix.python-version }} ruff format --check .
+      - name: Type check
+        run: uv run --python ${{ matrix.python-version }} mypy src
+      - name: Test with pytest
+        run: uv run --python ${{ matrix.python-version }} pytest
+      - name: CLI smoke test (run)
+        run: uv run --python ${{ matrix.python-version }} mosaic run --scenario nominal --seed 1 --duration 0.5 --num-objects 1
+      - name: CLI smoke test (evaluate)
+        run: |
+          uv run --python ${{ matrix.python-version }} mosaic evaluate \
+            --scenario nominal --seeds 1 --duration 0.5 --num-objects 1 \
+            --output /tmp/mosaic-smoke
+      - name: CLI smoke test (compare)
+        run: |
+          uv run --python ${{ matrix.python-version }} mosaic compare \
+            --scenario nominal --seeds 1 --duration 0.5 --num-objects 1 \
+            --output /tmp/mosaic-compare
+          test -s /tmp/mosaic-compare/benchmark.json
+          test -s /tmp/mosaic-compare/per_seed.csv
+          test -s /tmp/mosaic-compare/report.md
+      - name: CLI smoke test (benchmark)
+        run: |
+          uv run --python ${{ matrix.python-version }} mosaic benchmark \
+            --scenario nominal --seeds 1 --duration 0.5 --num-objects 1 \
+            --output /tmp/mosaic-benchmark
+          test -s /tmp/mosaic-benchmark/benchmark.json
+          test -s /tmp/mosaic-benchmark/per_seed.csv
+          test -s /tmp/mosaic-benchmark/report.md

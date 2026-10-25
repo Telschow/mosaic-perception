@@ -1,48 +1,86 @@
-# Demo Walkthrough (2-3 minutes)
+# Demo Walkthrough (2–3 minutes)
 
-This walkthrough demonstrates the core capability of Mosaic: showing when sensor fusion helps and when it hurts.
+This walkthrough demonstrates the core capability of Mosaic: a paired comparison
+of range-bearing-only tracking and fused range+vision tracking, with explicit
+evaluation denominators and honest reporting of unsupported metrics.
 
 ## Prerequisites
+
 ```bash
 cd mosaic-perception
-uv sync  # or pip install -e ".[dev]"
+uv sync --all-extras
 ```
 
 ## Step 1: Quick CLI test (30 seconds)
-Run a single scenario to see basic functionality:
+
 ```bash
-PYTHONPATH=src python3 -c "from mosaic_perception.cli.main import app; app(['run', '--scenario', 'nominal', '--seed', '42', '--duration', '10.0'])"
+uv run mosaic run --scenario nominal --seed 42 --duration 10.0
 ```
 
-You'll see a comparison table showing position RMSE for range-only vs fused tracking.
+You will see both methods on the same world and range stream, with position and
+velocity RMSE, recall, precision, coverage, matched samples and unmatched confirmed tracks.
+The fused method adds vision observations only.
 
 ## Step 2: Multi-seed comparison (45 seconds)
-Run across multiple seeds to see variability:
+
 ```bash
-PYTHONPATH=src python3 -c "from mosaic_perception.cli.main import app; app(['compare', '--scenario', 'nominal', '--seeds', '1,5,10,20,30', '--duration', '10.0'])"
+uv run mosaic compare --scenario nominal --seeds 1-5 --duration 10.0
 ```
 
-Notice that sometimes fusion improves (negative delta), sometimes degrades (positive delta). This is the key insight!
+Compare the aggregate metrics. Note that small RMSE differences can coexist with
+large precision and false-track differences; do not reduce the comparison to a
+single number.
 
-## Step 3: Interactive exploration (60 seconds)
-Launch the Streamlit workbench:
+## Step 3: Reproducible artifacts (45 seconds)
+
 ```bash
-streamlit run app/streamlit_app.py
+uv run mosaic evaluate --scenario all --seeds 1-5 --duration 10.0 --output results/
 ```
 
-1. Try different seeds - see how results change
-2. Look at the 2D plot showing ground truth (dashed) vs tracks (markers)
-3. Compare the metrics between range-only and fused
-4. Notice that fusion can create more tracks or different behavior
+Open `results/report.md`. The report includes:
 
-## Key Takeaways
-- **Fusion isn't always better** - depends on conditions, data association, calibration
-- **Reproducible** - same seed gives same results
-- **Transparent** - can see individual tracks and understand behavior
-- **Synthetic but rigorous** - controlled environment to study trade-offs
+- code commit and protocol;
+- aggregate metrics with sample standard deviations;
+- delivery statistics (delivered, rejected, out-of-sequence, pending, mean AoI);
+- per-seed deltas;
+- findings and limitations.
 
-## Limitations to Note
-- This is synthetic data only - not real sensor performance
-- Vision-only track initiation is not performed (bearing alone doesn't determine range)
-- Observer is currently assumed static at origin in this implementation
-- Simple gated nearest-neighbor association
+The checked-in canonical copy is under `artifacts/benchmark/`. Repeated runs
+with the same seeds and commit are byte-identical because no wall-clock
+timestamps are stored.
+
+## Step 4: Interactive exploration (60 seconds)
+
+```bash
+uv run streamlit run app/streamlit_app.py
+```
+
+1. Select a scenario and seed.
+2. Run the simulation.
+3. Inspect the metrics table and the 2-D plot of ground truth and final
+   confirmed/coasting tracks.
+4. Try `moving_observer`, `measurement_bias`, `uncertainty_miscalibration` and
+   `out_of_sequence` to see different failure modes.
+
+## Key takeaways
+
+- **Fusion is not always better.** In the current development benchmark, fused
+  position RMSE is often slightly lower, but precision is lower in every
+  scenario with defined precision, coverage is not improved overall, and the
+  miscalibration scenario remains badly calibrated.
+- **Association is per group.** A track can receive range and vision in the
+  same epoch; within each group matching is one-to-one.
+- **Stale data is rejected explicitly.** The `out_of_sequence` scenario reports
+  `N/A` accuracy because stale observations are rejected and counted.
+- **Unsupported metrics are not faked.** `track_fragmentation` is `N/A`.
+- **Reproducible.** Explicit seeds, deterministic IDs and paired runs.
+
+## Limitations to note
+
+- Synthetic 2-D world; simplified sensor models; no hardware validation.
+- Vision-only track initiation is unsupported.
+- Observations older than one tracker epoch are rejected, not replayed.
+- `track_fragmentation` is not implemented.
+- The benchmark uses development seeds 1–5 only. Held-out seeds 25–49 are
+  reserved and were not run; no held-out or real-world claim is made.
+- The published v0.1.0 benchmark numbers are invalid and superseded.
