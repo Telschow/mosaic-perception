@@ -1,6 +1,6 @@
 {
   "code": {
-    "git_commit": "1d8c71038a8503ba2482c7d8e92ecb3aa776dfe8",
+    "git_commit": "6aa20ecd29732afb7e5bb052c5f1410d7d20ff06",
     "package_version": "0.1.0"
   },
   "command": "benchmark",
@@ -77,7 +77,21 @@
           "unmatched_track_samples": 148.4,
           "unmatched_track_samples_std": 51.05683108066931,
           "velocity_rmse": 0.2783689150129148,
-          "velocity_rmse_std": 0.04517807608722761
+          "velocity_rmse_std": 0.04517807608722761,
+          "vision_applied": 257.0,
+          "vision_applied_std": 9.1104335791443,
+          "vision_delivered": 272.6,
+          "vision_delivered_std": 5.319774431308154,
+          "vision_gate_rejected": 14.0,
+          "vision_gate_rejected_std": 5.1478150704935,
+          "vision_generated": 275.4,
+          "vision_generated_std": 5.594640292279746,
+          "vision_invalid_or_stale": 1.0,
+          "vision_invalid_or_stale_std": 1.0,
+          "vision_lost_competition": 0.6,
+          "vision_lost_competition_std": 0.5477225575051662,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 284.8,
@@ -128,7 +142,21 @@
           "unmatched_track_samples": 73.0,
           "unmatched_track_samples_std": 38.137907651049765,
           "velocity_rmse": 0.3411546890373886,
-          "velocity_rmse_std": 0.09436191234886744
+          "velocity_rmse_std": 0.09436191234886744,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -170,7 +198,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 10,
             "unmatched_track_samples": 102,
-            "velocity_rmse": 0.2652581171600798
+            "velocity_rmse": 0.2652581171600798,
+            "vision_applied": 269,
+            "vision_delivered": 280,
+            "vision_gate_rejected": 9,
+            "vision_generated": 283,
+            "vision_invalid_or_stale": 1,
+            "vision_lost_competition": 1,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 286,
@@ -209,7 +244,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 10,
             "unmatched_track_samples": 43,
-            "velocity_rmse": 0.26273625063795
+            "velocity_rmse": 0.26273625063795,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -251,7 +293,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 166,
-            "velocity_rmse": 0.22552966524973242
+            "velocity_rmse": 0.22552966524973242,
+            "vision_applied": 260,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 10,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 1,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 291,
@@ -290,7 +339,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 126,
-            "velocity_rmse": 0.23722306237312393
+            "velocity_rmse": 0.23722306237312393,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -332,7 +388,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 96,
-            "velocity_rmse": 0.3503406064901123
+            "velocity_rmse": 0.3503406064901123,
+            "vision_applied": 246,
+            "vision_delivered": 269,
+            "vision_gate_rejected": 22,
+            "vision_generated": 272,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 1,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 279,
@@ -371,7 +434,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 33,
-            "velocity_rmse": 0.4729510026808593
+            "velocity_rmse": 0.4729510026808593,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -413,7 +483,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 158,
-            "velocity_rmse": 0.27643057348193323
+            "velocity_rmse": 0.27643057348193323,
+            "vision_applied": 250,
+            "vision_delivered": 267,
+            "vision_gate_rejected": 15,
+            "vision_generated": 269,
+            "vision_invalid_or_stale": 2,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 282,
@@ -452,7 +529,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 68,
-            "velocity_rmse": 0.3693759089119392
+            "velocity_rmse": 0.3693759089119392,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -494,7 +578,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 220,
-            "velocity_rmse": 0.274285612682716
+            "velocity_rmse": 0.274285612682716,
+            "vision_applied": 260,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 14,
+            "vision_generated": 279,
+            "vision_invalid_or_stale": 2,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 286,
@@ -533,7 +624,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 10,
             "unmatched_track_samples": 95,
-            "velocity_rmse": 0.36348722058307065
+            "velocity_rmse": 0.36348722058307065,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -636,7 +734,21 @@
           "unmatched_track_samples": 189.4,
           "unmatched_track_samples_std": 34.28264867246987,
           "velocity_rmse": 0.2520914284812831,
-          "velocity_rmse_std": 0.10528524546445674
+          "velocity_rmse_std": 0.10528524546445674,
+          "vision_applied": 293.4,
+          "vision_applied_std": 8.384509526501832,
+          "vision_delivered": 572.6,
+          "vision_delivered_std": 14.328293687665674,
+          "vision_gate_rejected": 276.0,
+          "vision_gate_rejected_std": 13.946325680981353,
+          "vision_generated": 572.6,
+          "vision_generated_std": 14.328293687665674,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 3.2,
+          "vision_lost_competition_std": 2.16794833886788,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 387.8,
@@ -687,7 +799,21 @@
           "unmatched_track_samples": 57.0,
           "unmatched_track_samples_std": 14.124446891825535,
           "velocity_rmse": 0.31057155625098737,
-          "velocity_rmse_std": 0.08344639198645913
+          "velocity_rmse_std": 0.08344639198645913,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -729,7 +855,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 208,
-            "velocity_rmse": 0.2190346749232784
+            "velocity_rmse": 0.2190346749232784,
+            "vision_applied": 303,
+            "vision_delivered": 563,
+            "vision_gate_rejected": 257,
+            "vision_generated": 563,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 3,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 395,
@@ -768,7 +901,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 50,
-            "velocity_rmse": 0.2904631062337716
+            "velocity_rmse": 0.2904631062337716,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -810,7 +950,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 143,
-            "velocity_rmse": 0.19405248232397437
+            "velocity_rmse": 0.19405248232397437,
+            "vision_applied": 281,
+            "vision_delivered": 555,
+            "vision_gate_rejected": 274,
+            "vision_generated": 555,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 389,
@@ -849,7 +996,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 78,
-            "velocity_rmse": 0.23644142604900262
+            "velocity_rmse": 0.23644142604900262,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -891,7 +1045,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 187,
-            "velocity_rmse": 0.42776918349599213
+            "velocity_rmse": 0.42776918349599213,
+            "vision_applied": 292,
+            "vision_delivered": 592,
+            "vision_gate_rejected": 296,
+            "vision_generated": 592,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 4,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 382,
@@ -930,7 +1091,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 53,
-            "velocity_rmse": 0.44201162542077027
+            "velocity_rmse": 0.44201162542077027,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -972,7 +1140,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 175,
-            "velocity_rmse": 0.15765192157832772
+            "velocity_rmse": 0.15765192157832772,
+            "vision_applied": 299,
+            "vision_delivered": 579,
+            "vision_gate_rejected": 274,
+            "vision_generated": 579,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 6,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 393,
@@ -1011,7 +1186,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 41,
-            "velocity_rmse": 0.2473327775282877
+            "velocity_rmse": 0.2473327775282877,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -1053,7 +1235,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 234,
-            "velocity_rmse": 0.26194888008484263
+            "velocity_rmse": 0.26194888008484263,
+            "vision_applied": 292,
+            "vision_delivered": 574,
+            "vision_gate_rejected": 279,
+            "vision_generated": 574,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 3,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 380,
@@ -1092,7 +1281,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 63,
-            "velocity_rmse": 0.33660884602310465
+            "velocity_rmse": 0.33660884602310465,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -1195,7 +1391,21 @@
           "unmatched_track_samples": 198.8,
           "unmatched_track_samples_std": 55.22408894676308,
           "velocity_rmse": 0.5753536538669252,
-          "velocity_rmse_std": 0.043738552860052654
+          "velocity_rmse_std": 0.043738552860052654,
+          "vision_applied": 260.4,
+          "vision_applied_std": 7.368853370776216,
+          "vision_delivered": 276.4,
+          "vision_delivered_std": 4.8270073544588685,
+          "vision_gate_rejected": 16.0,
+          "vision_gate_rejected_std": 6.928203230275509,
+          "vision_generated": 276.4,
+          "vision_generated_std": 4.8270073544588685,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 289.6,
@@ -1246,7 +1456,21 @@
           "unmatched_track_samples": 102.6,
           "unmatched_track_samples_std": 18.994736112934028,
           "velocity_rmse": 0.549835506934697,
-          "velocity_rmse_std": 0.04387663500587923
+          "velocity_rmse_std": 0.04387663500587923,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -1288,7 +1512,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 197,
-            "velocity_rmse": 0.5544308910630146
+            "velocity_rmse": 0.5544308910630146,
+            "vision_applied": 265,
+            "vision_delivered": 284,
+            "vision_gate_rejected": 19,
+            "vision_generated": 284,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -1327,7 +1558,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 17,
             "unmatched_track_samples": 83,
-            "velocity_rmse": 0.580152708410279
+            "velocity_rmse": 0.580152708410279,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -1369,7 +1607,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 22,
             "unmatched_track_samples": 286,
-            "velocity_rmse": 0.6414757047561565
+            "velocity_rmse": 0.6414757047561565,
+            "vision_applied": 268,
+            "vision_delivered": 277,
+            "vision_gate_rejected": 9,
+            "vision_generated": 277,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 296,
@@ -1408,7 +1653,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 20,
             "unmatched_track_samples": 133,
-            "velocity_rmse": 0.5513814073983058
+            "velocity_rmse": 0.5513814073983058,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -1450,7 +1702,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 23,
             "unmatched_track_samples": 135,
-            "velocity_rmse": 0.5227989245511167
+            "velocity_rmse": 0.5227989245511167,
+            "vision_applied": 258,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 18,
+            "vision_generated": 276,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 284,
@@ -1489,7 +1748,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 32,
             "unmatched_track_samples": 91,
-            "velocity_rmse": 0.5965290965647185
+            "velocity_rmse": 0.5965290965647185,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -1531,7 +1797,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 26,
             "unmatched_track_samples": 176,
-            "velocity_rmse": 0.5738687406236527
+            "velocity_rmse": 0.5738687406236527,
+            "vision_applied": 262,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 9,
+            "vision_generated": 271,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -1570,7 +1843,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 27,
             "unmatched_track_samples": 103,
-            "velocity_rmse": 0.5380639391921948
+            "velocity_rmse": 0.5380639391921948,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -1612,7 +1892,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 24,
             "unmatched_track_samples": 200,
-            "velocity_rmse": 0.5841940083406855
+            "velocity_rmse": 0.5841940083406855,
+            "vision_applied": 249,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 25,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 282,
@@ -1651,7 +1938,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 44,
             "unmatched_track_samples": 103,
-            "velocity_rmse": 0.4830503831079869
+            "velocity_rmse": 0.4830503831079869,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -1757,7 +2051,21 @@
           "unmatched_track_samples": 126.6,
           "unmatched_track_samples_std": 43.76414057193401,
           "velocity_rmse": 0.2719903411772743,
-          "velocity_rmse_std": 0.04887970349112087
+          "velocity_rmse_std": 0.04887970349112087,
+          "vision_applied": 258.6,
+          "vision_applied_std": 7.92464510246358,
+          "vision_delivered": 276.4,
+          "vision_delivered_std": 4.8270073544588685,
+          "vision_gate_rejected": 17.6,
+          "vision_gate_rejected_std": 7.987490219086344,
+          "vision_generated": 276.4,
+          "vision_generated_std": 4.8270073544588685,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.2,
+          "vision_lost_competition_std": 0.447213595499958,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 289.6,
@@ -1808,7 +2116,21 @@
           "unmatched_track_samples": 72.2,
           "unmatched_track_samples_std": 39.42334333868704,
           "velocity_rmse": 0.3341317812942054,
-          "velocity_rmse_std": 0.07876324193680126
+          "velocity_rmse_std": 0.07876324193680126,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -1850,7 +2172,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 77,
-            "velocity_rmse": 0.2659600899583457
+            "velocity_rmse": 0.2659600899583457,
+            "vision_applied": 264,
+            "vision_delivered": 284,
+            "vision_gate_rejected": 20,
+            "vision_generated": 284,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -1889,7 +2218,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 57,
-            "velocity_rmse": 0.2950932558238101
+            "velocity_rmse": 0.2950932558238101,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -1931,7 +2267,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 192,
-            "velocity_rmse": 0.23158829386118496
+            "velocity_rmse": 0.23158829386118496,
+            "vision_applied": 266,
+            "vision_delivered": 277,
+            "vision_gate_rejected": 11,
+            "vision_generated": 277,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 296,
@@ -1970,7 +2313,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 98,
-            "velocity_rmse": 0.28113642316466414
+            "velocity_rmse": 0.28113642316466414,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -2012,7 +2362,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 110,
-            "velocity_rmse": 0.35143929819866304
+            "velocity_rmse": 0.35143929819866304,
+            "vision_applied": 247,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 29,
+            "vision_generated": 276,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 284,
@@ -2051,7 +2408,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 40,
-            "velocity_rmse": 0.4405962507480434
+            "velocity_rmse": 0.4405962507480434,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -2093,7 +2457,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 145,
-            "velocity_rmse": 0.23277710436066587
+            "velocity_rmse": 0.23277710436066587,
+            "vision_applied": 262,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 9,
+            "vision_generated": 271,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -2132,7 +2503,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 128,
-            "velocity_rmse": 0.25967336787426776
+            "velocity_rmse": 0.25967336787426776,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -2174,7 +2552,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 109,
-            "velocity_rmse": 0.278186919507512
+            "velocity_rmse": 0.278186919507512,
+            "vision_applied": 254,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 19,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 1,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 282,
@@ -2213,7 +2598,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 12,
             "unmatched_track_samples": 38,
-            "velocity_rmse": 0.39415960886024143
+            "velocity_rmse": 0.39415960886024143,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -2316,7 +2708,21 @@
           "unmatched_track_samples": 149.0,
           "unmatched_track_samples_std": 34.9857113690718,
           "velocity_rmse": 0.27036794243404716,
-          "velocity_rmse_std": 0.04036432548918488
+          "velocity_rmse_std": 0.04036432548918488,
+          "vision_applied": 262.2,
+          "vision_applied_std": 9.959919678390985,
+          "vision_delivered": 276.4,
+          "vision_delivered_std": 4.8270073544588685,
+          "vision_gate_rejected": 14.2,
+          "vision_gate_rejected_std": 7.661592523751182,
+          "vision_generated": 276.4,
+          "vision_generated_std": 4.8270073544588685,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 289.6,
@@ -2367,7 +2773,21 @@
           "unmatched_track_samples": 74.0,
           "unmatched_track_samples_std": 28.853076092507017,
           "velocity_rmse": 0.31713385662599597,
-          "velocity_rmse_std": 0.06856249081942413
+          "velocity_rmse_std": 0.06856249081942413,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -2409,7 +2829,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 157,
-            "velocity_rmse": 0.32020655447241786
+            "velocity_rmse": 0.32020655447241786,
+            "vision_applied": 273,
+            "vision_delivered": 284,
+            "vision_gate_rejected": 11,
+            "vision_generated": 284,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -2448,7 +2875,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 56,
-            "velocity_rmse": 0.3071820677617772
+            "velocity_rmse": 0.3071820677617772,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -2490,7 +2924,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 205,
-            "velocity_rmse": 0.2523519041614571
+            "velocity_rmse": 0.2523519041614571,
+            "vision_applied": 271,
+            "vision_delivered": 277,
+            "vision_gate_rejected": 6,
+            "vision_generated": 277,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 296,
@@ -2529,7 +2970,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 117,
-            "velocity_rmse": 0.2467436566895605
+            "velocity_rmse": 0.2467436566895605,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -2571,7 +3019,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 113,
-            "velocity_rmse": 0.29444184293765013
+            "velocity_rmse": 0.29444184293765013,
+            "vision_applied": 257,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 19,
+            "vision_generated": 276,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 284,
@@ -2610,7 +3065,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 59,
-            "velocity_rmse": 0.43002364818259275
+            "velocity_rmse": 0.43002364818259275,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -2652,7 +3114,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 133,
-            "velocity_rmse": 0.2144296213364099
+            "velocity_rmse": 0.2144296213364099,
+            "vision_applied": 261,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 10,
+            "vision_generated": 271,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -2691,7 +3160,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 90,
-            "velocity_rmse": 0.3162816521545487
+            "velocity_rmse": 0.3162816521545487,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -2733,7 +3209,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 137,
-            "velocity_rmse": 0.2704097892623008
+            "velocity_rmse": 0.2704097892623008,
+            "vision_applied": 249,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 25,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 282,
@@ -2772,7 +3255,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 48,
-            "velocity_rmse": 0.2854382583415007
+            "velocity_rmse": 0.2854382583415007,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -2875,7 +3365,21 @@
           "unmatched_track_samples": 0.0,
           "unmatched_track_samples_std": 0.0,
           "velocity_rmse": null,
-          "velocity_rmse_std": null
+          "velocity_rmse_std": null,
+          "vision_applied": 0.2,
+          "vision_applied_std": 0.447213595499958,
+          "vision_delivered": 267.2,
+          "vision_delivered_std": 5.449770637375485,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 275.4,
+          "vision_generated_std": 5.594640292279746,
+          "vision_invalid_or_stale": 267.0,
+          "vision_invalid_or_stale_std": 5.291502622129181,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 1.4,
@@ -2926,7 +3430,21 @@
           "unmatched_track_samples": 0.0,
           "unmatched_track_samples_std": 0.0,
           "velocity_rmse": null,
-          "velocity_rmse_std": null
+          "velocity_rmse_std": null,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -2968,7 +3486,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 0,
+            "vision_generated": 283,
+            "vision_invalid_or_stale": 274,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 0,
@@ -3007,7 +3532,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -3049,7 +3581,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 266,
+            "vision_gate_rejected": 0,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 266,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 1,
@@ -3088,7 +3627,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -3130,7 +3676,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 265,
+            "vision_gate_rejected": 0,
+            "vision_generated": 272,
+            "vision_invalid_or_stale": 265,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 0,
@@ -3169,7 +3722,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -3211,7 +3771,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 260,
+            "vision_gate_rejected": 0,
+            "vision_generated": 269,
+            "vision_invalid_or_stale": 260,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 2,
@@ -3250,7 +3817,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -3292,7 +3866,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 1,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 0,
+            "vision_generated": 279,
+            "vision_invalid_or_stale": 270,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 4,
@@ -3331,7 +3912,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 303,
             "unmatched_track_samples": 0,
-            "velocity_rmse": null
+            "velocity_rmse": null,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -3434,7 +4022,21 @@
           "unmatched_track_samples": 82.6,
           "unmatched_track_samples_std": 16.622274212634082,
           "velocity_rmse": 0.3118768722385494,
-          "velocity_rmse_std": 0.13635725938116267
+          "velocity_rmse_std": 0.13635725938116267,
+          "vision_applied": 256.4,
+          "vision_applied_std": 6.387487769068525,
+          "vision_delivered": 276.4,
+          "vision_delivered_std": 4.8270073544588685,
+          "vision_gate_rejected": 19.4,
+          "vision_gate_rejected_std": 6.4265076052238514,
+          "vision_generated": 276.4,
+          "vision_generated_std": 4.8270073544588685,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.2,
+          "vision_lost_competition_std": 0.44721359549995804,
+          "vision_unassigned_other": 0.4,
+          "vision_unassigned_other_std": 0.894427190999916
         },
         "range_only": {
           "age_samples": 165.2,
@@ -3485,7 +4087,21 @@
           "unmatched_track_samples": 10.0,
           "unmatched_track_samples_std": 5.049752469181039,
           "velocity_rmse": 0.3803403295441702,
-          "velocity_rmse_std": 0.07877080450516091
+          "velocity_rmse_std": 0.07877080450516091,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -3527,7 +4143,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 10,
             "unmatched_track_samples": 95,
-            "velocity_rmse": 0.5394592410574642
+            "velocity_rmse": 0.5394592410574642,
+            "vision_applied": 261,
+            "vision_delivered": 284,
+            "vision_gate_rejected": 23,
+            "vision_generated": 284,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 155,
@@ -3566,7 +4189,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 63,
             "unmatched_track_samples": 10,
-            "velocity_rmse": 0.4587210951205394
+            "velocity_rmse": 0.4587210951205394,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -3608,7 +4238,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 71,
-            "velocity_rmse": 0.21095858119636723
+            "velocity_rmse": 0.21095858119636723,
+            "vision_applied": 264,
+            "vision_delivered": 277,
+            "vision_gate_rejected": 13,
+            "vision_generated": 277,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 172,
@@ -3647,7 +4284,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 32,
             "unmatched_track_samples": 16,
-            "velocity_rmse": 0.3872908503048009
+            "velocity_rmse": 0.3872908503048009,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -3689,7 +4333,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 104,
-            "velocity_rmse": 0.3380480358571547
+            "velocity_rmse": 0.3380480358571547,
+            "vision_applied": 249,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 26,
+            "vision_generated": 276,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 1,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 164,
@@ -3728,7 +4379,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 36,
             "unmatched_track_samples": 5,
-            "velocity_rmse": 0.4516736048540874
+            "velocity_rmse": 0.4516736048540874,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -3770,7 +4428,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 9,
             "unmatched_track_samples": 79,
-            "velocity_rmse": 0.2393795428773836
+            "velocity_rmse": 0.2393795428773836,
+            "vision_applied": 257,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 12,
+            "vision_generated": 271,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 2
           },
           "range_only": {
             "age_samples": 168,
@@ -3809,7 +4474,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 28,
             "unmatched_track_samples": 5,
-            "velocity_rmse": 0.3271792208619586
+            "velocity_rmse": 0.3271792208619586,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -3851,7 +4523,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 13,
             "unmatched_track_samples": 64,
-            "velocity_rmse": 0.23153896020437734
+            "velocity_rmse": 0.23153896020437734,
+            "vision_applied": 251,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 23,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 167,
@@ -3890,7 +4569,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 42,
             "unmatched_track_samples": 14,
-            "velocity_rmse": 0.27683687657946443
+            "velocity_rmse": 0.27683687657946443,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -3993,7 +4679,21 @@
           "unmatched_track_samples": 103.4,
           "unmatched_track_samples_std": 48.93158489156058,
           "velocity_rmse": 0.3156069395712046,
-          "velocity_rmse_std": 0.05717888579965559
+          "velocity_rmse_std": 0.05717888579965559,
+          "vision_applied": 22.2,
+          "vision_applied_std": 40.326170162811145,
+          "vision_delivered": 276.4,
+          "vision_delivered_std": 4.8270073544588685,
+          "vision_gate_rejected": 253.8,
+          "vision_gate_rejected_std": 36.90799371409939,
+          "vision_generated": 276.4,
+          "vision_generated_std": 4.8270073544588685,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.4,
+          "vision_lost_competition_std": 0.8944271909999161,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 289.6,
@@ -4044,7 +4744,21 @@
           "unmatched_track_samples": 74.0,
           "unmatched_track_samples_std": 28.853076092507017,
           "velocity_rmse": 0.31713385662599597,
-          "velocity_rmse_std": 0.06856249081942413
+          "velocity_rmse_std": 0.06856249081942413,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -4081,12 +4795,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 1,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 171,
-            "velocity_rmse": 0.31559609690253193
+            "velocity_rmse": 0.31559609690253193,
+            "vision_applied": 94,
+            "vision_delivered": 284,
+            "vision_gate_rejected": 188,
+            "vision_generated": 284,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 2,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -4120,12 +4841,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 1,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 56,
-            "velocity_rmse": 0.3071820677617772
+            "velocity_rmse": 0.3071820677617772,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -4162,12 +4890,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 2,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 132,
-            "velocity_rmse": 0.25377008913486887
+            "velocity_rmse": 0.25377008913486887,
+            "vision_applied": 11,
+            "vision_delivered": 277,
+            "vision_gate_rejected": 266,
+            "vision_generated": 277,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 296,
@@ -4201,12 +4936,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 2,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 117,
-            "velocity_rmse": 0.2467436566895605
+            "velocity_rmse": 0.2467436566895605,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -4243,12 +4985,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 3,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 71,
-            "velocity_rmse": 0.406948601322573
+            "velocity_rmse": 0.406948601322573,
+            "vision_applied": 2,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 274,
+            "vision_generated": 276,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 284,
@@ -4282,12 +5031,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 3,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 59,
-            "velocity_rmse": 0.43002364818259275
+            "velocity_rmse": 0.43002364818259275,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -4324,12 +5080,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 4,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 95,
-            "velocity_rmse": 0.3162816521545487
+            "velocity_rmse": 0.3162816521545487,
+            "vision_applied": 2,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 269,
+            "vision_generated": 271,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -4363,12 +5126,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 4,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 90,
-            "velocity_rmse": 0.3162816521545487
+            "velocity_rmse": 0.3162816521545487,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -4405,12 +5175,19 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 5,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 48,
-            "velocity_rmse": 0.2854382583415007
+            "velocity_rmse": 0.2854382583415007,
+            "vision_applied": 2,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 272,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 282,
@@ -4444,22 +5221,29 @@
             "rejected_invalid": 0,
             "rejected_observations": 0,
             "rejected_out_of_sequence": 0,
-            "scenario_name": "sensor_disagreement",
+            "scenario_name": "sensor_disagreement_large_bias",
             "seed": 5,
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 48,
-            "velocity_rmse": 0.2854382583415007
+            "velocity_rmse": 0.2854382583415007,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
       ],
       "scenario": {
-        "description": "Vision bearing bias of 0.12 rad while range-bearing is unbiased.",
+        "description": "Large vision bearing bias of 0.12 rad (well outside 1-DOF gate) while range-bearing is unbiased.",
         "dt": 0.1,
         "duration": 10.0,
-        "hypothesis": "Conflicting bearings pull fused estimates away from truth when the filter treats them as unbiased.",
-        "name": "sensor_disagreement",
+        "hypothesis": "A sufficiently large vision bias should be rejected by the association gate rather than corrupting the fused estimate. The gate protects against grossly inconsistent measurements.",
+        "name": "sensor_disagreement_large_bias",
         "num_objects": 3,
         "observer_trajectory": "static",
         "seed": 1,
@@ -4485,6 +5269,665 @@
           "vision_bearing": {
             "bias": {
               "bearing": 0.12
+            },
+            "delivery_delay_mean": 0.0,
+            "delivery_delay_std": 0.0,
+            "detection_probability": 0.9,
+            "dropout_prob": 0.0,
+            "enabled": true,
+            "false_alarm_rate": 0.02,
+            "frame_rate": 10.0,
+            "noise_std": {
+              "bearing": 0.005
+            },
+            "reported_cov_scale": 1.0,
+            "sensor_id": "vision1",
+            "sensor_type": "vision_bearing"
+          }
+        }
+      }
+    },
+    {
+      "aggregate": {
+        "fused": {
+          "age_samples": 566.0,
+          "age_samples_std": 8.803408430829505,
+          "confirmed_track_samples": 567.8,
+          "confirmed_track_samples_std": 29.79429475587566,
+          "coverage_samples": 296.8,
+          "coverage_samples_std": 0.447213595499958,
+          "delivered_observations": 566.0,
+          "delivered_observations_std": 8.803408430829505,
+          "ground_truth_samples": 303.0,
+          "ground_truth_samples_std": 0.0,
+          "identity_switches": 20.0,
+          "identity_switches_std": 4.123105625617661,
+          "matched_samples": 296.8,
+          "matched_samples_std": 0.447213595499958,
+          "mean_age_of_information": 0.0,
+          "mean_age_of_information_std": 0.0,
+          "num_confirmed_tracks": 22.4,
+          "num_confirmed_tracks_std": 4.393176527297759,
+          "num_false_tracks": 3.6,
+          "num_false_tracks_std": 1.949358868961793,
+          "num_seeds": 5,
+          "num_tracks": 25.0,
+          "num_tracks_std": 4.69041575982343,
+          "pending_observations": 0.0,
+          "pending_observations_std": 0.0,
+          "position_coverage_68": 0.30388797888797886,
+          "position_coverage_68_std": 0.10808323066674563,
+          "position_coverage_95": 0.49656019656019657,
+          "position_coverage_95_std": 0.10544033326728743,
+          "position_rmse": 0.284941181008099,
+          "position_rmse_std": 0.043172645275179077,
+          "precision": 0.5238368952638506,
+          "precision_std": 0.026640381746430176,
+          "recall": 0.9795379537953796,
+          "recall_std": 0.0014759524603958692,
+          "rejected_invalid": 0.0,
+          "rejected_invalid_std": 0.0,
+          "rejected_observations": 0.0,
+          "rejected_observations_std": 0.0,
+          "rejected_out_of_sequence": 0.0,
+          "rejected_out_of_sequence_std": 0.0,
+          "track_fragmentation": null,
+          "track_fragmentation_std": null,
+          "unmatched_ground_truth_samples": 6.2,
+          "unmatched_ground_truth_samples_std": 0.44721359549995787,
+          "unmatched_track_samples": 271.0,
+          "unmatched_track_samples_std": 29.58039891549808,
+          "velocity_rmse": 0.42697189639588207,
+          "velocity_rmse_std": 0.09243570779911682,
+          "vision_applied": 252.0,
+          "vision_applied_std": 9.354143466934854,
+          "vision_delivered": 276.4,
+          "vision_delivered_std": 4.8270073544588685,
+          "vision_gate_rejected": 24.2,
+          "vision_gate_rejected_std": 10.329569206893384,
+          "vision_generated": 276.4,
+          "vision_generated_std": 4.8270073544588685,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.2,
+          "vision_lost_competition_std": 0.44721359549995804,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
+        },
+        "range_only": {
+          "age_samples": 289.6,
+          "age_samples_std": 6.18869937870632,
+          "confirmed_track_samples": 370.0,
+          "confirmed_track_samples_std": 29.748949561287034,
+          "coverage_samples": 296.0,
+          "coverage_samples_std": 1.0,
+          "delivered_observations": 289.6,
+          "delivered_observations_std": 6.18869937870632,
+          "ground_truth_samples": 303.0,
+          "ground_truth_samples_std": 0.0,
+          "identity_switches": 10.4,
+          "identity_switches_std": 1.6733200530681511,
+          "matched_samples": 296.0,
+          "matched_samples_std": 1.0,
+          "mean_age_of_information": 0.0,
+          "mean_age_of_information_std": 0.0,
+          "num_confirmed_tracks": 14.2,
+          "num_confirmed_tracks_std": 1.9235384061671343,
+          "num_false_tracks": 2.4,
+          "num_false_tracks_std": 0.5477225575051661,
+          "num_seeds": 5,
+          "num_tracks": 17.8,
+          "num_tracks_std": 2.7748873851023212,
+          "pending_observations": 0.0,
+          "pending_observations_std": 0.0,
+          "position_coverage_68": 0.5270044775129521,
+          "position_coverage_68_std": 0.061095662626498036,
+          "position_coverage_95": 0.8363572355097778,
+          "position_coverage_95_std": 0.05139588819511623,
+          "position_rmse": 0.22863652886445793,
+          "position_rmse_std": 0.024468141486694222,
+          "precision": 0.8038300262416185,
+          "precision_std": 0.059575979816154936,
+          "recall": 0.9768976897689768,
+          "recall_std": 0.0033003300330032848,
+          "rejected_invalid": 0.0,
+          "rejected_invalid_std": 0.0,
+          "rejected_observations": 0.0,
+          "rejected_observations_std": 0.0,
+          "rejected_out_of_sequence": 0.0,
+          "rejected_out_of_sequence_std": 0.0,
+          "track_fragmentation": null,
+          "track_fragmentation_std": null,
+          "unmatched_ground_truth_samples": 7.0,
+          "unmatched_ground_truth_samples_std": 1.0,
+          "unmatched_track_samples": 74.0,
+          "unmatched_track_samples_std": 28.853076092507017,
+          "velocity_rmse": 0.31713385662599597,
+          "velocity_rmse_std": 0.06856249081942413,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
+        }
+      },
+      "runs": [
+        {
+          "fused": {
+            "age_samples": 577,
+            "confirmed_track_samples": 542,
+            "coverage_samples": 296,
+            "delivered_observations": 577,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 23,
+            "matched_samples": 296,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "fused",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 25,
+            "num_false_tracks": 5,
+            "num_tracks": 26,
+            "pending_observations": 0,
+            "position_coverage_68": 0.27364864864864863,
+            "position_coverage_95": 0.3918918918918919,
+            "position_rmse": 0.2626357351348357,
+            "precision": 0.5461254612546126,
+            "recall": 0.976897689768977,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 1,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 7,
+            "unmatched_track_samples": 246,
+            "velocity_rmse": 0.35460525424355605,
+            "vision_applied": 254,
+            "vision_delivered": 284,
+            "vision_gate_rejected": 30,
+            "vision_generated": 284,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "range_only": {
+            "age_samples": 293,
+            "confirmed_track_samples": 351,
+            "coverage_samples": 295,
+            "delivered_observations": 293,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 10,
+            "matched_samples": 295,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "range_only",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 15,
+            "num_false_tracks": 2,
+            "num_tracks": 17,
+            "pending_observations": 0,
+            "position_coverage_68": 0.4440677966101695,
+            "position_coverage_95": 0.7932203389830509,
+            "position_rmse": 0.2257477027453443,
+            "precision": 0.8404558404558404,
+            "recall": 0.9735973597359736,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 1,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 8,
+            "unmatched_track_samples": 56,
+            "velocity_rmse": 0.3071820677617772,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "seed": 1
+        },
+        {
+          "fused": {
+            "age_samples": 573,
+            "confirmed_track_samples": 540,
+            "coverage_samples": 297,
+            "delivered_observations": 573,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 23,
+            "matched_samples": 297,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "fused",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 26,
+            "num_false_tracks": 3,
+            "num_tracks": 31,
+            "pending_observations": 0,
+            "position_coverage_68": 0.30976430976430974,
+            "position_coverage_95": 0.5656565656565656,
+            "position_rmse": 0.27429822135931853,
+            "precision": 0.55,
+            "recall": 0.9801980198019802,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 2,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 6,
+            "unmatched_track_samples": 243,
+            "velocity_rmse": 0.4523170698182332,
+            "vision_applied": 258,
+            "vision_delivered": 277,
+            "vision_gate_rejected": 19,
+            "vision_generated": 277,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "range_only": {
+            "age_samples": 296,
+            "confirmed_track_samples": 414,
+            "coverage_samples": 297,
+            "delivered_observations": 296,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 12,
+            "matched_samples": 297,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "range_only",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 15,
+            "num_false_tracks": 3,
+            "num_tracks": 21,
+            "pending_observations": 0,
+            "position_coverage_68": 0.5050505050505051,
+            "position_coverage_95": 0.898989898989899,
+            "position_rmse": 0.1999981086352106,
+            "precision": 0.717391304347826,
+            "recall": 0.9801980198019802,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 2,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 6,
+            "unmatched_track_samples": 117,
+            "velocity_rmse": 0.2467436566895605,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "seed": 2
+        },
+        {
+          "fused": {
+            "age_samples": 560,
+            "confirmed_track_samples": 587,
+            "coverage_samples": 297,
+            "delivered_observations": 560,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 21,
+            "matched_samples": 297,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "fused",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 24,
+            "num_false_tracks": 3,
+            "num_tracks": 24,
+            "pending_observations": 0,
+            "position_coverage_68": 0.1919191919191919,
+            "position_coverage_95": 0.4175084175084175,
+            "position_rmse": 0.32003211175551133,
+            "precision": 0.5059625212947189,
+            "recall": 0.9801980198019802,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 3,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 6,
+            "unmatched_track_samples": 290,
+            "velocity_rmse": 0.5332569210579929,
+            "vision_applied": 250,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 25,
+            "vision_generated": 276,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 1,
+            "vision_unassigned_other": 0
+          },
+          "range_only": {
+            "age_samples": 284,
+            "confirmed_track_samples": 355,
+            "coverage_samples": 296,
+            "delivered_observations": 284,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 10,
+            "matched_samples": 296,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "range_only",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 16,
+            "num_false_tracks": 3,
+            "num_tracks": 17,
+            "pending_observations": 0,
+            "position_coverage_68": 0.5135135135135135,
+            "position_coverage_95": 0.8040540540540541,
+            "position_rmse": 0.267831228448233,
+            "precision": 0.8338028169014085,
+            "recall": 0.976897689768977,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 3,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 7,
+            "unmatched_track_samples": 59,
+            "velocity_rmse": 0.43002364818259275,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "seed": 3
+        },
+        {
+          "fused": {
+            "age_samples": 564,
+            "confirmed_track_samples": 609,
+            "coverage_samples": 297,
+            "delivered_observations": 564,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 20,
+            "matched_samples": 297,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "fused",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 15,
+            "num_false_tracks": 1,
+            "num_tracks": 18,
+            "pending_observations": 0,
+            "position_coverage_68": 0.26262626262626265,
+            "position_coverage_95": 0.46464646464646464,
+            "position_rmse": 0.33683705474732994,
+            "precision": 0.4876847290640394,
+            "recall": 0.9801980198019802,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 4,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 6,
+            "unmatched_track_samples": 312,
+            "velocity_rmse": 0.48464859623923623,
+            "vision_applied": 261,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 10,
+            "vision_generated": 271,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "range_only": {
+            "age_samples": 293,
+            "confirmed_track_samples": 387,
+            "coverage_samples": 297,
+            "delivered_observations": 293,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 8,
+            "matched_samples": 297,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "range_only",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 11,
+            "num_false_tracks": 2,
+            "num_tracks": 14,
+            "pending_observations": 0,
+            "position_coverage_68": 0.5723905723905723,
+            "position_coverage_95": 0.8855218855218855,
+            "position_rmse": 0.22536670235186856,
+            "precision": 0.7674418604651163,
+            "recall": 0.9801980198019802,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 4,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 6,
+            "unmatched_track_samples": 90,
+            "velocity_rmse": 0.3162816521545487,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "seed": 4
+        },
+        {
+          "fused": {
+            "age_samples": 556,
+            "confirmed_track_samples": 561,
+            "coverage_samples": 297,
+            "delivered_observations": 556,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 13,
+            "matched_samples": 297,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "fused",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 22,
+            "num_false_tracks": 6,
+            "num_tracks": 26,
+            "pending_observations": 0,
+            "position_coverage_68": 0.48148148148148145,
+            "position_coverage_95": 0.6430976430976431,
+            "position_rmse": 0.23090278204349945,
+            "precision": 0.5294117647058824,
+            "recall": 0.9801980198019802,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 5,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 6,
+            "unmatched_track_samples": 264,
+            "velocity_rmse": 0.31003164062039185,
+            "vision_applied": 237,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 37,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "range_only": {
+            "age_samples": 282,
+            "confirmed_track_samples": 343,
+            "coverage_samples": 295,
+            "delivered_observations": 282,
+            "evaluated_frames": 101,
+            "ground_truth_samples": 303,
+            "identity_switches": 12,
+            "matched_samples": 295,
+            "matching_gate_m": 2.0,
+            "mean_age_of_information": 0.0,
+            "method_name": "range_only",
+            "notes": [
+              "Matching: one-to-one Hungarian assignment per timestamp with a 2.00 m Euclidean gate.",
+              "Evaluated tracks: confirmed and coasting snapshots only; tentative and deleted tracks are excluded.",
+              "Recall denominator: every ground-truth object in every simulated frame.",
+              "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+              "Coverage: matched position errors against the reported 2x2 covariance; 95% threshold chi2(2,0.95)=5.991.",
+              "track_fragmentation is unsupported and reported as None; identity_switches is the supported continuity metric."
+            ],
+            "num_confirmed_tracks": 14,
+            "num_false_tracks": 2,
+            "num_tracks": 20,
+            "pending_observations": 0,
+            "position_coverage_68": 0.6,
+            "position_coverage_95": 0.8,
+            "position_rmse": 0.2242389021416331,
+            "precision": 0.8600583090379009,
+            "recall": 0.9735973597359736,
+            "rejected_invalid": 0,
+            "rejected_observations": 0,
+            "rejected_out_of_sequence": 0,
+            "scenario_name": "sensor_disagreement_within_gate",
+            "seed": 5,
+            "track_fragmentation": null,
+            "unmatched_ground_truth_samples": 8,
+            "unmatched_track_samples": 48,
+            "velocity_rmse": 0.2854382583415007,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
+          },
+          "seed": 5
+        }
+      ],
+      "scenario": {
+        "description": "Moderate vision bearing bias of 0.015 rad (within 1-DOF gate) while range-bearing is unbiased.",
+        "dt": 0.1,
+        "duration": 10.0,
+        "hypothesis": "A bias that passes the association gate will be fused and may degrade accuracy. This measures the trade-off between accepting more vision observations and introducing systematic error.",
+        "name": "sensor_disagreement_within_gate",
+        "num_objects": 3,
+        "observer_trajectory": "static",
+        "seed": 1,
+        "sensors": {
+          "range_bearing": {
+            "bias": {},
+            "delivery_delay_mean": 0.0,
+            "delivery_delay_std": 0.0,
+            "detection_probability": 0.95,
+            "dropout_prob": 0.0,
+            "enabled": true,
+            "false_alarm_rate": 0.01,
+            "frame_rate": 10.0,
+            "noise_std": {
+              "bearing": 0.01,
+              "range": 0.5,
+              "range_rate": 0.1
+            },
+            "reported_cov_scale": 1.0,
+            "sensor_id": "range1",
+            "sensor_type": "range_bearing"
+          },
+          "vision_bearing": {
+            "bias": {
+              "bearing": 0.015
             },
             "delivery_delay_mean": 0.0,
             "delivery_delay_std": 0.0,
@@ -4554,7 +5997,21 @@
           "unmatched_track_samples": 379.4,
           "unmatched_track_samples_std": 59.60956299118456,
           "velocity_rmse": 0.6373613818197967,
-          "velocity_rmse_std": 0.11523485539594927
+          "velocity_rmse_std": 0.11523485539594927,
+          "vision_applied": 241.2,
+          "vision_applied_std": 13.700364958642524,
+          "vision_delivered": 276.4,
+          "vision_delivered_std": 4.8270073544588685,
+          "vision_gate_rejected": 35.2,
+          "vision_gate_rejected_std": 12.77497553813705,
+          "vision_generated": 276.4,
+          "vision_generated_std": 4.8270073544588685,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 289.6,
@@ -4605,7 +6062,21 @@
           "unmatched_track_samples": 27.0,
           "unmatched_track_samples_std": 3.872983346207417,
           "velocity_rmse": 0.5728479424505538,
-          "velocity_rmse_std": 0.16987860673651148
+          "velocity_rmse_std": 0.16987860673651148,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -4647,7 +6118,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 14,
             "unmatched_track_samples": 427,
-            "velocity_rmse": 0.5022509358813932
+            "velocity_rmse": 0.5022509358813932,
+            "vision_applied": 249,
+            "vision_delivered": 284,
+            "vision_gate_rejected": 35,
+            "vision_generated": 284,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -4686,7 +6164,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 150,
             "unmatched_track_samples": 31,
-            "velocity_rmse": 0.36428084514078135
+            "velocity_rmse": 0.36428084514078135,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -4728,7 +6213,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 17,
             "unmatched_track_samples": 414,
-            "velocity_rmse": 0.5701482981649248
+            "velocity_rmse": 0.5701482981649248,
+            "vision_applied": 254,
+            "vision_delivered": 277,
+            "vision_gate_rejected": 23,
+            "vision_generated": 277,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 296,
@@ -4767,7 +6259,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 166,
             "unmatched_track_samples": 28,
-            "velocity_rmse": 0.4151041129238858
+            "velocity_rmse": 0.4151041129238858,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -4809,7 +6308,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 19,
             "unmatched_track_samples": 309,
-            "velocity_rmse": 0.8065492992793735
+            "velocity_rmse": 0.8065492992793735,
+            "vision_applied": 238,
+            "vision_delivered": 276,
+            "vision_gate_rejected": 38,
+            "vision_generated": 276,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 284,
@@ -4848,7 +6354,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 147,
             "unmatched_track_samples": 24,
-            "velocity_rmse": 0.656311682061979
+            "velocity_rmse": 0.656311682061979,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -4890,7 +6403,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 16,
             "unmatched_track_samples": 427,
-            "velocity_rmse": 0.6297391014214809
+            "velocity_rmse": 0.6297391014214809,
+            "vision_applied": 246,
+            "vision_delivered": 271,
+            "vision_gate_rejected": 25,
+            "vision_generated": 271,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -4929,7 +6449,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 153,
             "unmatched_track_samples": 22,
-            "velocity_rmse": 0.7077849043286553
+            "velocity_rmse": 0.7077849043286553,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -4971,7 +6498,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 25,
             "unmatched_track_samples": 320,
-            "velocity_rmse": 0.6781192743518107
+            "velocity_rmse": 0.6781192743518107,
+            "vision_applied": 219,
+            "vision_delivered": 274,
+            "vision_gate_rejected": 55,
+            "vision_generated": 274,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 282,
@@ -5010,7 +6544,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 160,
             "unmatched_track_samples": 30,
-            "velocity_rmse": 0.7207581677974673
+            "velocity_rmse": 0.7207581677974673,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
@@ -5113,7 +6654,21 @@
           "unmatched_track_samples": 138.6,
           "unmatched_track_samples_std": 35.500704218367275,
           "velocity_rmse": 0.30134780844964754,
-          "velocity_rmse_std": 0.06500909668287963
+          "velocity_rmse_std": 0.06500909668287963,
+          "vision_applied": 131.8,
+          "vision_applied_std": 8.28854631404084,
+          "vision_delivered": 137.2,
+          "vision_delivered_std": 7.293833011524187,
+          "vision_gate_rejected": 5.4,
+          "vision_gate_rejected_std": 4.159326868617084,
+          "vision_generated": 137.2,
+          "vision_generated_std": 7.293833011524187,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         },
         "range_only": {
           "age_samples": 289.6,
@@ -5164,7 +6719,21 @@
           "unmatched_track_samples": 74.0,
           "unmatched_track_samples_std": 28.853076092507017,
           "velocity_rmse": 0.31713385662599597,
-          "velocity_rmse_std": 0.06856249081942413
+          "velocity_rmse_std": 0.06856249081942413,
+          "vision_applied": 0.0,
+          "vision_applied_std": 0.0,
+          "vision_delivered": 0.0,
+          "vision_delivered_std": 0.0,
+          "vision_gate_rejected": 0.0,
+          "vision_gate_rejected_std": 0.0,
+          "vision_generated": 0.0,
+          "vision_generated_std": 0.0,
+          "vision_invalid_or_stale": 0.0,
+          "vision_invalid_or_stale_std": 0.0,
+          "vision_lost_competition": 0.0,
+          "vision_lost_competition_std": 0.0,
+          "vision_unassigned_other": 0.0,
+          "vision_unassigned_other_std": 0.0
         }
       },
       "runs": [
@@ -5206,7 +6775,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 101,
-            "velocity_rmse": 0.37881568623170064
+            "velocity_rmse": 0.37881568623170064,
+            "vision_applied": 131,
+            "vision_delivered": 138,
+            "vision_gate_rejected": 7,
+            "vision_generated": 138,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -5245,7 +6821,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 56,
-            "velocity_rmse": 0.3071820677617772
+            "velocity_rmse": 0.3071820677617772,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 1
         },
@@ -5287,7 +6870,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 147,
-            "velocity_rmse": 0.2587273567618919
+            "velocity_rmse": 0.2587273567618919,
+            "vision_applied": 143,
+            "vision_delivered": 146,
+            "vision_gate_rejected": 3,
+            "vision_generated": 146,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 296,
@@ -5326,7 +6916,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 117,
-            "velocity_rmse": 0.2467436566895605
+            "velocity_rmse": 0.2467436566895605,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 2
         },
@@ -5368,7 +6965,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 117,
-            "velocity_rmse": 0.3649559813517856
+            "velocity_rmse": 0.3649559813517856,
+            "vision_applied": 124,
+            "vision_delivered": 136,
+            "vision_gate_rejected": 12,
+            "vision_generated": 136,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 284,
@@ -5407,7 +7011,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 7,
             "unmatched_track_samples": 59,
-            "velocity_rmse": 0.43002364818259275
+            "velocity_rmse": 0.43002364818259275,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 3
         },
@@ -5449,7 +7060,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 194,
-            "velocity_rmse": 0.24226598771259575
+            "velocity_rmse": 0.24226598771259575,
+            "vision_applied": 137,
+            "vision_delivered": 140,
+            "vision_gate_rejected": 3,
+            "vision_generated": 140,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 293,
@@ -5488,7 +7106,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 90,
-            "velocity_rmse": 0.3162816521545487
+            "velocity_rmse": 0.3162816521545487,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 4
         },
@@ -5530,7 +7155,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 6,
             "unmatched_track_samples": 134,
-            "velocity_rmse": 0.2619740301902638
+            "velocity_rmse": 0.2619740301902638,
+            "vision_applied": 124,
+            "vision_delivered": 126,
+            "vision_gate_rejected": 2,
+            "vision_generated": 126,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "range_only": {
             "age_samples": 282,
@@ -5569,7 +7201,14 @@
             "track_fragmentation": null,
             "unmatched_ground_truth_samples": 8,
             "unmatched_track_samples": 48,
-            "velocity_rmse": 0.2854382583415007
+            "velocity_rmse": 0.2854382583415007,
+            "vision_applied": 0,
+            "vision_delivered": 0,
+            "vision_gate_rejected": 0,
+            "vision_generated": 0,
+            "vision_invalid_or_stale": 0,
+            "vision_lost_competition": 0,
+            "vision_unassigned_other": 0
           },
           "seed": 5
         }
