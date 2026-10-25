@@ -85,7 +85,8 @@ only orchestrates them.
 
 ### Experiment runner (`experiment.py`)
 
-- Builds one world, then runs `range_only` and `fused` on the same states.
+- Builds one world, then runs `range_only`, `fused` and `fused_bias_estimated` on the same
+  states.
 - Reuses the same range-sensor random stream; fused adds vision only.
 - Clears evaluator-only object IDs before processing.
 - Wraps the evaluator and optional git-commit metadata.

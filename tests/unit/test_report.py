@@ -53,9 +53,11 @@ def _payload():
                     }
                 ],
                 "paired_differences": {
-                    "position_rmse": {"n": 5, "mean": -0.1, "ci95_low": -0.2, "ci95_high": 0.0},
-                    "precision": {"n": 1, "mean": 0.05, "ci95_low": None, "ci95_high": None},
-                    "recall": {"n": 0, "mean": None, "ci95_low": None, "ci95_high": None},
+                    "fused_vs_range_only": {
+                        "position_rmse": {"n": 5, "mean": -0.1, "ci95_low": -0.2, "ci95_high": 0.0},
+                        "precision": {"n": 1, "mean": 0.05, "ci95_low": None, "ci95_high": None},
+                        "recall": {"n": 0, "mean": None, "ci95_low": None, "ci95_high": None},
+                    }
                 },
                 "aggregate": {
                     "range_only": _aggregate(0.3),
@@ -100,8 +102,10 @@ def test_paired_difference_section_renders_intervals_and_na():
 
 def _with_paired(rmse_row, precision_row=None):
     payload = _payload()
-    payload["protocol"]["paired_comparison"] = {"baseline": "range_only", "treatment": "fused"}
-    paired = payload["scenarios"][0]["paired_differences"]
+    payload["protocol"]["paired_comparisons"] = [
+        {"name": "fused_vs_range_only", "baseline": "range_only", "treatment": "fused"}
+    ]
+    paired = payload["scenarios"][0]["paired_differences"]["fused_vs_range_only"]
     paired["position_rmse"] = rmse_row
     if precision_row is not None:
         paired["precision"] = precision_row
@@ -174,3 +178,34 @@ def test_paired_section_states_which_direction_favours_fusion():
     text = render_report(_payload())
     assert "Lower is" in text and "better for the RMSE metrics and GOSPA" in text
     assert "MOTA, IDF1 and GOSPA (interval excludes zero)" in text
+
+
+def test_second_comparison_gets_its_own_section_and_findings():
+    payload = _payload()
+    payload["protocol"]["paired_comparisons"] = [
+        {"name": "fused_vs_range_only", "baseline": "range_only", "treatment": "fused"},
+        {
+            "name": "bias_estimated_vs_fused",
+            "baseline": "fused",
+            "treatment": "fused_bias_estimated",
+        },
+    ]
+    payload["scenarios"][0]["paired_differences"]["bias_estimated_vs_fused"] = {
+        "position_rmse": {"n": 25, "mean": -0.03, "ci95_low": -0.05, "ci95_high": -0.01},
+        "precision": {"n": 25, "mean": 0.02, "ci95_low": 0.01, "ci95_high": 0.03},
+        "mota": {"n": 25, "mean": 0.0, "ci95_low": -0.01, "ci95_high": 0.01},
+        "gospa_p1": {"n": 25, "mean": 0.1, "ci95_low": 0.05, "ci95_high": 0.15},
+    }
+    payload["scenarios"][0]["runs"][0]["fused_bias_estimated"] = {"position_rmse": 0.19}
+    text = render_report(payload)
+    assert "## Paired differences (fused-bias-estimated minus fused)" in text
+    assert "Same conventions as the first comparison." in text
+    assert "| toy | position_rmse | 25 | -0.030 | [-0.050, -0.010] |" in text
+    assert (
+        "fused-bias-estimated against fused (interval excludes zero): "
+        "position RMSE: better in 1, worse in 0, inconclusive in 0; "
+        "precision: better in 1, worse in 0, inconclusive in 0; "
+        "MOTA: better in 0, worse in 0, inconclusive in 1; "
+        "GOSPA: better in 0, worse in 1, inconclusive in 0." in text
+    )
+    assert "| toy | 1 | 0.300 | 0.200 | -0.100 | 0.190 |" in text

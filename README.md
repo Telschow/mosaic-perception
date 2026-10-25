@@ -4,7 +4,7 @@
 
 Mosaic is a deterministic synthetic workbench for investigating a narrow but important question: *when does combining noisy, asynchronous sensor observations improve an estimate of a moving object's state, and when can fusion make the result worse?*
 
-It compares a **range-bearing-sensor-only baseline** (method identifier `range_only`, no vision at all) with a **fused** method that adds vision-like bearing observations. Both methods run on the same worlds and the same range-sensor random streams, so the comparison is paired rather than a comparison of two unrelated runs.
+It compares a **range-bearing-sensor-only baseline** (method identifier `range_only`, no vision at all) with a **fused** method that adds vision-like bearing observations, and a third method, **fused_bias_estimated**, that also estimates a constant vision bearing bias and removes it before gating and updating. All methods run on the same worlds and the same sensor random streams, so the comparisons are paired rather than comparisons of unrelated runs.
 
 ## What is implemented
 
@@ -186,8 +186,8 @@ hardware performance.
 ## Reproducibility
 
 - Explicit seeds control world generation and independent sensor streams.
-- A paired run reuses the same world states and the same range-sensor random
-  stream for both methods.
+- A paired run reuses the same world states and the same sensor random streams
+  for all methods.
 - No wall-clock timestamps are stored in benchmark artifacts, so repeated runs
   with the same seed set and code commit are byte-identical.
 - Artifacts record the package version, git commit, protocol, seeds and config.

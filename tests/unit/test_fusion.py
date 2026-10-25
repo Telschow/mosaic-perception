@@ -453,3 +453,147 @@ def test_rejected_observations_do_not_contribute_to_nis():
     tracker.process_observations([vision_observation("far", bearing=0.12)], 0.0)
     stats = tracker.statistics()
     assert stats.nis_updates == 0 and stats.nis_sum == 0.0
+
+
+# --- vision bias estimation (opt-in, issue #20) ---------------------------------------
+
+
+def _bias_tracker(position_var=1e-6, **kwargs):
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True, bias_estimation=True, **kwargs)
+    tracker.tracks["t0"] = _confirmed_track("t0", (10.0, 0.0), position_var)
+    return tracker
+
+
+def test_bias_estimation_is_off_by_default():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True)
+    assert tracker.vision_bias_estimate is None
+    tracker.tracks["t0"] = _confirmed_track("t0", (10.0, 0.0), 1e-6)
+    tracker.process_observations([vision_observation("v", bearing=0.004)], 0.0)
+    assert tracker.vision_bias_estimate is None
+
+
+def test_bias_estimate_stays_near_zero_for_unbiased_vision():
+    tracker = _bias_tracker()
+    for step in range(10):
+        tracker.process_observations(
+            [
+                vision_observation(
+                    f"v{step}", bearing=0.0, capture_time=0.1 * step, delivery_time=0.1 * step
+                )
+            ],
+            0.1 * step,
+        )
+    assert abs(tracker.vision_bias_estimate) < 1e-4
+
+
+def test_a_large_bias_is_gate_rejected_before_any_bias_can_be_learned():
+    tracker = _bias_tracker()
+    for step in range(5):
+        tracker.process_observations(
+            [
+                vision_observation(
+                    f"v{step}", bearing=0.12, capture_time=0.1 * step, delivery_time=0.1 * step
+                )
+            ],
+            0.1 * step,
+        )
+    assert tracker.vision_bias_updates == 0
+    assert tracker.vision_bias_estimate == 0.0
+    assert tracker.statistics().vision_applied == 0
+
+
+def test_association_applies_the_bearing_correction_before_gating():
+    from mosaic_perception.tracking.association import GatedHungarianAssociator
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    associator = GatedHungarianAssociator()
+    ekf = ExtendedKalmanFilter(dt=0.1)
+    track = _confirmed_track("t0", (10.0, 0.0), 1e-6)
+    biased = vision_observation("v", bearing=0.015)  # d^2 = 9 against a 3.84 gate
+    assert associator.associate([track], [biased], ekf).matches == {}
+    corrected = associator.associate([track], [biased], ekf, bearing_correction=0.015)
+    assert list(corrected.matches) == ["t0"]
+
+
+def test_bias_corrected_updates_use_the_corrected_bearing():
+    tracker = _bias_tracker()
+    tracker._bias = 0.012  # as if already learned
+    tracker._bias_var = 1e-6
+    tracker.process_observations([vision_observation("v", bearing=0.012)], 0.0)
+    track = tracker.tracks["t0"]
+    # The corrected bearing equals the track's bearing (0), so y barely moves.
+    assert abs(track.state_array()[1]) < 1e-3
+
+
+def _feed(tracker, bias, steps, anchor=True):
+    """Stationary target at (10, 0); vision reports `bias` extra rad, range-bearing is unbiased."""
+    for step in range(steps):
+        t = 0.1 * step
+        observations = [
+            vision_observation(f"v{step}", bearing=bias, capture_time=t, delivery_time=t)
+        ]
+        if anchor:
+            observations.append(
+                range_observation(f"r{step}", 10.0, 0.0, 0.0, capture_time=t, delivery_time=t)
+            )
+        tracker.process_observations(observations, t)
+
+
+def test_a_bias_the_gate_rejects_is_never_learned():
+    # Against a tight track a 0.02 rad bias has d^2 ~ 16 > 3.84, so it is never applied.
+    tracker = _bias_tracker(position_var=0.01)
+    _feed(tracker, 0.02, 20)
+    assert tracker.vision_bias_updates == 0
+    assert tracker.vision_bias_estimate == 0.0
+
+
+def test_bias_estimate_converges_to_a_gate_passing_bias_using_the_range_bearing_anchor():
+    # The measurement is (vision bearing - contemporaneous range-bearing bearing), which does
+    # not depend on the track state, so the estimate converges to the injected bias.
+    tracker = _bias_tracker(position_var=0.01)
+    _feed(tracker, 0.012, 10)
+    assert tracker.vision_bias_estimate == pytest.approx(0.012, abs=2e-4)
+    assert tracker.vision_bias_updates == 10
+
+
+def test_bias_estimate_stays_at_zero_for_unbiased_vision():
+    tracker = _bias_tracker(position_var=0.01)
+    _feed(tracker, 0.0, 20)
+    assert abs(tracker.vision_bias_estimate) < 1e-9
+
+
+def test_bias_is_not_learned_without_a_contemporaneous_range_bearing_observation():
+    tracker = _bias_tracker(position_var=0.01)
+    _feed(tracker, 0.012, 5, anchor=False)
+    assert tracker.vision_bias_updates == 0
+    assert tracker.vision_bias_estimate == 0.0
+    assert tracker.statistics().vision_applied == 5  # the observations are still fused
+
+
+def test_bias_is_not_learned_when_the_range_bearing_observation_is_from_another_time():
+    tracker = _bias_tracker(position_var=0.01)
+    tracker.process_observations([], 0.0)
+    for step in range(1, 6):
+        t = 0.1 * step
+        tracker.process_observations(
+            [
+                vision_observation(f"v{step}", bearing=0.012, capture_time=t, delivery_time=t),
+                # captured 0.03 s earlier but delivered in the same epoch: not contemporaneous
+                range_observation(
+                    f"r{step}", 10.0, 0.0, 0.0, capture_time=t - 0.03, delivery_time=t
+                ),
+            ],
+            t,
+        )
+    assert tracker.vision_bias_updates == 0
+
+
+def test_the_estimate_does_not_depend_on_what_the_track_state_does():
+    # A track that absorbed the biased bearing (anchored only weakly) must not stall learning:
+    # compare a tight range-bearing weight with the loose default.
+    tight = _bias_tracker(position_var=1e-3)
+    loose = _bias_tracker(position_var=0.5)
+    _feed(tight, 0.010, 12)
+    _feed(loose, 0.010, 12)
+    assert tight.vision_bias_estimate == pytest.approx(0.010, abs=3e-4)
+    assert loose.vision_bias_estimate == pytest.approx(0.010, abs=3e-4)

@@ -142,3 +142,42 @@ def test_retrodiction_scenario_runs_and_reports_the_same_delivery_statistics():
     assert retro.rejected_out_of_sequence == base.rejected_out_of_sequence
     assert retro.age_samples == base.age_samples
     assert retro.position_rmse is not None
+
+
+def test_bias_estimated_method_runs_and_reports_its_estimate():
+    from mosaic_perception.experiment import run_method
+
+    scenario = resolve_scenario("sensor_disagreement_within_gate", seed=1, duration=10.0)
+    plain = run_method(scenario, "fused").result
+    estimated = run_method(scenario, "fused_bias_estimated").result
+    assert plain.vision_bias_estimate is None and plain.vision_bias_updates == 0
+    assert estimated.vision_bias_configured == 0.015
+    assert estimated.vision_bias_estimate is not None
+    # Measured against the contemporaneous range-bearing bearing, the estimate lands close to
+    # the injected bias (0.0161 on this seed) from many gate-passing observations.
+    assert abs(estimated.vision_bias_estimate - 0.015) < 0.004
+    assert estimated.vision_bias_updates > 100
+    # Same sensors and streams: the same vision observations are generated.
+    assert estimated.vision_generated == plain.vision_generated
+
+
+def test_bias_estimation_does_not_change_the_other_methods():
+    from mosaic_perception.experiment import run_method, run_pair
+
+    scenario = resolve_scenario("nominal", seed=3, duration=4.0)
+    pair = run_pair(scenario, include_bias_estimation=True)
+    assert pair.fused_bias_estimated is not None
+    assert pair.record("fused_bias_estimated").result.method_name == "fused_bias_estimated"
+    standalone = run_method(scenario, "fused")
+    assert pair.fused.result.model_dump() == standalone.result.model_dump()
+
+
+def test_run_pair_leaves_the_third_method_out_unless_requested():
+    from mosaic_perception.experiment import run_pair
+
+    pair = run_pair(resolve_scenario("nominal", seed=3, duration=2.0))
+    assert pair.fused_bias_estimated is None
+    import pytest
+
+    with pytest.raises(ValueError):
+        pair.record("fused_bias_estimated")

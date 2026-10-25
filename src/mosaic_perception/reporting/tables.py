@@ -194,7 +194,26 @@ VISION_TABLE = TableSpec(
         Column("Stale/invalid", "vision_invalid_or_stale"),
         Column("Applied", "vision_applied"),
     ),
-    methods=("fused",),
+    methods=("fused", "fused_bias_estimated"),
+)
+
+BIAS_TABLE = TableSpec(
+    heading="Vision bias estimation (bias-estimated fusion)",
+    intro=(
+        "A single global bearing bias per vision sensor, estimated by a scalar Kalman filter",
+        "from vision innovations on confirmed tracks (prior standard deviation 0.05 rad, random",
+        "walk 1e-4 rad per epoch; fixed in advance) and subtracted before gating and updating.",
+        "`Configured bias` is the bias injected by the scenario (never given to the estimator);",
+        "`Mean estimate` is the final estimate averaged over seeds. Only observations that pass the",
+        "gate are applied, so a bias too large for the gate is never learned, and vision updates",
+        "also pull the track toward the biased bearing, which slows learning.",
+    ),
+    columns=(
+        Column("Configured bias (rad)", "vision_bias_configured"),
+        Column("Mean estimate (rad)", "vision_bias_estimate"),
+        Column("Estimator updates (mean)", "vision_bias_updates"),
+    ),
+    methods=("fused_bias_estimated",),
 )
 
 DELIVERY_TABLE = TableSpec(
@@ -224,6 +243,7 @@ TABLES: tuple[TableSpec, ...] = (
     CONSISTENCY_TABLE,
     DUPLICATE_GATE_TABLE,
     VISION_TABLE,
+    BIAS_TABLE,
     DELIVERY_TABLE,
 )
 
@@ -245,6 +265,8 @@ def render_table(spec: TableSpec, payload: dict[str, Any], methods: tuple[str, .
     for scenario_report in payload["scenarios"]:
         name = scenario_report["scenario"]["name"]
         for method in shown_methods:
+            if method not in scenario_report["aggregate"]:
+                continue  # e.g. a payload produced without the bias-estimated method
             aggregate = scenario_report["aggregate"][method]
             cells = [
                 name,

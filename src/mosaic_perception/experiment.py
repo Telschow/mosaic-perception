@@ -22,8 +22,16 @@ from .sensors import RangeBearingSensor, VisionBearingSensor
 from .simulation.world import SyntheticWorld
 from .tracking import MultiSensorTracker
 
-Method = Literal["range_only", "fused"]
-METHODS: tuple[Method, Method] = ("range_only", "fused")
+Method = Literal["range_only", "fused", "fused_bias_estimated"]
+METHODS: tuple[Method, Method, Method] = ("range_only", "fused", "fused_bias_estimated")
+_VISION_METHODS = ("fused", "fused_bias_estimated")
+
+# Paired comparisons reported in the benchmark: (name, baseline, treatment). The first is the
+# headline fusion comparison; the second asks whether estimating the vision bias helps.
+PAIRED_COMPARISONS: tuple[tuple[str, Method, Method], ...] = (
+    ("fused_vs_range_only", "range_only", "fused"),
+    ("bias_estimated_vs_fused", "fused", "fused_bias_estimated"),
+)
 
 
 @dataclass
@@ -40,19 +48,25 @@ class RunRecord:
 
 @dataclass
 class PairedRun:
-    """Paired range-only and fused runs on identical worlds and range streams."""
+    """Paired runs on identical worlds and sensor random streams.
+
+    ``fused_bias_estimated`` is only present when requested (see ``run_pair``).
+    """
 
     scenario: ScenarioConfig
     states: list[WorldState]
     range_only: RunRecord
     fused: RunRecord
+    fused_bias_estimated: RunRecord | None = None
 
     def record(self, method: str) -> RunRecord:
         if method == "range_only":
             return self.range_only
         if method == "fused":
             return self.fused
-        raise ValueError(f"unknown method {method!r}")
+        if method == "fused_bias_estimated" and self.fused_bias_estimated is not None:
+            return self.fused_bias_estimated
+        raise ValueError(f"unknown or missing method {method!r}")
 
 
 def current_git_commit() -> str | None:
@@ -85,7 +99,7 @@ def _build_sensors(
                 )
             )
         elif config.sensor_type == "vision_bearing":
-            if method == "fused":
+            if method in _VISION_METHODS:
                 vision_sensors.append(
                     VisionBearingSensor(
                         config,
@@ -123,8 +137,9 @@ def run_method(
     range_sensors, vision_sensors = _build_sensors(scenario, method)
     tracker = MultiSensorTracker(
         dt=scenario.dt,
-        use_vision=method == "fused",
+        use_vision=method in _VISION_METHODS,
         delayed_update=scenario.delayed_update,
+        bias_estimation=method == "fused_bias_estimated",
     )
 
     for world_state in states:
@@ -156,6 +171,15 @@ def run_method(
         config=scenario.model_dump(mode="json"),
         git_commit=commit,
     )
+    vision_config = next(
+        (c for c in scenario.sensors.values() if c.sensor_type == "vision_bearing"), None
+    )
+    # Reported next to the estimate for comparison only; never an estimator input.
+    result.vision_bias_configured = (
+        float((vision_config.bias or {}).get("bearing", 0.0)) if vision_config else None
+    )
+    result.vision_bias_estimate = tracker.vision_bias_estimate
+    result.vision_bias_updates = tracker.vision_bias_updates
     return RunRecord(
         scenario_name=scenario.name,
         seed=scenario.seed,
@@ -171,8 +195,12 @@ def run_pair(
     *,
     git_commit: str | None = None,
     evaluator: TrackingEvaluator | None = None,
+    include_bias_estimation: bool = False,
 ) -> PairedRun:
-    """Run range-only and fused methods on identical worlds and range streams."""
+    """Run range-only and fused methods (optionally also bias-estimated fusion).
+
+    All methods share the world states and the same per-sensor random streams.
+    """
     states = SyntheticWorld(
         seed=scenario.seed,
         duration=scenario.duration,
@@ -196,4 +224,15 @@ def run_pair(
         git_commit=commit,
         evaluator=evaluator,
     )
-    return PairedRun(scenario, states, range_only, fused)
+    bias_estimated = (
+        run_method(
+            scenario,
+            "fused_bias_estimated",
+            states,
+            git_commit=commit,
+            evaluator=evaluator,
+        )
+        if include_bias_estimation
+        else None
+    )
+    return PairedRun(scenario, states, range_only, fused, bias_estimated)

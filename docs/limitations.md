@@ -45,6 +45,23 @@
   not a precise estimate; the pooled value is 0.320. The report shows the
   unweighted mean, the pooled accuracy and the classified fraction side by side.
 
+## Vision bias estimation
+
+- The third method, `fused_bias_estimated`, estimates one global constant bearing bias for
+  the vision sensor with a scalar Kalman filter (prior standard deviation 0.05 rad, random
+  walk 1e-4 rad per epoch, fixed in advance) and subtracts it before gating and updating.
+  It is a comparison, not a claim that bias is solved: it assumes a constant bias and an
+  unbiased range-bearing sensor, one sensor, and no time variation.
+- The measurement is the difference between a vision bearing and the bearing of the
+  range-bearing observation applied to the same confirmed track at the same capture time and
+  observer pose. A first design measured the bias against the track's own bearing; in real
+  runs that was coupled to the track (which is pulled toward the biased vision bearing), so
+  the filter became overconfident and stuck, once at the wrong sign (-0.023 rad against a
+  configured +0.015 on one seed). The bearing-difference measurement avoids the coupling.
+- Only observations that pass the gate are applied, so a bias too large for the gate is never
+  learned: for the 0.12 rad scenario the estimator sees 0-3 updates and its estimate is noise.
+  Observability rests on the range-bearing sensor sharing the vision sensor's viewpoint.
+
 ## Timing and delivery
 
 - Observations older than one tracker epoch (`dt + 1e-6`) are explicitly

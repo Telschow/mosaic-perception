@@ -37,6 +37,7 @@ from ..evaluation.registry import (
 from ..evaluation.statistics import paired_difference
 from ..experiment import (
     METHODS,
+    PAIRED_COMPARISONS,
     PairedRun,
     current_git_commit,
     run_pair,
@@ -116,6 +117,8 @@ def _print_pair(pair: PairedRun) -> None:
     ):
         table.add_column(column)
     for method in METHODS:
+        if method == "fused_bias_estimated" and pair.fused_bias_estimated is None:
+            continue
         result = pair.record(method).result
         table.add_row(
             method,
@@ -173,7 +176,6 @@ def _aggregate(
     return aggregate
 
 
-_BASELINE, _TREATMENT = METHODS  # paired comparison: treatment minus baseline
 _PAIRED_METRICS = (
     "position_rmse",
     "position_rmse_distance_only",
@@ -186,20 +188,22 @@ _PAIRED_METRICS = (
 )
 
 
-def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """Per-metric paired difference (fused - range_only) over the seeds of one scenario."""
-    summary: dict[str, dict[str, Any]] = {}
-    for metric in _PAIRED_METRICS:
-        difference = paired_difference(
-            [run[_BASELINE].get(metric) for run in runs],
-            [run[_TREATMENT].get(metric) for run in runs],
-        )
-        summary[metric] = {
-            "n": difference.n,
-            "mean": difference.mean,
-            "ci95_low": difference.low,
-            "ci95_high": difference.high,
-        }
+def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, dict[str, Any]]]:
+    """Per comparison and metric: paired difference (treatment - baseline) over seeds."""
+    summary: dict[str, dict[str, dict[str, Any]]] = {}
+    for name, baseline, treatment in PAIRED_COMPARISONS:
+        summary[name] = {}
+        for metric in _PAIRED_METRICS:
+            difference = paired_difference(
+                [run[baseline].get(metric) for run in runs],
+                [run[treatment].get(metric) for run in runs],
+            )
+            summary[name][metric] = {
+                "n": difference.n,
+                "mean": difference.mean,
+                "ci95_low": difference.low,
+                "ci95_high": difference.high,
+            }
     return summary
 
 
@@ -242,11 +246,13 @@ def _run_experiment(
             )
             if first_config is None:
                 first_config = scenario.model_dump(mode="json")
-            pair = run_pair(scenario)
+            pair = run_pair(scenario, include_bias_estimation=True)
+            assert pair.fused_bias_estimated is not None
             console.print(
                 f"  {scenario_name} seed={seed}: "
                 f"range RMSE={_fmt(pair.range_only.result.position_rmse)} m, "
-                f"fused RMSE={_fmt(pair.fused.result.position_rmse)} m"
+                f"fused RMSE={_fmt(pair.fused.result.position_rmse)} m, "
+                f"bias-estimated RMSE={_fmt(pair.fused_bias_estimated.result.position_rmse)} m"
             )
             run_payload: dict[str, Any] = {"seed": seed}
             for method in METHODS:
@@ -294,9 +300,12 @@ def _run_experiment(
             "num_objects": num_objects,
             "methods": list(METHODS),
             "paired": "same world states and range-sensor random stream per seed",
-            "paired_comparison": {"baseline": _BASELINE, "treatment": _TREATMENT},
+            "paired_comparisons": [
+                {"name": name, "baseline": baseline, "treatment": treatment}
+                for name, baseline, treatment in PAIRED_COMPARISONS
+            ],
             "paired_difference_interval": (
-                "two-sided 95% t interval over seeds of (fused - range_only); "
+                "two-sided 95% t interval over seeds of (treatment - baseline); "
                 "descriptive seed-to-seed variation, not a generalisation claim"
             ),
             "metrics_document": "docs/metrics.md",

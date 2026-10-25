@@ -44,10 +44,13 @@ For each scenario and seed:
    for both methods.
 3. Run the `range_only` tracker (vision observations not enqueued).
 4. Run the `fused` tracker (range plus vision observations).
-5. Evaluate both against the same ground-truth states using per-epoch
+5. Run the `fused_bias_estimated` tracker (the same observations, with an estimated
+   vision bearing bias removed before gating and updating).
+6. Evaluate all three against the same ground-truth states using per-epoch
    snapshots.
-6. Repeat over seeds and aggregate with mean and sample standard deviation;
-   also report per-metric paired differences (fused minus range-only) with a
+7. Repeat over seeds and aggregate with mean and sample standard deviation;
+   also report per-metric paired differences (fused minus range-only, and
+   fused-bias-estimated minus fused) with a
    two-sided 95% t interval over seeds. The interval describes seed-to-seed
    variation, not generalisation, and macro means across heterogeneous
    scenarios are not reported.

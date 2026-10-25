@@ -121,8 +121,13 @@ class GatedHungarianAssociator:
         tracks: list[TrackEstimate],
         observations: list[SensorObservation],
         ekf: ExtendedKalmanFilter,
+        bearing_correction: float = 0.0,
     ) -> GroupAssociation:
-        """Associate one measurement group and return the one-to-one matching."""
+        """Associate one measurement group and return the one-to-one matching.
+
+        ``bearing_correction`` (rad) is subtracted from vision bearings before gating, so
+        an estimated sensor bias can be removed; it is ignored for range-bearing groups.
+        """
         result = GroupAssociation()
         if not observations:
             return result
@@ -144,6 +149,8 @@ class GatedHungarianAssociator:
                 if pose is None:
                     raise ValueError("observation has no observer pose at capture time")
                 measurement, angle_indices, group = self._measurement(observation)
+                if group == "vision_bearing" and bearing_correction:
+                    measurement = measurement - bearing_correction
                 if group_name is None:
                     group_name = group
                 elif group != group_name:

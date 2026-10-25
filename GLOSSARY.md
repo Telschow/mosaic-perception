@@ -80,6 +80,12 @@ _Avoid_: Baseline (alone), non-fused
 **Fused method**:
 The method that adds vision bearing observations to the same tracker.
 
+**Bias-estimated fusion**:
+The fused method plus a global estimate of the vision sensor's constant bearing bias, subtracted from vision bearings before gating and updating.
+
+**Vision bias**:
+A constant offset in the vision sensor's reported bearing; the scenarios inject it, the estimator never sees it.
+
 **Development seeds**:
 Seeds 0–24, usable for debugging and the checked-in benchmark.
 

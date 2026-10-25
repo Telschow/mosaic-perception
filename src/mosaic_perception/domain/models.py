@@ -433,6 +433,11 @@ class EvaluationResult(BaseModel):
     num_duplicate_tracks: int = 0
     # Standard aggregate tracking scores (CLEAR-MOT, identity, GOSPA)
     identity_switches_distance_only: int | None = None
+    # Vision bias estimation (bias-estimated fusion only): estimate and update count, plus the
+    # configured bias for comparison (evaluator-side metadata, never an estimator input).
+    vision_bias_estimate: float | None = None
+    vision_bias_updates: int = 0
+    vision_bias_configured: float | None = None
     position_rmse_distance_only: float | None = None
     mota: float | None = None
     idf1: float | None = None
