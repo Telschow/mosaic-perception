@@ -24,6 +24,11 @@ quality or uncertainty calibration, and when it does not.
 - **Reserved held-out seeds**: 25–49. They have **not** been run for this
   repair. No held-out result or generalization claim is made.
 - The benchmark artifact records its seed group and the exact seed list.
+- The reserved seeds come from the same generator, scenarios and code as the
+  development seeds. A held-out run is therefore only as blind as the freeze
+  discipline around it (code, scenarios and metrics frozen first, run once, no
+  changes afterwards); it is not blind in the sense of a hidden test set, and it
+  says nothing about other generators or real data.
 
 Development results include choices made while repairing the code. They are
 useful for debugging and regression detection, not for a confirmatory claim.

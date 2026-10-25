@@ -68,7 +68,7 @@ release. The v0.1.0 benchmark numbers are invalid and have been replaced; see
 - Canonical artifacts are `artifacts/benchmark/benchmark.json`,
   `per_seed.csv` and `report.md`. The duplicate `summary.json` and
   `benchmark_report.md` aliases were removed.
-- The checked-in benchmark uses all 10 scenarios and development seeds 1–5 at
+- The checked-in benchmark uses all 15 scenarios and development seeds 0–24 at
   10 s. Held-out seeds 25–49 are reserved and were **not** run.
 
 ### Documentation

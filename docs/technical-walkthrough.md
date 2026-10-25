@@ -11,7 +11,7 @@ trade-off in a controlled synthetic setting with paired comparisons.
 
 1. **Synthetic world** (`simulation/world.py`) — deterministic 2-D trajectories
    on an exact time grid, with analytic observer heading/velocity.
-2. **Scenarios** (`scenarios.py`) — 10 presets that override sensor parameters
+2. **Scenarios** (`scenarios.py`) — 15 presets that override sensor parameters
    or the observer trajectory.
 3. **Sensors** (`sensors/*`) — range-bearing (range, sensor-frame bearing,
    relative range rate) and vision-bearing (bearing + class probabilities).

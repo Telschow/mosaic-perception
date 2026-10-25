@@ -110,7 +110,9 @@ Full definitions, matching rules and denominators are in
 
 The checked-in benchmark is generated with `--scenario all --seeds 0-24
 --duration 10.0`, i.e. **all 25 development seeds and no held-out seed**. The reserved held-out range
-25–49 has **not** been run, and no held-out claim is made.
+25–49 has **not** been run, and no held-out claim is made. When it is run, it
+will only be as blind as the freeze discipline around it: the reserved seeds
+come from the same generator and code, so it is not a hidden test set.
 
 See [artifacts/benchmark/report.md](artifacts/benchmark/report.md) for the
 generated tables and [artifacts/benchmark/benchmark.json](artifacts/benchmark/benchmark.json)
