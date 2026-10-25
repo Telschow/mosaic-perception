@@ -4,16 +4,17 @@ Tracking evaluation against ground truth.
 Evaluation uses per-epoch :class:`TrackSnapshot` records produced during the
 run. It never reconstructs history from final track states. At each world
 timestamp, confirmed/coasting tracks are matched one-to-one to ground-truth
-objects with a gated Hungarian assignment (default Euclidean gate 2.0 m).
-Metrics and their denominators are documented in ``docs/metrics.md``.
+objects with a gated Hungarian assignment (default Euclidean gate 2.0 m); see
+``frames.py``. Every metric below is a function of the resulting list of
+:class:`FrameMatch`, so metrics can be tested on hand-built frames. Metrics and
+their denominators are documented in ``docs/metrics.md``.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
-from scipy.optimize import linear_sum_assignment
 from scipy.stats import chi2
 
 from ..domain.models import (
@@ -21,29 +22,172 @@ from ..domain.models import (
     ObjectClass,
     ObservationStatistics,
     TrackSnapshot,
-    TrackStatus,
     WorldState,
 )
+from .frames import EVALUATED_STATUSES, FrameMatch, index_snapshots, match_frames
 
 _COVERAGE_95 = float(chi2.ppf(0.95, 2))  # 5.991 for two-dimensional position
 _COVERAGE_68 = float(chi2.ppf(0.68, 2))
-_EVALUATED_STATUSES = {TrackStatus.CONFIRMED, TrackStatus.COASTING}
-
-
-@dataclass(frozen=True)
-class _FrameMatch:
-    time: float
-    matched_pairs: list[tuple[TrackSnapshot, str]]
-    unmatched_tracks: int
-    unmatched_objects: int
-    # Unmatched evaluated tracks that had a ground-truth object inside the
-    # matching gate: the object was claimed by another track (a duplicate).
-    duplicate_tracks: list[TrackSnapshot] = field(default_factory=list)
-
 
 # Matching gates at which duplicate-track counts are also reported. Fixed before
 # any run (issue #11); the canonical headline gate stays 2.0 m.
 DUPLICATE_SENSITIVITY_GATES_M = (1.0, 2.0, 3.0)
+
+
+@dataclass(frozen=True)
+class SampleCounts:
+    ground_truth: int
+    evaluated_tracks: int
+    matched: int
+    unmatched_ground_truth: int
+    unmatched_tracks: int
+
+
+@dataclass(frozen=True)
+class Errors:
+    """Squared position and velocity errors over all matched samples."""
+
+    position_squared: list[float]
+    velocity_squared: list[float]
+
+
+@dataclass(frozen=True)
+class Coverage:
+    samples: int
+    hits_95: int
+    hits_68: int
+
+
+@dataclass(frozen=True)
+class ClassCounts:
+    classified: int
+    correct: int
+
+
+def sample_counts(frames: list[FrameMatch]) -> SampleCounts:
+    return SampleCounts(
+        ground_truth=sum(len(frame.objects) for frame in frames),
+        evaluated_tracks=sum(len(frame.tracks) for frame in frames),
+        matched=sum(len(frame.matched_pairs) for frame in frames),
+        unmatched_ground_truth=sum(frame.unmatched_objects for frame in frames),
+        unmatched_tracks=sum(frame.unmatched_tracks for frame in frames),
+    )
+
+
+def matched_errors(frames: list[FrameMatch]) -> Errors:
+    position_squared: list[float] = []
+    velocity_squared: list[float] = []
+    for frame in frames:
+        for snapshot, truth in frame.matched_pairs:
+            error = snapshot.position() - truth.position.to_array()
+            velocity_error = snapshot.velocity() - truth.velocity.to_array()
+            position_squared.append(float(error @ error))
+            velocity_squared.append(float(velocity_error @ velocity_error))
+    return Errors(position_squared, velocity_squared)
+
+
+def coverage_counts(frames: list[FrameMatch]) -> Coverage:
+    samples = hits_95 = hits_68 = 0
+    for frame in frames:
+        for snapshot, truth in frame.matched_pairs:
+            error = snapshot.position() - truth.position.to_array()
+            try:
+                mahalanobis_sq = float(error @ np.linalg.solve(snapshot.position_cov(), error))
+            except np.linalg.LinAlgError:
+                continue
+            if np.isfinite(mahalanobis_sq) and mahalanobis_sq >= 0.0:
+                samples += 1
+                hits_95 += int(mahalanobis_sq <= _COVERAGE_95)
+                hits_68 += int(mahalanobis_sq <= _COVERAGE_68)
+    return Coverage(samples, hits_95, hits_68)
+
+
+def class_counts(frames: list[FrameMatch]) -> ClassCounts:
+    """Matched samples whose track estimate and true class are both known."""
+    classified = correct = 0
+    for frame in frames:
+        for snapshot, truth in frame.matched_pairs:
+            if (
+                snapshot.class_estimate != ObjectClass.UNKNOWN
+                and truth.true_class != ObjectClass.UNKNOWN
+            ):
+                classified += 1
+                correct += int(snapshot.class_estimate == truth.true_class)
+    return ClassCounts(classified, correct)
+
+
+def matched_track_ids(frames: list[FrameMatch]) -> set[str]:
+    return {snapshot.track_id for frame in frames for snapshot, _ in frame.matched_pairs}
+
+
+def duplicate_track_ids(frames: list[FrameMatch]) -> set[str]:
+    return {track.track_id for frame in frames for track in frame.duplicate_tracks}
+
+
+def duplicate_track_samples(frames: list[FrameMatch]) -> int:
+    return sum(len(frame.duplicate_tracks) for frame in frames)
+
+
+def identity_switches(frames: list[FrameMatch]) -> int | None:
+    """Track ID changes between consecutive matched frames of the same object."""
+    assignments: dict[str, list[tuple[float, str]]] = {}
+    for frame in frames:
+        for snapshot, truth in frame.matched_pairs:
+            assignments.setdefault(truth.object_id, []).append((frame.time, snapshot.track_id))
+    if not assignments:
+        return None
+    switches = 0
+    for object_assignments in assignments.values():
+        ordered = sorted(object_assignments, key=lambda item: item[0])
+        for (_t0, track0), (_t1, track1) in zip(ordered[:-1], ordered[1:], strict=True):
+            if track0 != track1:
+                switches += 1
+    return switches
+
+
+def interruptions(frames: list[FrameMatch]) -> float | None:
+    """Matched-to-unmatched-to-matched interruptions, summed over objects.
+
+    An object contributes one interruption per gap of at least one evaluated
+    frame between two of its matched frames. Leading and trailing unmatched
+    frames are not interruptions.
+    """
+    matched_frames: dict[str, list[int]] = {}
+    for frame in frames:
+        for _snapshot, truth in frame.matched_pairs:
+            matched_frames.setdefault(truth.object_id, []).append(frame.index)
+    if not matched_frames:
+        return None
+    total = 0
+    for indices in matched_frames.values():
+        ordered = sorted(indices)
+        total += sum(
+            1
+            for previous, current in zip(ordered[:-1], ordered[1:], strict=True)
+            if current - previous > 1
+        )
+    return float(total)
+
+
+def per_frame_metrics(frames: list[FrameMatch]) -> list[dict]:
+    rows: list[dict] = []
+    for frame in frames:
+        errors = [
+            float(np.linalg.norm(snapshot.position() - truth.position.to_array()))
+            for snapshot, truth in frame.matched_pairs
+        ]
+        rows.append(
+            {
+                "time": frame.time,
+                "ground_truth_objects": len(frame.objects),
+                "evaluated_tracks": len(frame.tracks),
+                "matched": len(frame.matched_pairs),
+                "unmatched_ground_truth": frame.unmatched_objects,
+                "unmatched_tracks": frame.unmatched_tracks,
+                "mean_position_error_m": float(np.mean(errors)) if errors else None,
+            }
+        )
+    return rows
 
 
 class TrackingEvaluator:
@@ -75,154 +219,59 @@ class TrackingEvaluator:
             git_commit=git_commit,
         )
         if statistics is not None:
-            result.delivered_observations = statistics.delivered_observations
-            result.rejected_observations = statistics.rejected_observations
-            result.rejected_out_of_sequence = statistics.rejected_out_of_sequence
-            result.rejected_invalid = statistics.rejected_invalid
-            result.pending_observations = statistics.pending_observations
-            result.age_samples = statistics.age_samples
-            result.mean_age_of_information = statistics.mean_age_of_information
-            # Vision-specific observation acceptance
-            result.vision_generated = statistics.vision_generated
-            result.vision_delivered = statistics.vision_delivered
-            result.vision_gate_rejected = statistics.vision_gate_rejected
-            result.vision_lost_competition = statistics.vision_lost_competition
-            result.vision_unassigned_other = statistics.vision_unassigned_other
-            result.vision_applied = statistics.vision_applied
-            result.vision_invalid_or_stale = statistics.vision_invalid_or_stale
+            _copy_observation_statistics(result, statistics)
 
-        snapshots_by_time: dict[float, dict[str, TrackSnapshot]] = {}
-        all_track_ids: set[str] = set()
-        ever_confirmed: set[str] = set()
-        for snapshot in snapshots:
-            all_track_ids.add(snapshot.track_id)
-            if snapshot.status in _EVALUATED_STATUSES:
-                ever_confirmed.add(snapshot.track_id)
-            key = round(float(snapshot.time), 9)
-            snapshots_by_time.setdefault(key, {})[snapshot.track_id] = snapshot
+        snapshots_by_time = index_snapshots(snapshots)
+        all_track_ids = {snapshot.track_id for snapshot in snapshots}
+        ever_confirmed = {
+            snapshot.track_id for snapshot in snapshots if snapshot.status in EVALUATED_STATUSES
+        }
+        frames = match_frames(snapshots_by_time, world_states, self.match_gate_m)
 
-        position_squared_errors: list[float] = []
-        velocity_squared_errors: list[float] = []
-        coverage_hits_95 = 0
-        coverage_hits_68 = 0
-        coverage_samples = 0
-        matched_samples = 0
-        ground_truth_samples = 0
-        confirmed_track_samples = 0
-        unmatched_ground_truth_samples = 0
-        unmatched_track_samples = 0
-        matched_track_ids: set[str] = set()
-        duplicate_track_ids: set[str] = set()
-        duplicate_track_samples = 0
-        class_classified_samples = 0
-        class_correct_samples = 0
-        assignments_by_object: dict[str, list[tuple[float, str]]] = {}
-        matched_frames_by_object: dict[str, list[int]] = {}
-
+        counts = sample_counts(frames)
         result.evaluated_frames = len(world_states)
-        for frame_index, world_state in enumerate(world_states):
-            key = round(float(world_state.time), 9)
-            frame_tracks = [
-                snapshot
-                for snapshot in snapshots_by_time.get(key, {}).values()
-                if snapshot.status in _EVALUATED_STATUSES
-            ]
-            frame_objects = list(world_state.objects.values())
-            ground_truth_samples += len(frame_objects)
-            confirmed_track_samples += len(frame_tracks)
+        result.matched_samples = counts.matched
+        result.ground_truth_samples = counts.ground_truth
+        result.confirmed_track_samples = counts.evaluated_tracks
+        result.unmatched_ground_truth_samples = counts.unmatched_ground_truth
+        result.unmatched_track_samples = counts.unmatched_tracks
+        result.per_frame_metrics = per_frame_metrics(frames)
 
-            frame = self._match_frame(float(world_state.time), frame_tracks, frame_objects)
-            unmatched_track_samples += frame.unmatched_tracks
-            unmatched_ground_truth_samples += frame.unmatched_objects
-            matched_samples += len(frame.matched_pairs)
-            duplicate_track_samples += len(frame.duplicate_tracks)
-            duplicate_track_ids.update(track.track_id for track in frame.duplicate_tracks)
+        errors = matched_errors(frames)
+        if errors.position_squared:
+            result.position_rmse = float(np.sqrt(np.mean(errors.position_squared)))
+            result.velocity_rmse = float(np.sqrt(np.mean(errors.velocity_squared)))
+        if counts.ground_truth:
+            result.recall = counts.matched / counts.ground_truth
+        if counts.evaluated_tracks:
+            result.precision = counts.matched / counts.evaluated_tracks
 
-            frame_errors: list[float] = []
-            for snapshot, object_id in frame.matched_pairs:
-                matched_track_ids.add(snapshot.track_id)
-                truth = world_state.objects[object_id]
-                error = snapshot.position() - truth.position.to_array()
-                velocity_error = snapshot.velocity() - truth.velocity.to_array()
-                squared_position = float(error @ error)
-                position_squared_errors.append(squared_position)
-                velocity_squared_errors.append(float(velocity_error @ velocity_error))
-                frame_errors.append(float(np.sqrt(squared_position)))
-                assignments_by_object.setdefault(object_id, []).append(
-                    (float(world_state.time), snapshot.track_id)
-                )
-                matched_frames_by_object.setdefault(object_id, []).append(frame_index)
-                if (
-                    snapshot.class_estimate != ObjectClass.UNKNOWN
-                    and truth.true_class != ObjectClass.UNKNOWN
-                ):
-                    class_classified_samples += 1
-                    class_correct_samples += int(snapshot.class_estimate == truth.true_class)
+        coverage = coverage_counts(frames)
+        result.coverage_samples = coverage.samples
+        if coverage.samples:
+            result.position_coverage_95 = coverage.hits_95 / coverage.samples
+            result.position_coverage_68 = coverage.hits_68 / coverage.samples
 
-                covariance = snapshot.position_cov()
-                try:
-                    mahalanobis_sq = float(error @ np.linalg.solve(covariance, error))
-                except np.linalg.LinAlgError:
-                    continue
-                if np.isfinite(mahalanobis_sq) and mahalanobis_sq >= 0.0:
-                    coverage_samples += 1
-                    if mahalanobis_sq <= _COVERAGE_95:
-                        coverage_hits_95 += 1
-                    if mahalanobis_sq <= _COVERAGE_68:
-                        coverage_hits_68 += 1
+        classes = class_counts(frames)
+        result.class_classified_samples = classes.classified
+        result.class_correct_samples = classes.correct
+        if classes.classified:
+            result.class_accuracy = classes.correct / classes.classified
 
-            result.per_frame_metrics.append(
-                {
-                    "time": float(world_state.time),
-                    "ground_truth_objects": len(frame_objects),
-                    "evaluated_tracks": len(frame_tracks),
-                    "matched": len(frame.matched_pairs),
-                    "unmatched_ground_truth": frame.unmatched_objects,
-                    "unmatched_tracks": frame.unmatched_tracks,
-                    "mean_position_error_m": (
-                        float(np.mean(frame_errors)) if frame_errors else None
-                    ),
-                }
-            )
-
-        result.matched_samples = matched_samples
-        result.ground_truth_samples = ground_truth_samples
-        result.confirmed_track_samples = confirmed_track_samples
-        result.unmatched_ground_truth_samples = unmatched_ground_truth_samples
-        result.unmatched_track_samples = unmatched_track_samples
-        result.coverage_samples = coverage_samples
-        result.duplicate_track_samples = duplicate_track_samples
-        result.class_classified_samples = class_classified_samples
-        result.class_correct_samples = class_correct_samples
-        if class_classified_samples:
-            result.class_accuracy = class_correct_samples / class_classified_samples
-
-        if position_squared_errors:
-            result.position_rmse = float(np.sqrt(np.mean(position_squared_errors)))
-            result.velocity_rmse = float(np.sqrt(np.mean(velocity_squared_errors)))
-        if ground_truth_samples:
-            result.recall = matched_samples / ground_truth_samples
-        if confirmed_track_samples:
-            result.precision = matched_samples / confirmed_track_samples
-        if coverage_samples:
-            result.position_coverage_95 = coverage_hits_95 / coverage_samples
-            result.position_coverage_68 = coverage_hits_68 / coverage_samples
-
-        result.identity_switches = self._count_identity_switches(assignments_by_object)
-        result.track_fragmentation = self._count_interruptions(matched_frames_by_object)
+        result.identity_switches = identity_switches(frames)
+        result.track_fragmentation = interruptions(frames)
 
         result.num_tracks = len(all_track_ids)
         result.num_confirmed_tracks = len(ever_confirmed)
-        unmatched_confirmed = ever_confirmed - matched_track_ids
+        unmatched_confirmed = ever_confirmed - matched_track_ids(frames)
         result.num_unmatched_confirmed_tracks = len(unmatched_confirmed)
-        result.num_duplicate_tracks = len(unmatched_confirmed & duplicate_track_ids)
+        result.duplicate_track_samples = duplicate_track_samples(frames)
+        result.num_duplicate_tracks = len(unmatched_confirmed & duplicate_track_ids(frames))
         duplicate_counts = {
             gate: (
                 result.num_duplicate_tracks
                 if gate == self.match_gate_m
-                else self._count_duplicate_tracks(
-                    gate, snapshots_by_time, world_states, ever_confirmed
-                )
+                else _duplicates_at_gate(gate, snapshots_by_time, world_states, ever_confirmed)
             )
             for gate in DUPLICATE_SENSITIVITY_GATES_M
         }
@@ -256,104 +305,32 @@ class TrackingEvaluator:
         )
         return result
 
-    def _match_frame(
-        self,
-        time: float,
-        tracks: list[TrackSnapshot],
-        objects: list,
-        gate_m: float | None = None,
-    ) -> _FrameMatch:
-        if not tracks or not objects:
-            return _FrameMatch(time, [], len(tracks), len(objects))
 
-        track_positions = np.array([track.position() for track in tracks])
-        object_positions = np.array([obj.position.to_array() for obj in objects])
-        distances = np.linalg.norm(
-            track_positions[:, None, :] - object_positions[None, :, :], axis=2
-        )
-        finite = distances <= (self.match_gate_m if gate_m is None else gate_m)
-        if not np.any(finite):
-            return _FrameMatch(time, [], len(tracks), len(objects))
+def _duplicates_at_gate(
+    gate_m: float,
+    snapshots_by_time: dict[float, dict[str, TrackSnapshot]],
+    world_states: list[WorldState],
+    ever_confirmed: set[str],
+) -> int:
+    """Duplicate-track count at another matching gate, via matching only."""
+    frames = match_frames(snapshots_by_time, world_states, gate_m)
+    return len((ever_confirmed - matched_track_ids(frames)) & duplicate_track_ids(frames))
 
-        assignment_cost = np.where(finite, distances, 1e9)
-        rows, columns = linear_sum_assignment(assignment_cost)
-        paired_rows: set[int] = set()
-        paired_columns: set[int] = set()
-        matched_pairs: list[tuple[TrackSnapshot, str]] = []
-        for row, column in zip(rows, columns, strict=True):
-            if finite[row, column]:
-                paired_rows.add(int(row))
-                paired_columns.add(int(column))
-                matched_pairs.append((tracks[row], objects[column].object_id))
-        claimed_columns = np.zeros(len(objects), dtype=bool)
-        claimed_columns[list(paired_columns)] = True
-        duplicates = [
-            tracks[row]
-            for row in range(len(tracks))
-            if row not in paired_rows and bool(np.any(finite[row] & claimed_columns))
-        ]
-        return _FrameMatch(
-            time,
-            matched_pairs,
-            len(tracks) - len(paired_rows),
-            len(objects) - len(paired_columns),
-            duplicate_tracks=duplicates,
-        )
 
-    def _count_duplicate_tracks(
-        self,
-        gate_m: float,
-        snapshots_by_time: dict[float, dict[str, TrackSnapshot]],
-        world_states: list[WorldState],
-        ever_confirmed: set[str],
-    ) -> int:
-        """Duplicate-track count at another matching gate, via matching only."""
-        matched_ids: set[str] = set()
-        duplicate_ids: set[str] = set()
-        for world_state in world_states:
-            key = round(float(world_state.time), 9)
-            frame_tracks = [
-                snapshot
-                for snapshot in snapshots_by_time.get(key, {}).values()
-                if snapshot.status in _EVALUATED_STATUSES
-            ]
-            frame = self._match_frame(
-                float(world_state.time), frame_tracks, list(world_state.objects.values()), gate_m
-            )
-            matched_ids.update(snapshot.track_id for snapshot, _ in frame.matched_pairs)
-            duplicate_ids.update(track.track_id for track in frame.duplicate_tracks)
-        return len((ever_confirmed - matched_ids) & duplicate_ids)
-
-    @staticmethod
-    def _count_interruptions(matched_frames_by_object: dict[str, list[int]]) -> float | None:
-        """Count matched-to-unmatched-to-matched interruptions summed over objects.
-
-        An object contributes one interruption per gap of at least one evaluated
-        frame between two of its matched frames. Leading and trailing unmatched
-        frames are not interruptions.
-        """
-        if not matched_frames_by_object:
-            return None
-        interruptions = 0
-        for frames in matched_frames_by_object.values():
-            ordered = sorted(frames)
-            interruptions += sum(
-                1
-                for previous, current in zip(ordered[:-1], ordered[1:], strict=True)
-                if current - previous > 1
-            )
-        return float(interruptions)
-
-    @staticmethod
-    def _count_identity_switches(
-        assignments_by_object: dict[str, list[tuple[float, str]]],
-    ) -> int | None:
-        if not assignments_by_object:
-            return None
-        switches = 0
-        for assignments in assignments_by_object.values():
-            ordered = sorted(assignments, key=lambda item: item[0])
-            for (_t0, track0), (_t1, track1) in zip(ordered[:-1], ordered[1:], strict=True):
-                if track0 != track1:
-                    switches += 1
-        return switches
+def _copy_observation_statistics(
+    result: EvaluationResult, statistics: ObservationStatistics
+) -> None:
+    result.delivered_observations = statistics.delivered_observations
+    result.rejected_observations = statistics.rejected_observations
+    result.rejected_out_of_sequence = statistics.rejected_out_of_sequence
+    result.rejected_invalid = statistics.rejected_invalid
+    result.pending_observations = statistics.pending_observations
+    result.age_samples = statistics.age_samples
+    result.mean_age_of_information = statistics.mean_age_of_information
+    result.vision_generated = statistics.vision_generated
+    result.vision_delivered = statistics.vision_delivered
+    result.vision_gate_rejected = statistics.vision_gate_rejected
+    result.vision_lost_competition = statistics.vision_lost_competition
+    result.vision_unassigned_other = statistics.vision_unassigned_other
+    result.vision_applied = statistics.vision_applied
+    result.vision_invalid_or_stale = statistics.vision_invalid_or_stale

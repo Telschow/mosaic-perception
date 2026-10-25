@@ -68,7 +68,12 @@ Key properties:
     snapshots and delivery statistics;
   - no broad exception swallowing and no ground-truth identity use.
 
-### Evaluation layer (`evaluation/metrics.py`)
+### Evaluation layer (`evaluation/frames.py`, `evaluation/metrics.py`)
+
+`frames.py` matches evaluated tracks to ground truth once per frame and returns
+one `FrameMatch` per world state. Every metric in `metrics.py` is a function of
+that list, so a metric can be tested on hand-built frames; `TrackingEvaluator`
+only orchestrates them.
 
 - Snapshot-based, not final-state-based.
 - One-to-one gated Hungarian matching per timestamp; confirmed/coasting only.
