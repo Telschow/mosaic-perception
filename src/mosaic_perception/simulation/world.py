@@ -27,7 +27,10 @@ class SyntheticWorld:
         dt: float = 0.1,
         num_objects: int = 3,
         observer_trajectory: str = "static",
+        target_layout: str = "random",
     ):
+        if target_layout not in ("random", "crossing"):
+            raise ValueError(f"unknown target_layout {target_layout!r}")
         if dt <= 0:
             raise ValueError("dt must be positive")
         if duration < 0:
@@ -37,6 +40,7 @@ class SyntheticWorld:
         self.dt = dt
         self.num_objects = num_objects
         self.observer_trajectory = observer_trajectory
+        self.target_layout = target_layout
 
         self.rng = np.random.RandomState(seed)
         # Number of steps: inclusive of t=0 and the final step <= duration.
@@ -48,6 +52,8 @@ class SyntheticWorld:
 
     def _generate_trajectories(self) -> dict[str, list[ObjectState]]:
         """Generate deterministic object trajectories."""
+        if self.target_layout == "crossing":
+            return self._generate_crossing_trajectories()
         trajectories: dict[str, list[ObjectState]] = {}
         classes = [ObjectClass.UNKNOWN, ObjectClass.VEHICLE, ObjectClass.PEDESTRIAN]
 
@@ -102,6 +108,42 @@ class SyntheticWorld:
 
             trajectories[obj_id] = states
 
+        return trajectories
+
+    def _generate_crossing_trajectories(self) -> dict[str, list[ObjectState]]:
+        """Constant-velocity targets whose paths cross at mid-run.
+
+        Every target moves at 2 m/s on its own heading (headings spaced by
+        pi / num_objects) and passes the seeded crossing point at
+        ``duration / 2``. Target ``i`` is offset by ``0.5 * (i - (n - 1) / 2)``
+        m along the x axis at that instant, so adjacent targets are 0.5 m
+        apart there, well inside the 2 m matching gate.
+        """
+        speed = 2.0
+        crossing_time = self.duration / 2.0
+        centre = self.rng.uniform(-10.0, 10.0, size=2)
+        classes = [ObjectClass.VEHICLE, ObjectClass.PEDESTRIAN, ObjectClass.UNKNOWN]
+        trajectories: dict[str, list[ObjectState]] = {}
+        n = self.num_objects
+        for i in range(n):
+            heading = i * math.pi / max(n, 1)
+            vx, vy = speed * math.cos(heading), speed * math.sin(heading)
+            offset_x = 0.5 * (i - (n - 1) / 2.0)
+            cross_x, cross_y = float(centre[0]) + offset_x, float(centre[1])
+            states = [
+                ObjectState(
+                    object_id=f"obj_{i:03d}",
+                    position=Vector2(
+                        x=cross_x + vx * (float(t) - crossing_time),
+                        y=cross_y + vy * (float(t) - crossing_time),
+                    ),
+                    velocity=Vector2(x=vx, y=vy),
+                    true_class=classes[i % len(classes)],
+                    visible=True,
+                )
+                for t in self.time_steps
+            ]
+            trajectories[f"obj_{i:03d}"] = states
         return trajectories
 
     def _generate_observer_trajectory(self) -> list[Pose2D]:

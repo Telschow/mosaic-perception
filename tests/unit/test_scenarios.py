@@ -103,3 +103,15 @@ def test_within_gate_bias_sweep_uses_only_the_preregistered_values():
         "sensor_disagreement_within_gate": 0.015,
         "sensor_disagreement_within_gate_high": 0.020,
     }
+
+
+def test_crossing_and_dense_clutter_presets_are_constructed_as_documented():
+    crossing = resolve_scenario("crossing_targets", seed=1, duration=10.0, dt=0.1, num_objects=3)
+    assert crossing.target_layout == "crossing"
+    nominal = resolve_scenario("nominal", seed=1, duration=10.0, dt=0.1, num_objects=3)
+    assert nominal.target_layout == "random"
+
+    dense = resolve_scenario("dense_clutter", seed=1, duration=10.0, dt=0.1, num_objects=3)
+    assert dense.sensors["range_bearing"].false_alarm_rate == 4.0
+    assert dense.sensors["vision_bearing"].false_alarm_rate == 8.0
+    assert dense.target_layout == "random"

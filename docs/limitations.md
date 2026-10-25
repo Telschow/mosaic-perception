@@ -16,8 +16,12 @@
   produce lag or bias.
 - EKF linearisation and Gaussian assumptions are approximations.
 - Association is gated Hungarian assignment within each measurement group, not
-  MHT, JPDA or learned association. Ambiguous crossings and dense false alarms
-  can still produce identity errors.
+  MHT, JPDA, random-finite-set or learned association; those are out of scope
+  for this workbench. The `crossing_targets` (one crossing of a few targets)
+  and `dense_clutter` scenarios exercise ambiguity and clutter, but only for
+  global-nearest-neighbour association, so no claim is made about how other
+  associators would compare. The other scenarios use sparse, well-separated
+  targets, and their association results should be read as such.
 - Track initiation uses range-bearing observations only, with a simple
   velocity guess from range rate and observer velocity. Vision-only initiation
   is unsupported because a bearing does not determine range.

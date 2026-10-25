@@ -64,7 +64,7 @@ trade-off in a controlled synthetic setting with paired comparisons.
 
 ## 5) Current development benchmark
 
-From `artifacts/benchmark/report.md` (all 13 scenarios, development seeds 0–24,
+From `artifacts/benchmark/report.md` (all 15 scenarios, development seeds 0–24,
 10 s; see the artifact for the exact commit):
 
 - Fused position RMSE is lower in 6 of the 12 scenarios with defined accuracy,

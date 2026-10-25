@@ -181,6 +181,7 @@ class ScenarioConfig(BaseModel):
     dt: float = 0.1  # seconds
     num_objects: int = 3
     observer_trajectory: str = "static"
+    target_layout: str = "random"
     sensors: dict[str, SensorConfig] = Field(default_factory=dict)
 
 

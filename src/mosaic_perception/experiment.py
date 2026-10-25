@@ -117,6 +117,7 @@ def run_method(
             dt=scenario.dt,
             num_objects=scenario.num_objects,
             observer_trajectory=scenario.observer_trajectory,
+            target_layout=scenario.target_layout,
         ).get_all_states()
 
     range_sensors, vision_sensors = _build_sensors(scenario, method)
@@ -177,6 +178,7 @@ def run_pair(
         dt=scenario.dt,
         num_objects=scenario.num_objects,
         observer_trajectory=scenario.observer_trajectory,
+        target_layout=scenario.target_layout,
     ).get_all_states()
     commit = git_commit if git_commit is not None else current_git_commit()
     range_only = run_method(
