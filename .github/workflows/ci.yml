@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege: every job gets read-only access only. Individual jobs may
+# narrow further, never widen beyond this.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,9 +19,9 @@ jobs:
         python-version: ["3.12"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           enable-cache: true
       - name: Set up Python ${{ matrix.python-version }}
@@ -70,3 +75,47 @@ jobs:
             exit 1
           fi
           grep -q "unknown scenario" /tmp/mosaic-benchmark-bad.err
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      # Pin the scanner version; bump deliberately, alongside a rescan.
+      GITLEAKS_VERSION: "8.30.1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks (pinned, checksum-verified)
+        run: |
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL "${base}/${archive}" -o "${RUNNER_TEMP}/${archive}"
+          curl -sSfL "${base}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" -o "${RUNNER_TEMP}/checksums.txt"
+          (cd "${RUNNER_TEMP}" && grep "${archive}" checksums.txt | sha256sum --check --strict -)
+          tar -xzf "${RUNNER_TEMP}/${archive}" -C "${RUNNER_TEMP}" gitleaks
+          echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
+      - name: Secret scan (full history, includes the tracked tree at HEAD)
+        run: gitleaks git . --redact --no-banner
+
+  artifact-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          enable-cache: true
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+      - name: Install locked dependencies
+        run: uv sync --locked --all-extras --python 3.12
+      - name: Artifact provenance (recorded commit, unchanged source, version)
+        run: uv run --python 3.12 python scripts/check_artifact_provenance.py
+      - name: Golden benchmark (byte-for-byte against committed goldens)
+        run: uv run --python 3.12 python scripts/check_benchmark_golden.py
