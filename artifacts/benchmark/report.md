@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `f31b8b89fd2c5096ed7c34e65b527ba34821d569`
+- Git commit: `d7f1bf36faca3628f32573a8702ff8e4fe1aa276`
 - Seeds: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -60,10 +60,11 @@ never a fabricated zero.
 ## Paired differences (fused minus range-only)
 
 Mean per-seed difference with a two-sided 95% t interval over seeds. Seeds with
-an undefined value on either side are dropped (`n` is the number kept). A
-negative RMSE difference favours fusion; for recall, precision and coverage a
-positive one does. The interval describes seed-to-seed variation in this
-synthetic setup and is not a claim about other worlds.
+an undefined value on either side are dropped (`n` is the number kept). Lower is
+better for the RMSE metrics and GOSPA, so a negative difference favours fusion;
+higher is better for recall, precision, coverage, MOTA and IDF1, so a positive one
+does. The interval describes seed-to-seed variation in this synthetic setup and is
+not a claim about other worlds.
 
 | Scenario | Metric | n | Mean diff | 95% interval |
 |---|---|---|---|---|
@@ -242,14 +243,16 @@ falls: above means overconfident, below means underconfident.
 
 - NEES (position and velocity, 2 DOF each) uses only samples matched to a ground-truth
   object inside the 2 m matching gate, so it is conditioned on that gate;
-  `GT samples outside gate` is the mean number of ground-truth samples excluded.
+  `Unmatched GT samples` is the mean number of ground-truth samples with no matched
+  track (no track inside the gate, or its tracks matched other objects), which are
+  therefore absent from NEES.
 - NIS uses the filter's own innovations for every applied update, with no ground
   truth. Updates exist only after gating, so NIS is truncated and sits slightly
   below 1.0 even for a correct filter.
 - Samples within one track are correlated and seeds share the scenario, so the
   intervals assume more independence than there is and are optimistic.
 
-| Scenario | Method | Position NEES per DOF | Velocity NEES per DOF | NIS per DOF | NEES samples (mean) | NIS updates (mean) | GT samples outside gate |
+| Scenario | Method | Position NEES per DOF | Velocity NEES per DOF | NIS per DOF | NEES samples (mean) | NIS updates (mean) | Unmatched GT samples |
 |---|---|---|---|---|---|---|---|
 | crossing_targets | range_only | 1.350 [0.977, 1.023] above | 0.556 [0.977, 1.023] below | 0.759 [0.981, 1.019] below | 296 | 276.6 | 7 |
 | crossing_targets | fused | 2.557 [0.977, 1.023] above | 0.558 [0.977, 1.023] below | 0.708 [0.983, 1.017] below | 297 | 542.7 | 6 |
@@ -776,6 +779,8 @@ observations behind each mean age of information.
 ## Findings
 
 - Position RMSE: the paired interval excludes zero in favour of fusion in 1 scenario(s) and against fusion in 5 scenario(s); it includes zero (or has fewer than two seeds) in 8 scenario(s).
+- The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in 7 scenario(s), against fusion in 3, and includes zero in 4.
+- MOTA, IDF1 and GOSPA (interval excludes zero): fusion better in 0, 2 and 0 scenario(s) and worse in 13, 5 and 13, respectively.
 - Fused precision is lower (interval excludes zero) in 13 scenario(s) and higher in 0; fused 95% coverage is lower in 11 and higher in 1. Accuracy alone does not establish that fusion improved association or calibration.
 - Fusion is not guaranteed to improve accuracy. Systematic sensor bias,
   miscalibrated uncertainty, missed detections, false observations and
