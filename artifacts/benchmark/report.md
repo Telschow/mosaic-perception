@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `43b6e4a85c7c3290ab24aaa412a7c6cbeb58b35b`
+- Git commit: `0f999c59e36142e73ccc848a13d1eba41af09488`
 - Seeds: 1, 2, 3, 4, 5
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -25,7 +25,7 @@ metric was not defined for any seed (for example, no matched tracks); it is
 never a fabricated zero.
 
 | Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks | Duplicate tracks |
-|---|---|---|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|---|---|
 | delivery_delay | range_only | 0.279 ± 0.050 | 0.341 | 0.969 | 0.808 | 0.502 | 294/303 | 2.6 | 2.6 |
 | delivery_delay | fused | 0.235 ± 0.015 | 0.278 | 0.970 | 0.671 | 0.463 | 294/303 | 4.0 | 4.0 |
 | false_observations | range_only | 0.223 ± 0.051 | 0.311 | 0.979 | 0.840 | 0.865 | 297/303 | 2.0 | 2.0 |
