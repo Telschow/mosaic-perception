@@ -56,3 +56,28 @@ def test_resolved_scenario_is_independent_of_module_defaults():
     third = resolve_scenario("nominal", seed=3, duration=2.0)
     assert third.sensors["range_bearing"].noise_std["range"] == pytest.approx(0.5)
     assert second.sensors["range_bearing"].noise_std["range"] == pytest.approx(0.5)
+
+
+def test_sensor_disagreement_scenarios_pin_acceptance_behaviour():
+    from mosaic_perception.experiment import run_method
+
+    def fused_stats(name: str):
+        scenario = resolve_scenario(name, seed=1, duration=10.0, dt=0.1, num_objects=3)
+        return run_method(scenario, "fused").result
+
+    large = fused_stats("sensor_disagreement_large_bias")
+    within = fused_stats("sensor_disagreement_within_gate")
+    for result in (large, within):
+        assert result.vision_generated > 0
+        assert result.vision_delivered == (
+            result.vision_gate_rejected
+            + result.vision_lost_competition
+            + result.vision_unassigned_other
+            + result.vision_invalid_or_stale
+            + result.vision_applied
+        )
+    # Large bias: most delivered vision observations are gate-rejected.
+    assert large.vision_gate_rejected > 0.5 * large.vision_delivered
+    # Within-gate bias: most are actually fused.
+    assert within.vision_applied > 0.5 * within.vision_delivered
+    assert within.vision_applied > large.vision_applied

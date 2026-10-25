@@ -129,8 +129,12 @@ def run_method(
         observations = []
         for sensor in range_sensors:
             observations.extend(sensor.generate_observations(world_state, world_state.time))
+        vision_observations = []
         for sensor in vision_sensors:
-            observations.extend(sensor.generate_observations(world_state, world_state.time))
+            vision_observations.extend(sensor.generate_observations(world_state, world_state.time))
+        # Record vision observations generated
+        tracker.record_vision_generated(len(vision_observations))
+        observations.extend(vision_observations)
         # Evaluator-only metadata is deliberately removed before estimation.
         for observation in observations:
             observation._true_object_id = None

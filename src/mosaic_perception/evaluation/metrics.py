@@ -73,6 +73,14 @@ class TrackingEvaluator:
             result.pending_observations = statistics.pending_observations
             result.age_samples = statistics.age_samples
             result.mean_age_of_information = statistics.mean_age_of_information
+            # Vision-specific observation acceptance
+            result.vision_generated = statistics.vision_generated
+            result.vision_delivered = statistics.vision_delivered
+            result.vision_gate_rejected = statistics.vision_gate_rejected
+            result.vision_lost_competition = statistics.vision_lost_competition
+            result.vision_unassigned_other = statistics.vision_unassigned_other
+            result.vision_applied = statistics.vision_applied
+            result.vision_invalid_or_stale = statistics.vision_invalid_or_stale
 
         snapshots_by_time: dict[float, dict[str, TrackSnapshot]] = {}
         all_track_ids: set[str] = set()

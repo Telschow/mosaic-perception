@@ -55,6 +55,13 @@ _RESULT_FIELDS = [
     "delivered_observations",
     "pending_observations",
     "age_samples",
+    "vision_generated",
+    "vision_delivered",
+    "vision_gate_rejected",
+    "vision_lost_competition",
+    "vision_unassigned_other",
+    "vision_invalid_or_stale",
+    "vision_applied",
 ]
 
 
@@ -314,6 +321,37 @@ def _render_report(payload: dict[str, Any]) -> str:
                     false_tracks=_fmt(aggregate.get("num_false_tracks"), 1),
                 )
             )
+
+    lines.extend(
+        [
+            "",
+            "## Vision observation acceptance (fused method)",
+            "",
+            "Mean per seed. `Generated` = produced by vision sensors; `Delivered` = left the",
+            "pending queue (generated minus those still pending at the end); `Gate-rejected` =",
+            "at least one track was evaluated and none passed the chi-square gate;",
+            "`Lost competition` = passed the gate for some track but lost the one-to-one",
+            "assignment; `Other unassigned` = no evaluable candidate track; `Stale/invalid` =",
+            "rejected outside association; `Applied` = used in a track update.",
+            "",
+            "| Scenario | Generated | Delivered | Gate-rejected | Lost competition | Other unassigned | Stale/invalid | Applied |",
+            "|---|---|---|---|---|---|---|---|",
+        ]
+    )
+    for scenario_report in payload["scenarios"]:
+        aggregate = scenario_report["aggregate"]["fused"]
+        lines.append(
+            "| {name} | {g} | {d} | {r} | {c} | {o} | {i} | {a} |".format(
+                name=scenario_report["scenario"]["name"],
+                g=_fmt(aggregate.get("vision_generated"), 1),
+                d=_fmt(aggregate.get("vision_delivered"), 1),
+                r=_fmt(aggregate.get("vision_gate_rejected"), 1),
+                c=_fmt(aggregate.get("vision_lost_competition"), 1),
+                o=_fmt(aggregate.get("vision_unassigned_other"), 1),
+                i=_fmt(aggregate.get("vision_invalid_or_stale"), 1),
+                a=_fmt(aggregate.get("vision_applied"), 1),
+            )
+        )
 
     lines.extend(
         [

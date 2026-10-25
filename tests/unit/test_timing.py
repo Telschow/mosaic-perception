@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from mosaic_perception.domain.models import SensorConfig
+from mosaic_perception.domain.models import SensorConfig, TrackStatus
 from mosaic_perception.sensors import RangeBearingSensor
 from mosaic_perception.simulation.world import SyntheticWorld
 from mosaic_perception.tracking import MultiSensorTracker
@@ -161,3 +161,109 @@ def test_ground_truth_identity_is_not_used_by_tracker():
     tracker.process_observations([observation], 0.0)
     assert observation.associated_track_id == track.track_id
     assert track.associated_observations == ["truth-test"]
+
+
+def _delay_scenario(observer_velocity, target_velocity, bearing=0.0, range_rate=0.0):
+    """Track at t=0, observation captured t=0, delivered t=0.05, processed t=0.1.
+
+    Returns the tracker's resulting track plus the independently computed
+    current-state update (the documented policy), the capture-time
+    rewind/replay alternative and the wrong-pose alternative.
+    """
+    from mosaic_perception.domain.models import Pose2D, Vector2
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    tracker = MultiSensorTracker(dt=0.1, use_vision=False)
+    track = make_track(velocity=target_velocity, status=TrackStatus.CONFIRMED)
+    track.covariance = np.diag([0.25, 0.25, 0.01, 0.01]).tolist()
+    tracker.tracks[track.track_id] = track
+    x0, p0 = track.state_array().copy(), track.cov_array().copy()
+
+    capture_pose = Pose2D(
+        position=Vector2(x=0.0, y=0.0),
+        heading=0.0,
+        velocity=Vector2(x=observer_velocity[0], y=observer_velocity[1]),
+    )
+    delivery_pose = Pose2D(
+        position=Vector2(x=observer_velocity[0] * 0.1, y=observer_velocity[1] * 0.1),
+        heading=0.0,
+        velocity=capture_pose.velocity,
+    )
+    obs = range_observation(
+        "delayed",
+        distance=10.0,
+        bearing=bearing,
+        range_rate=range_rate,
+        capture_time=0.0,
+        delivery_time=0.05,
+    )
+    obs.observer_pose = capture_pose
+    z = np.array([10.0, bearing, range_rate])
+    r = obs.get_measurement_cov()
+
+    tracker.process_observations([obs], 0.0)
+    assert tracker.pending_count() == 1  # queued, not dropped
+    tracker.process_observations([], 0.1)
+    assert tracker.pending_count() == 0
+
+    ekf = ExtendedKalmanFilter(dt=0.1)
+
+    def update(state, cov, pose):
+        return ekf.update(
+            state,
+            cov,
+            z,
+            ekf.jacobian_range_bearing(state, pose),
+            r,
+            ekf.measurement_range_bearing(state, pose),
+            angle_indices=(1,),
+        )
+
+    x_pred, p_pred = ekf.predict(x0, p0)
+    current_state, _ = update(x_pred, p_pred, capture_pose)
+    rewind_replay, _ = ekf.predict(*update(x0, p0, capture_pose))
+    wrong_pose, _ = update(x_pred, p_pred, delivery_pose)
+    return tracker, obs, track, current_state, rewind_replay, wrong_pose
+
+
+def test_delayed_observation_is_applied_to_delivery_time_state_not_rewound():
+    """Stationary observer, target at 5 m/s: age 0.1 s -> ~0.5 m state mismatch."""
+    tracker, obs, track, current, rewind, _ = _delay_scenario(
+        (0.0, 0.0), (5.0, 0.0), range_rate=5.0
+    )
+
+    assert obs.associated_track_id == track.track_id
+    assert (track.hits, track.misses) == (1, 0)
+    stats = tracker.statistics()
+    assert stats.age_samples == 1
+    assert stats.mean_age_of_information == pytest.approx(0.1)
+
+    final = track.state_array()
+    # Policy: update the delivery-time (t=0.1) prediction with the capture-time measurement.
+    np.testing.assert_allclose(final, current, atol=1e-9)
+    # Pinned: predicted x=10.5 is pulled halfway back toward the stale range of 10.
+    assert final[0] == pytest.approx(10.249975, abs=1e-5)
+    assert final[2] == pytest.approx(4.9995, abs=1e-4)
+    # Capture-time rewind/replay would give x=10.5 (measurement agrees with the t=0 state).
+    assert rewind[0] == pytest.approx(10.5, abs=1e-9)
+    # Applied-state mismatch vs. replay is 0.250 m; the pre-update state/measurement
+    # inconsistency is speed x age = 0.5 m (a scale, not a strict bound).
+    assert final[0] - rewind[0] == pytest.approx(-0.250025, abs=1e-5)
+
+
+def test_delayed_observation_with_moving_observer_uses_capture_time_pose():
+    """Observer velocity (0, 2) and target velocity (0, 3): distinguishes three policies."""
+    tracker, obs, track, current, rewind, wrong_pose = _delay_scenario((0.0, 2.0), (0.0, 3.0))
+
+    assert obs.associated_track_id == track.track_id
+    assert tracker.statistics().mean_age_of_information == pytest.approx(0.1)
+
+    final = track.state_array()
+    # Documented approximation: capture-time observer pose + delivery-time target state.
+    np.testing.assert_allclose(final, current, atol=1e-9)
+    # Pinned y: predicted 0.3 m is pulled to ~0.0115 m by the capture-time bearing of 0.
+    assert final[1] == pytest.approx(0.011513, abs=1e-5)
+    # Rewind/replay keeps y=0.3 (measurement is consistent with the t=0 state).
+    assert rewind[1] == pytest.approx(0.3, abs=1e-9)
+    # Using the delivery-time observer pose instead would give y~0.2038 (observer moved 0.2 m).
+    assert wrong_pose[1] == pytest.approx(0.203829, abs=1e-5)

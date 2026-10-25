@@ -46,6 +46,16 @@ one tracker epoch (`dt + 1e-6`) at processing time is rejected with a logged
 stale reason and counted in `rejected_out_of_sequence`. It is not replayed.
 In-flight observations at the end of a run are reported as pending.
 
+**Q: Does the tracker align delayed observations to their capture time?**
+A: No. Admitted observations are applied to the track state at **delivery time**,
+not rewound to capture time. The tracker predicts all tracks to the current
+processing epoch before applying due observations. The measurement geometry and
+observer pose refer to capture time, but the target state has already been
+propagated forward. This is a bounded-staleness approximation; the target-state
+displacement is approximately `speed × observation_age` under constant velocity.
+Full out-of-sequence replay (retroactive update at capture time) is not
+implemented.
+
 **Q: Why is coverage still low?**
 A: Coverage is measured empirically. Under the miscalibration scenario the
 filter is told covariances are 20× smaller than the actual noise, so it is

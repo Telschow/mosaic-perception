@@ -30,6 +30,25 @@
   rejected and counted; they are not replayed against historical state. The
   potential benefit of careful out-of-sequence fusion is therefore not
   measured.
+- **Delayed-observation state alignment (bounded-staleness approximation):**
+  Observations whose capture time is at most one epoch in the past are admitted
+  to the tracker. When an observation is processed, the tracker has already
+  predicted all tracks forward to the current processing time (the delivery
+  epoch). The measurement geometry and observer pose refer to the observation's
+  **capture time**, but the target state has been propagated to **delivery time**.
+  The tracker applies the observation to this delivery-time state without
+  rewinding to the capture time. This is a deliberate approximation, not a
+  capture-time-aligned estimation.
+  - Under a constant-velocity approximation, the target-state displacement
+    between capture and delivery is approximately `speed × observation_age`.
+    Acceleration and observer-motion effects are not accounted for in this
+    approximation and require additional consideration.
+  - The reported age of information (`mean_age_of_information`) reflects the
+    time between capture and delivery, not the estimation alignment error.
+  - Observations older than the staleness limit are rejected rather than
+    replayed.
+  - No claim of full out-of-sequence measurement fusion (retroactive state
+    update) is justified by this implementation.
 - Processing occurs on the discrete tracker epoch grid. Mean age of information
   is quantised by `dt` and is not a sub-epoch latency measurement.
 - `delivery_delay` with a 0.05 s mean is generally applied at the next 0.1 s

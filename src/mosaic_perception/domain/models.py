@@ -341,6 +341,16 @@ class ObservationStatistics(BaseModel):
     age_samples: int = 0
     mean_age_of_information: float | None = None
 
+    # Vision-specific observation acceptance (only populated when use_vision=True)
+    vision_generated: int = 0
+    vision_delivered: int = 0
+    vision_gate_rejected: int = 0
+    vision_lost_competition: int = 0
+    vision_unassigned_other: int = 0
+    vision_applied: int = 0
+    # Delivered but rejected before/after association (stale, invalid, update failure)
+    vision_invalid_or_stale: int = 0
+
 
 class EvaluationResult(BaseModel):
     """
@@ -382,6 +392,16 @@ class EvaluationResult(BaseModel):
     delivered_observations: int = 0
     pending_observations: int = 0
     age_samples: int = 0
+
+    # Vision-specific observation acceptance (only populated when use_vision=True)
+    vision_generated: int = 0
+    vision_delivered: int = 0
+    vision_gate_rejected: int = 0
+    vision_lost_competition: int = 0
+    vision_unassigned_other: int = 0
+    vision_applied: int = 0
+    # Delivered but rejected before/after association (stale, invalid, update failure)
+    vision_invalid_or_stale: int = 0
 
     # Uncertainty calibration
     position_coverage_95: float | None = None

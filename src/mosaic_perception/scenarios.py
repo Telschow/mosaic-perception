@@ -139,15 +139,44 @@ PRESETS: dict[str, ScenarioPreset] = {
         range_overrides={"reported_cov_scale": 0.05},
         vision_overrides={"reported_cov_scale": 0.05},
     ),
-    "sensor_disagreement": ScenarioPreset(
-        name="sensor_disagreement",
-        description="Vision bearing bias of 0.12 rad while range-bearing is unbiased.",
+    "sensor_disagreement_large_bias": ScenarioPreset(
+        name="sensor_disagreement_large_bias",
+        description="Large vision bearing bias of 0.12 rad (well outside 1-DOF gate) while range-bearing is unbiased.",
         hypothesis=(
-            "Conflicting bearings pull fused estimates away from truth when "
-            "the filter treats them as unbiased."
+            "A sufficiently large vision bias should be rejected by the association "
+            "gate rather than corrupting the fused estimate. The gate protects "
+            "against grossly inconsistent measurements."
         ),
-        relevant_metrics=["position_rmse", "coverage"],
+        relevant_metrics=[
+            "position_rmse",
+            "coverage",
+            "vision_generated",
+            "vision_delivered",
+            "vision_gate_rejected",
+            "vision_applied",
+        ],
         vision_overrides={"bias": {"bearing": 0.12}},
+    ),
+    "sensor_disagreement_within_gate": ScenarioPreset(
+        name="sensor_disagreement_within_gate",
+        description="Moderate vision bearing bias of 0.015 rad (within 1-DOF gate) while range-bearing is unbiased.",
+        hypothesis=(
+            "A bias that passes the association gate will be fused and may "
+            "degrade accuracy. This measures the trade-off between accepting "
+            "more vision observations and introducing systematic error."
+        ),
+        relevant_metrics=[
+            "position_rmse",
+            "coverage",
+            "precision",
+            "recall",
+            "num_false_tracks",
+            "vision_generated",
+            "vision_delivered",
+            "vision_gate_rejected",
+            "vision_applied",
+        ],
+        vision_overrides={"bias": {"bearing": 0.015}},
     ),
     "moving_observer": ScenarioPreset(
         name="moving_observer",

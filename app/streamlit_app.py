@@ -17,9 +17,7 @@ from mosaic_perception.scenarios import available_scenarios, resolve_scenario
 st.set_page_config(page_title="Mosaic Perception Workbench", layout="wide")
 
 st.title("Mosaic: Multi-Sensor Perception Workbench")
-st.markdown(
-    "*A reproducible workbench for investigating when sensor fusion helps or hurts.*"
-)
+st.markdown("*A reproducible workbench for investigating when sensor fusion helps or hurts.*")
 
 st.sidebar.header("Configuration")
 scenario_name = st.sidebar.selectbox("Scenario", available_scenarios())

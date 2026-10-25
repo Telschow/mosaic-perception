@@ -33,13 +33,28 @@ class GroupAssociation:
 
     matches: dict[str, SensorObservation] = field(default_factory=dict)
     unmatched: list[SensorObservation] = field(default_factory=list)
+    # Subsets of ``unmatched`` explaining why an observation was not assigned:
+    # gate_rejected: at least one track was evaluated and none passed the gate;
+    # lost_competition: passed the gate for some track but lost the one-to-one
+    # assignment. Unmatched observations in neither list had no evaluable
+    # candidate (e.g. no tracks existed or every pair was numerically invalid).
+    gate_rejected: list[SensorObservation] = field(default_factory=list)
+    lost_competition: list[SensorObservation] = field(default_factory=list)
     invalid: list[tuple[SensorObservation, str]] = field(default_factory=list)
 
 
 # 95% chi-square gates with degrees of freedom equal to the measurement
-# dimension: 2-D position innovation is 2-DOF, a bearing is 1-DOF and a
-# range/bearing/range-rate innovation is 3-DOF.
+# dimension: bearing-only is 1-DOF, range/bearing is 2-DOF,
+# range/bearing/range-rate is 3-DOF.
+# Keys are "group:dimension" (e.g., "range_bearing:2", "range_bearing:3").
+# A plain group name without dimension falls back to the maximum dimension
+# for that group (for backward compatibility with explicit gate configs).
 DEFAULT_GATES: dict[str, float] = {
+    "range_bearing:1": float(chi2.ppf(0.95, 1)),
+    "range_bearing:2": float(chi2.ppf(0.95, 2)),
+    "range_bearing:3": float(chi2.ppf(0.95, 3)),
+    "vision_bearing:1": float(chi2.ppf(0.95, 1)),
+    # Legacy keys without dimension (deprecated, for config compatibility)
     "range_bearing": float(chi2.ppf(0.95, 3)),
     "vision_bearing": float(chi2.ppf(0.95, 1)),
 }
@@ -53,7 +68,18 @@ class GatedHungarianAssociator:
         if gates:
             self.gates.update({key: float(value) for key, value in gates.items()})
 
-    def gate_for(self, measurement_group: str) -> float:
+    def gate_for(self, measurement_group: str, dimension: int | None = None) -> float:
+        """Return the gate threshold for a measurement group and dimension.
+
+        If ``dimension`` is provided, the method looks up the dimension-specific
+        key (e.g., ``"range_bearing:2"``). If not found, it falls back to the
+        plain group key. If ``dimension`` is None, the plain group key is used
+        directly (legacy behavior).
+        """
+        if dimension is not None:
+            dim_key = f"{measurement_group}:{dimension}"
+            if dim_key in self.gates:
+                return self.gates[dim_key]
         if measurement_group not in self.gates:
             raise ValueError(f"no association gate configured for {measurement_group!r}")
         return self.gates[measurement_group]
@@ -146,7 +172,13 @@ class GatedHungarianAssociator:
             result.unmatched.extend(valid_observations)
             return result
 
-        gate = self.gate_for(group_name or "range_bearing")
+        # The gate is chosen per observation from its own validated measurement
+        # dimension, so 2-D and 3-D range/bearing observations may coexist.
+        gates = [
+            self.gate_for(group_name or "range_bearing", measurement.size)
+            for measurement in valid_measurements
+        ]
+        evaluated = np.zeros(len(valid_observations), dtype=bool)
         cost_matrix = np.full((len(tracks), len(valid_observations)), np.inf)
 
         for row, track in enumerate(tracks):
@@ -185,7 +217,9 @@ class GatedHungarianAssociator:
                     mahalanobis = float(
                         residual.T @ np.linalg.solve(innovation_covariance, residual)
                     )
-                    if np.isfinite(mahalanobis) and mahalanobis <= gate:
+                    if np.isfinite(mahalanobis):
+                        evaluated[column] = True
+                    if np.isfinite(mahalanobis) and mahalanobis <= gates[column]:
                         cost_matrix[row, column] = mahalanobis
                 except (ValueError, np.linalg.LinAlgError):
                     # A numerically invalid pair cannot be associated. The
@@ -203,12 +237,18 @@ class GatedHungarianAssociator:
                     track_id = tracks[row].track_id
                     result.matches[track_id] = valid_observations[column]
                     assigned_columns.add(int(column))
-            result.unmatched.extend(
-                observation
-                for index, observation in enumerate(valid_observations)
-                if index not in assigned_columns
-            )
+            for index, observation in enumerate(valid_observations):
+                if index in assigned_columns:
+                    continue
+                result.unmatched.append(observation)
+                if finite[:, index].any():
+                    result.lost_competition.append(observation)
+                elif evaluated[index]:
+                    result.gate_rejected.append(observation)
         else:
             result.unmatched.extend(valid_observations)
+            result.gate_rejected.extend(
+                obs for index, obs in enumerate(valid_observations) if evaluated[index]
+            )
 
         return result

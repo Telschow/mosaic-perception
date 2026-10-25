@@ -79,15 +79,36 @@ counted in `rejected_out_of_sequence`. It is not replayed. In-flight
 observations at the end of the simulation are reported as
 `pending_observations`.
 
+**Delayed-observation state alignment (bounded-staleness approximation):**
+When an observation is processed, the tracker has already predicted all tracks
+forward to the current processing time (the delivery epoch). The measurement
+geometry and observer pose refer to the observation's **capture time**, but the
+target state has been propagated to **delivery time**. The tracker applies the
+observation to this delivery-time state without rewinding to the capture time.
+This is a deliberate approximation, not a capture-time-aligned estimation.
+
+- Under a constant-velocity approximation, the target-state displacement
+  between capture and delivery is approximately `speed × observation_age`.
+  Acceleration and observer-motion effects are not accounted for in this
+  approximation and require additional consideration.
+- The reported age of information (`mean_age_of_information`) reflects the
+  time between capture and delivery, not the estimation alignment error.
+- Observations older than the staleness limit are rejected rather than
+  replayed.
+- No claim of full out-of-sequence measurement fusion (retroactive state
+  update) is justified by this implementation.
+
 This is a bounded-staleness approximation, not a full out-of-sequence
 historical replay.
 
 ## Association gates
 
-Association is performed separately for each measurement group:
+Association is performed separately for each measurement group, with gates
+selected by the actual measurement dimension:
 
-- range-bearing: 3-DOF innovation, χ²(3, 0.95) ≈ 7.815;
-- vision-bearing: 1-DOF bearing innovation, χ²(1, 0.95) ≈ 3.841.
+- range-bearing, 3-DOF (range, bearing, range rate): χ²(3, 0.95) ≈ 7.815;
+- range-bearing, 2-DOF (range, bearing only): χ²(2, 0.95) ≈ 5.991;
+- vision-bearing, 1-DOF (bearing only): χ²(1, 0.95) ≈ 3.841.
 
 Within a group the assignment is a one-to-one Hungarian assignment on gated
 Mahalanobis distance. The same track may receive one observation from each

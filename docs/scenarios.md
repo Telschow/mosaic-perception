@@ -1,6 +1,6 @@
 # Scenarios
 
-Mosaic has 10 implemented presets. A scenario changes sensor parameters and/or
+Mosaic has 11 implemented presets. A scenario changes sensor parameters and/or
 the observer trajectory; world generation, tracker management and evaluation
 logic stay identical so that comparisons between scenarios and methods remain
 meaningful. Every preset has a stated hypothesis and a list of metrics that can
@@ -26,7 +26,8 @@ All presets resolve to two sensor groups:
 | `out_of_sequence` | Delivery delay 0.25 ± 0.05 s, older than one epoch | Stale observations are rejected and counted; accuracy becomes `N/A`, not silently computed from stale data. |
 | `false_observations` | Range false-alarm rate 1.0, vision 3.0 per step | False alarms create spurious tentative tracks and can steal associations; precision and false tracks should worsen. |
 | `uncertainty_miscalibration` | Reported covariance 20× too small (scale 0.05) | Overconfident measurements are over-trusted; empirical 95% coverage falls below nominal. |
-| `sensor_disagreement` | Vision bearing bias 0.12 rad, range unbiased | Conflicting bearings pull fused estimates away from truth when treated as unbiased. |
+| `sensor_disagreement_large_bias` | Vision bearing bias 0.12 rad (well outside 1-DOF gate), range unbiased | A sufficiently large bias should be rejected by the gate rather than corrupting the fused estimate. |
+| `sensor_disagreement_within_gate` | Vision bearing bias 0.015 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
 | `moving_observer` | Observer follows a circular trajectory with changing heading and velocity | Correct sensor-frame models and observer-velocity handling keep error comparable to the static case. |
 
 Random seed, duration, step size and object count are supplied by the caller;
