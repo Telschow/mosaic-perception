@@ -116,12 +116,12 @@ generated tables and [artifacts/benchmark/benchmark.json](artifacts/benchmark/be
 for the machine-readable record (protocol, per-seed metrics, git commit).
 Headline observations from the current development benchmark:
 
-- Fused position RMSE is lower in 6 of the 10 scenarios with defined accuracy,
-  within 0.01 m in 3, and worse in 1 (`sensor_disagreement_within_gate`). The
-  differences are generally small. Unweighted macro means over the scenarios
-  where the metric is defined (development seeds, descriptive only): RMSE
-  0.392 m range-only vs 0.379 m fused (n=10); recall 0.827 vs 0.881 (n=11);
-  precision 0.821 vs 0.643 (n=10).
+- Fused position RMSE is lower in 6 of the 12 scenarios with defined accuracy,
+  within 0.01 m in 3, and worse in 3 (the three within-gate bias scenarios).
+  The differences are generally small. Unweighted macro means over the
+  scenarios where the metric is defined (development seeds, descriptive only):
+  RMSE 0.365 m range-only vs 0.362 m fused (n=12); recall 0.850 vs 0.896
+  (n=13); precision 0.818 vs 0.624 (n=12).
 - Fused **precision is lower in every scenario with defined precision**.
   Precision is sample-based (matched samples / all confirmed-or-coasting track
   samples), and the extra "unmatched confirmed tracks" are confirmed tracks never matched to
@@ -129,14 +129,17 @@ Headline observations from the current development benchmark:
   left unmatched while a true object lay inside the 2 m matching gate (the
   object was already claimed by another track). Most unmatched confirmed
   tracks in the benchmark are such duplicates (see the report).
-- The two sensor-disagreement scenarios test different things.
+- The sensor-disagreement scenarios test different things.
   `sensor_disagreement_large_bias` (0.12 rad) is a **gate-rejection**
   experiment: about 92% of delivered vision observations were rejected by the
   gate (mean 253.8 of 276.4 per seed), and fused RMSE matched range-only
-  within noise. `sensor_disagreement_within_gate` (0.015 rad) is **actually
-  fused** (mean 252.0 of 276.4 applied) and *degraded* RMSE (0.285 m vs 0.229
-  m range-only), precision (0.524 vs 0.804) and 95% coverage (0.497 vs 0.836).
-  Neither establishes real-world fusion performance.
+  within noise. The **within-gate** scenarios apply a bias small enough to be
+  fused. At the three preregistered values the gate rejected a mean 17.8, 24.2
+  and 50.8 of 276.4 observations per seed (0.010, 0.015, 0.020 rad), and fused
+  RMSE was worse than range-only each time (0.268, 0.285 and 0.293 m vs
+  0.229 m), as was precision (0.550, 0.524, 0.518 vs 0.804). 95% coverage fell
+  from 0.836 to 0.440, 0.497 and 0.534. This is a single synthetic world with
+  development seeds; it does not establish real-world fusion performance.
 - 95% coverage is not improved by fusion overall, and remains far below the
   nominal 0.95 in the miscalibration scenario.
 - The `out_of_sequence` scenario has no matched samples: observations older

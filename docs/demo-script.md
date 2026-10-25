@@ -35,9 +35,9 @@ precision, coverage, matched samples and unmatched confirmed tracks."
 Open `artifacts/benchmark/report.md` and point to the aggregate and per-seed
 tables.
 
-"Across the 11 development scenarios and seeds 1–5, fused position RMSE is
-lower in 6 scenarios, within 0.01 m in 3, and worse in 1 (a within-gate vision
-bias that is actually fused). But fused precision
+"Across the 13 development scenarios and seeds 1–5, fused position RMSE is
+lower in 6 scenarios, within 0.01 m in 3, and worse in 3 (the within-gate vision
+bias scenarios, where biased data is actually fused). But fused precision
 is lower in every scenario with defined precision, and coverage is not improved
 overall. So the honest finding
 is small accuracy gains with worse association quality, not 'fusion wins'."
