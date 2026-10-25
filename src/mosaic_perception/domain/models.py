@@ -313,6 +313,7 @@ class TrackSnapshot(BaseModel):
     misses: int = 0
     age: int = 0
     updated_this_epoch: bool = False
+    class_estimate: ObjectClass = ObjectClass.UNKNOWN
 
     def state_array(self) -> np.ndarray:
         return np.array(self.state, dtype=float)
@@ -374,7 +375,7 @@ class EvaluationResult(BaseModel):
     precision: float | None = None  # matched samples / confirmed track samples
     recall: float | None = None  # matched samples / ground-truth object samples
     identity_switches: int | None = None
-    track_fragmentation: float | None = None  # unsupported in v0.1
+    track_fragmentation: float | None = None  # matched-frame interruptions, summed over objects
     matched_samples: int = 0
     ground_truth_samples: int = 0
     confirmed_track_samples: int = 0
@@ -412,6 +413,14 @@ class EvaluationResult(BaseModel):
     num_confirmed_tracks: int = 0
     num_unmatched_confirmed_tracks: int = 0
     num_duplicate_tracks: int = 0
+    # Class estimate accuracy over matched samples with a known estimate and known truth
+    class_classified_samples: int = 0
+    class_correct_samples: int = 0
+    class_accuracy: float | None = None
+    # Duplicate-track sensitivity to the matching gate (fixed, preregistered gates)
+    num_duplicate_tracks_gate_1m: int = 0
+    num_duplicate_tracks_gate_2m: int = 0
+    num_duplicate_tracks_gate_3m: int = 0
     duplicate_track_samples: int = 0
 
     # Raw data for detailed analysis

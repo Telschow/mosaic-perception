@@ -29,7 +29,7 @@
 - [x] Frame-rate honoring
 - [x] Snapshot-based evaluation with one-to-one gated matching
 - [x] Explicit metric denominators; χ²(2, 0.95) = 5.991 coverage
-- [x] `track_fragmentation` explicitly unsupported (`None`)
+- [x] `track_fragmentation` computed with a documented definition
 - [x] Deterministic IDs and artifact generation
 - [x] Paired same-world/same-range-stream comparison
 - [x] Implemented `mosaic evaluate`
@@ -40,7 +40,6 @@
 
 - [ ] Run the reserved held-out seeds 25–49 once, after freezing code and
       protocol, and report them separately
-- [ ] Implement track fragmentation with a documented definition
 - [ ] Add out-of-sequence historical replay and measure stale-data fusion
 - [ ] Investigate why fused precision and false-track counts are worse
 - [ ] Improve calibration under reported-covariance miscalibration

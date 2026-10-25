@@ -49,6 +49,12 @@ _RESULT_FIELDS = [
     "num_confirmed_tracks",
     "num_unmatched_confirmed_tracks",
     "num_duplicate_tracks",
+    "class_classified_samples",
+    "class_correct_samples",
+    "class_accuracy",
+    "num_duplicate_tracks_gate_1m",
+    "num_duplicate_tracks_gate_2m",
+    "num_duplicate_tracks_gate_3m",
     "duplicate_track_samples",
     "mean_age_of_information",
     "rejected_observations",
@@ -161,6 +167,12 @@ def _aggregate(results: list[EvaluationResult]) -> dict[str, Any]:
             continue
         aggregate[field] = float(np.mean(values))
         aggregate[f"{field}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+    classified = sum(result.class_classified_samples for result in results)
+    matched = sum(result.matched_samples for result in results)
+    correct = sum(result.class_correct_samples for result in results)
+    # Pooled over seeds so a seed with very few classified samples cannot dominate.
+    aggregate["class_accuracy_pooled"] = correct / classified if classified else None
+    aggregate["class_classified_fraction_pooled"] = classified / matched if matched else None
     return aggregate
 
 
@@ -292,8 +304,8 @@ def _render_report(payload: dict[str, Any]) -> str:
         "metric was not defined for any seed (for example, no matched tracks); it is",
         "never a fabricated zero.",
         "",
-        "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks | Duplicate tracks |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks | Duplicate tracks | Fragmentation |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for scenario_report in payload["scenarios"]:
         scenario_name = scenario_report["scenario"]["name"]
@@ -310,7 +322,7 @@ def _render_report(payload: dict[str, Any]) -> str:
             )
             lines.append(
                 "| {scenario} | {method} | {rmse} | {vel} | {recall} | {precision} | "
-                "{coverage} | {matched}/{gt} | {unmatched} | {duplicates} |".format(
+                "{coverage} | {matched}/{gt} | {unmatched} | {duplicates} | {fragmentation} |".format(
                     scenario=scenario_name,
                     method=method,
                     rmse=rmse_text,
@@ -322,6 +334,68 @@ def _render_report(payload: dict[str, Any]) -> str:
                     gt=_fmt(aggregate.get("ground_truth_samples"), 0),
                     unmatched=_fmt(aggregate.get("num_unmatched_confirmed_tracks"), 1),
                     duplicates=_fmt(aggregate.get("num_duplicate_tracks"), 1),
+                    fragmentation=_fmt(aggregate.get("track_fragmentation"), 1),
+                )
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Class estimate accuracy",
+            "",
+            "Correct / classified over matched samples where both the track's class estimate",
+            "and the ground-truth class are known. Range-only runs carry no class",
+            "information, so their accuracy is `N/A`, not zero. `Classified` is the mean",
+            "number of such samples per seed, out of the matched samples in the results table.",
+            "`Class accuracy` is an unweighted mean of per-seed accuracies (seeds with no",
+            "classified sample are excluded). `Pooled` is total correct / total classified",
+            "over all seeds, and `Classified fraction` is classified / matched samples, so a",
+            "method that classifies rarely cannot look accurate on its own: read the three",
+            "together.",
+            "",
+            "| Scenario | Method | Class accuracy | Pooled | Classified fraction | Classified (mean) |",
+            "|---|---|---|---|---|---|",
+        ]
+    )
+    for scenario_report in payload["scenarios"]:
+        for method in METHODS:
+            aggregate = scenario_report["aggregate"][method]
+            lines.append(
+                "| {name} | {method} | {accuracy} | {pooled} | {fraction} | {classified} |".format(
+                    name=scenario_report["scenario"]["name"],
+                    method=method,
+                    accuracy=_fmt(aggregate.get("class_accuracy")),
+                    pooled=_fmt(aggregate.get("class_accuracy_pooled")),
+                    fraction=_fmt(aggregate.get("class_classified_fraction_pooled")),
+                    classified=_fmt(aggregate.get("class_classified_samples"), 1),
+                )
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Duplicate-track sensitivity to the matching gate",
+            "",
+            "Mean number of duplicate tracks per seed when the evaluation matching gate is",
+            "1.0, 2.0 or 3.0 m. The three gates were chosen before running (see the project issue",
+            "tracker). The 2.0 m column is the headline gate used everywhere else in this",
+            "report when it is the evaluator gate; the others show how much the",
+            "duplicate count depends on that choice, not which gate is correct.",
+            "",
+            "| Scenario | Method | 1.0 m | 2.0 m | 3.0 m |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for scenario_report in payload["scenarios"]:
+        for method in METHODS:
+            aggregate = scenario_report["aggregate"][method]
+            lines.append(
+                "| {name} | {method} | {g1} | {g2} | {g3} |".format(
+                    name=scenario_report["scenario"]["name"],
+                    method=method,
+                    g1=_fmt(aggregate.get("num_duplicate_tracks_gate_1m"), 1),
+                    g2=_fmt(aggregate.get("num_duplicate_tracks_gate_2m"), 1),
+                    g3=_fmt(aggregate.get("num_duplicate_tracks_gate_3m"), 1),
                 )
             )
 
@@ -483,7 +557,8 @@ def _render_report(payload: dict[str, Any]) -> str:
             "  vision data is actually fused. Neither scenario establishes real-world",
             "  sensor-fusion performance; both are descriptive synthetic results on",
             "  development seeds, not statistical or held-out claims.",
-            "- `track_fragmentation` is not implemented and is reported as `N/A`.",
+            "- `track_fragmentation` counts interruptions in an object's matched frames, summed",
+            "  over objects; it is independent of identity switches.",
             "- `identity_switches` counts changes of matched track ID for the same",
             "  ground-truth object across consecutive matched frames.",
             "- Coverage is empirical and only defined over matched samples; its",

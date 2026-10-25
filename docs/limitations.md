@@ -21,8 +21,25 @@
 - Track initiation uses range-bearing observations only, with a simple
   velocity guess from range rate and observer velocity. Vision-only initiation
   is unsupported because a bearing does not determine range.
-- `track_fragmentation` is not implemented and is reported as `None`/`N/A`.
-- Class estimates are stored but not evaluated.
+- `track_fragmentation` counts gaps in an object's matched frames (not track
+  breaks as such): a gap of one or more evaluated frames between two matched
+  frames is one interruption, regardless of which track resumes. It is `N/A`
+  when no object is ever matched and says nothing about identity (see
+  `identity_switches`).
+- Duplicate-track counts depend on the matching gate. In the development
+  benchmark the fused count in `uncertainty_miscalibration` was 26.8, 30.0 and
+  30.6 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 0.8 and
+  2.0, so the choice of gate changes both the size and the ranking of the
+  effect. None of the gates is validated as the right one.
+- Class accuracy is evaluated over matched samples with a known estimate and a
+  known true class only. Classes come from a synthetic confusion model, so the
+  number says nothing about real classifiers; range-only runs have no class
+  information (`N/A`). The scenario value is an unweighted mean of per-seed
+  accuracies and can rest on very few samples: in
+  `sensor_disagreement_large_bias` only 13.8 samples per seed are classified
+  (3 of 5 seeds have any, 4.7% of matched samples), so its unweighted 0.333 is
+  not a precise estimate; the pooled value is 0.043. The report shows the
+  unweighted mean, the pooled accuracy and the classified fraction side by side.
 
 ## Timing and delivery
 
@@ -129,8 +146,9 @@ In particular, this project does **not** claim:
 - Supported CI (`.github/workflows/ci.yml`) runs, on Python 3.12:
   `ruff check src tests`, `ruff format --check .` (full tree), `mypy src`,
   `pytest`, and smoke tests of `mosaic run`, `evaluate`, `compare` and
-  `benchmark` (the last two also check that the three canonical artifacts are
-  written).
+  `benchmark` (the last two check that the three canonical artifacts are
+  written; `benchmark` runs three scenarios, checks each appears in the report
+  and checks that an unknown scenario name is rejected).
 - Type checking uses `scipy-stubs` from the dev dependencies; no
   `type: ignore` comments or config-level suppressions are used for the source
   package.

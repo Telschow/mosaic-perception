@@ -75,7 +75,8 @@ Key properties:
 - Accuracy, recall/precision with explicit denominators, identity switches,
   unmatched confirmed tracks, coverage with χ²(2, 0.95) = 5.991 and χ²(2, 0.68), delivery
   statistics and per-frame diagnostics.
-- `track_fragmentation` is explicitly unsupported.
+- `track_fragmentation` counts matched-to-unmatched-to-matched interruptions
+  per ground-truth object, summed over objects.
 
 ### Experiment runner (`experiment.py`)
 

@@ -40,7 +40,7 @@
   with a 2.0 m Euclidean gate. This is simple, documented and testable.
 - **Honest metrics**: recall and precision have explicit denominators;
   identity switches and unmatched confirmed tracks are computed; `track_fragmentation` is
-  reported as `None` because it is not implemented; undefined metrics are
+  computed with a documented definition (matched-frame gaps); undefined metrics are
   `N/A`, never zero.
 - **Chi-square coverage**: 95% coverage uses χ²(2, 0.95) = 5.991, not a
   hard-coded 0.85.

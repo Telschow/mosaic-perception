@@ -18,6 +18,7 @@ from scipy.stats import chi2
 
 from ..domain.models import (
     EvaluationResult,
+    ObjectClass,
     ObservationStatistics,
     TrackSnapshot,
     TrackStatus,
@@ -38,6 +39,11 @@ class _FrameMatch:
     # Unmatched evaluated tracks that had a ground-truth object inside the
     # matching gate: the object was claimed by another track (a duplicate).
     duplicate_tracks: list[TrackSnapshot] = field(default_factory=list)
+
+
+# Matching gates at which duplicate-track counts are also reported. Fixed before
+# any run (issue #11); the canonical headline gate stays 2.0 m.
+DUPLICATE_SENSITIVITY_GATES_M = (1.0, 2.0, 3.0)
 
 
 class TrackingEvaluator:
@@ -108,10 +114,13 @@ class TrackingEvaluator:
         matched_track_ids: set[str] = set()
         duplicate_track_ids: set[str] = set()
         duplicate_track_samples = 0
+        class_classified_samples = 0
+        class_correct_samples = 0
         assignments_by_object: dict[str, list[tuple[float, str]]] = {}
+        matched_frames_by_object: dict[str, list[int]] = {}
 
         result.evaluated_frames = len(world_states)
-        for world_state in world_states:
+        for frame_index, world_state in enumerate(world_states):
             key = round(float(world_state.time), 9)
             frame_tracks = [
                 snapshot
@@ -142,6 +151,13 @@ class TrackingEvaluator:
                 assignments_by_object.setdefault(object_id, []).append(
                     (float(world_state.time), snapshot.track_id)
                 )
+                matched_frames_by_object.setdefault(object_id, []).append(frame_index)
+                if (
+                    snapshot.class_estimate != ObjectClass.UNKNOWN
+                    and truth.true_class != ObjectClass.UNKNOWN
+                ):
+                    class_classified_samples += 1
+                    class_correct_samples += int(snapshot.class_estimate == truth.true_class)
 
                 covariance = snapshot.position_cov()
                 try:
@@ -176,6 +192,10 @@ class TrackingEvaluator:
         result.unmatched_track_samples = unmatched_track_samples
         result.coverage_samples = coverage_samples
         result.duplicate_track_samples = duplicate_track_samples
+        result.class_classified_samples = class_classified_samples
+        result.class_correct_samples = class_correct_samples
+        if class_classified_samples:
+            result.class_accuracy = class_correct_samples / class_classified_samples
 
         if position_squared_errors:
             result.position_rmse = float(np.sqrt(np.mean(position_squared_errors)))
@@ -189,13 +209,26 @@ class TrackingEvaluator:
             result.position_coverage_68 = coverage_hits_68 / coverage_samples
 
         result.identity_switches = self._count_identity_switches(assignments_by_object)
-        result.track_fragmentation = None  # unsupported; not silently reported as zero
+        result.track_fragmentation = self._count_interruptions(matched_frames_by_object)
 
         result.num_tracks = len(all_track_ids)
         result.num_confirmed_tracks = len(ever_confirmed)
         unmatched_confirmed = ever_confirmed - matched_track_ids
         result.num_unmatched_confirmed_tracks = len(unmatched_confirmed)
         result.num_duplicate_tracks = len(unmatched_confirmed & duplicate_track_ids)
+        duplicate_counts = {
+            gate: (
+                result.num_duplicate_tracks
+                if gate == self.match_gate_m
+                else self._count_duplicate_tracks(
+                    gate, snapshots_by_time, world_states, ever_confirmed
+                )
+            )
+            for gate in DUPLICATE_SENSITIVITY_GATES_M
+        }
+        result.num_duplicate_tracks_gate_1m = duplicate_counts[1.0]
+        result.num_duplicate_tracks_gate_2m = duplicate_counts[2.0]
+        result.num_duplicate_tracks_gate_3m = duplicate_counts[3.0]
 
         result.notes.extend(
             [
@@ -205,6 +238,9 @@ class TrackingEvaluator:
                 "tentative and deleted tracks are excluded.",
                 "Recall denominator: every ground-truth object in every simulated frame.",
                 "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+                "Class accuracy: matched samples whose track class estimate and ground-truth "
+                "class are both known (not UNKNOWN); correct / classified. None if no sample "
+                "qualifies, so a range-only run never reports a fabricated zero.",
                 "Duplicate track sample: an evaluated track left unmatched in a frame while "
                 f"a ground-truth object lay within the {self.match_gate_m:.2f} m matching gate "
                 "(the object was claimed by another track). A duplicate track is a confirmed "
@@ -212,8 +248,10 @@ class TrackingEvaluator:
                 "sample.",
                 "Coverage: matched position errors against the reported 2x2 covariance; "
                 f"95% threshold chi2(2,0.95)={_COVERAGE_95:.3f}.",
-                "track_fragmentation is unsupported and reported as None; "
-                "identity_switches is the supported continuity metric.",
+                "track_fragmentation: total interruptions, i.e. frames where a matched "
+                "object goes unmatched and is matched again later, summed over objects "
+                "(None if no object was ever matched). identity_switches counts track ID "
+                "changes between consecutive matched frames and is independent of gaps.",
             ]
         )
         return result
@@ -223,6 +261,7 @@ class TrackingEvaluator:
         time: float,
         tracks: list[TrackSnapshot],
         objects: list,
+        gate_m: float | None = None,
     ) -> _FrameMatch:
         if not tracks or not objects:
             return _FrameMatch(time, [], len(tracks), len(objects))
@@ -232,7 +271,7 @@ class TrackingEvaluator:
         distances = np.linalg.norm(
             track_positions[:, None, :] - object_positions[None, :, :], axis=2
         )
-        finite = distances <= self.match_gate_m
+        finite = distances <= (self.match_gate_m if gate_m is None else gate_m)
         if not np.any(finite):
             return _FrameMatch(time, [], len(tracks), len(objects))
 
@@ -260,6 +299,50 @@ class TrackingEvaluator:
             len(objects) - len(paired_columns),
             duplicate_tracks=duplicates,
         )
+
+    def _count_duplicate_tracks(
+        self,
+        gate_m: float,
+        snapshots_by_time: dict[float, dict[str, TrackSnapshot]],
+        world_states: list[WorldState],
+        ever_confirmed: set[str],
+    ) -> int:
+        """Duplicate-track count at another matching gate, via matching only."""
+        matched_ids: set[str] = set()
+        duplicate_ids: set[str] = set()
+        for world_state in world_states:
+            key = round(float(world_state.time), 9)
+            frame_tracks = [
+                snapshot
+                for snapshot in snapshots_by_time.get(key, {}).values()
+                if snapshot.status in _EVALUATED_STATUSES
+            ]
+            frame = self._match_frame(
+                float(world_state.time), frame_tracks, list(world_state.objects.values()), gate_m
+            )
+            matched_ids.update(snapshot.track_id for snapshot, _ in frame.matched_pairs)
+            duplicate_ids.update(track.track_id for track in frame.duplicate_tracks)
+        return len((ever_confirmed - matched_ids) & duplicate_ids)
+
+    @staticmethod
+    def _count_interruptions(matched_frames_by_object: dict[str, list[int]]) -> float | None:
+        """Count matched-to-unmatched-to-matched interruptions summed over objects.
+
+        An object contributes one interruption per gap of at least one evaluated
+        frame between two of its matched frames. Leading and trailing unmatched
+        frames are not interruptions.
+        """
+        if not matched_frames_by_object:
+            return None
+        interruptions = 0
+        for frames in matched_frames_by_object.values():
+            ordered = sorted(frames)
+            interruptions += sum(
+                1
+                for previous, current in zip(ordered[:-1], ordered[1:], strict=True)
+                if current - previous > 1
+            )
+        return float(interruptions)
 
     @staticmethod
     def _count_identity_switches(

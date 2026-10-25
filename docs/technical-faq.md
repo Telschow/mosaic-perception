@@ -62,9 +62,12 @@ filter is told covariances are 20× smaller than the actual noise, so it is
 overconfident and 95% coverage is roughly 0.12–0.14. The workbench measures
 this rather than assuming calibration.
 
-**Q: Why is track fragmentation N/A?**
-A: It is not implemented. Reporting `None`/`N/A` is deliberate; a fabricated
-zero would look like a perfect result.
+**Q: How is track fragmentation defined?**
+A: As the number of interruptions in an object's matched frames: each gap of
+one or more evaluated frames between two matched frames counts once, summed
+over objects. Leading and trailing unmatched frames do not count, and the
+resuming track may be a different one (that is `identity_switches`). It is
+`N/A` when no object is ever matched, never a fabricated zero.
 
 **Q: What does the synthetic model omit?**
 A: Raw sensing, occlusion, clutter maps, multipath, realistic environments,
