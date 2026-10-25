@@ -300,3 +300,31 @@ def test_fragmentation_sums_over_objects():
     ]
     result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
     assert result.track_fragmentation == 1
+
+
+def test_duplicate_counts_depend_on_matching_gate():
+    world = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "track_main", (0.1, 0.0)),
+        make_snapshot(0.0, "track_near_dup", (0.0, 1.5)),  # inside 2 m and 3 m, not 1 m
+        make_snapshot(0.0, "track_far_dup", (2.5, 0.0)),  # inside 3 m only
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.num_duplicate_tracks_gate_1m == 0
+    assert result.num_duplicate_tracks_gate_2m == 1
+    assert result.num_duplicate_tracks_gate_3m == 2
+    assert result.num_duplicate_tracks == result.num_duplicate_tracks_gate_2m
+
+
+def test_sensitivity_fields_are_independent_of_the_headline_gate():
+    world = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "track_main", (0.1, 0.0)),
+        make_snapshot(0.0, "track_dup", (0.0, 1.5)),
+    ]
+    headline_1m = TrackingEvaluator(match_gate_m=1.0).evaluate(snapshots, [world])
+    headline_3m = TrackingEvaluator(match_gate_m=3.0).evaluate(snapshots, [world])
+    for result in (headline_1m, headline_3m):
+        assert result.num_duplicate_tracks_gate_1m == 0
+        assert result.num_duplicate_tracks_gate_2m == 1
+        assert result.num_duplicate_tracks_gate_3m == 1

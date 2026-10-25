@@ -40,6 +40,11 @@ class _FrameMatch:
     duplicate_tracks: list[TrackSnapshot] = field(default_factory=list)
 
 
+# Matching gates at which duplicate-track counts are also reported. Fixed before
+# any run (issue #11); the canonical headline gate stays 2.0 m.
+DUPLICATE_SENSITIVITY_GATES_M = (1.0, 2.0, 3.0)
+
+
 class TrackingEvaluator:
     """Evaluate per-epoch track snapshots against world ground truth."""
 
@@ -58,6 +63,7 @@ class TrackingEvaluator:
         statistics: ObservationStatistics | None = None,
         config: dict | None = None,
         git_commit: str | None = None,
+        _with_sensitivity: bool = True,
     ) -> EvaluationResult:
         """Compute accuracy, association, coverage and timing metrics."""
         result = EvaluationResult(
@@ -198,6 +204,20 @@ class TrackingEvaluator:
         unmatched_confirmed = ever_confirmed - matched_track_ids
         result.num_unmatched_confirmed_tracks = len(unmatched_confirmed)
         result.num_duplicate_tracks = len(unmatched_confirmed & duplicate_track_ids)
+        if _with_sensitivity:
+            counts: dict[float, int] = {}
+            for gate in DUPLICATE_SENSITIVITY_GATES_M:
+                if gate == self.match_gate_m:
+                    counts[gate] = result.num_duplicate_tracks
+                else:
+                    counts[gate] = (
+                        TrackingEvaluator(match_gate_m=gate)
+                        .evaluate(snapshots, world_states, _with_sensitivity=False)
+                        .num_duplicate_tracks
+                    )
+            result.num_duplicate_tracks_gate_1m = counts[1.0]
+            result.num_duplicate_tracks_gate_2m = counts[2.0]
+            result.num_duplicate_tracks_gate_3m = counts[3.0]
 
         result.notes.extend(
             [

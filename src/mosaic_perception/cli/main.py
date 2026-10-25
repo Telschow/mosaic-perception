@@ -49,6 +49,9 @@ _RESULT_FIELDS = [
     "num_confirmed_tracks",
     "num_unmatched_confirmed_tracks",
     "num_duplicate_tracks",
+    "num_duplicate_tracks_gate_1m",
+    "num_duplicate_tracks_gate_2m",
+    "num_duplicate_tracks_gate_3m",
     "duplicate_track_samples",
     "mean_age_of_information",
     "rejected_observations",
@@ -323,6 +326,33 @@ def _render_report(payload: dict[str, Any]) -> str:
                     unmatched=_fmt(aggregate.get("num_unmatched_confirmed_tracks"), 1),
                     duplicates=_fmt(aggregate.get("num_duplicate_tracks"), 1),
                     fragmentation=_fmt(aggregate.get("track_fragmentation"), 1),
+                )
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Duplicate-track sensitivity to the matching gate",
+            "",
+            "Mean number of duplicate tracks per seed when the evaluation matching gate is",
+            "1.0, 2.0 or 3.0 m. The gates were fixed before any run. The 2.0 m column is the",
+            "headline gate used everywhere else in this report; the others show how much the",
+            "duplicate count depends on that choice, not which gate is correct.",
+            "",
+            "| Scenario | Method | 1.0 m | 2.0 m | 3.0 m |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for scenario_report in payload["scenarios"]:
+        for method in METHODS:
+            aggregate = scenario_report["aggregate"][method]
+            lines.append(
+                "| {name} | {method} | {g1} | {g2} | {g3} |".format(
+                    name=scenario_report["scenario"]["name"],
+                    method=method,
+                    g1=_fmt(aggregate.get("num_duplicate_tracks_gate_1m"), 1),
+                    g2=_fmt(aggregate.get("num_duplicate_tracks_gate_2m"), 1),
+                    g3=_fmt(aggregate.get("num_duplicate_tracks_gate_3m"), 1),
                 )
             )
 

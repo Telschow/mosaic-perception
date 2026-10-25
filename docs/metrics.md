@@ -36,6 +36,7 @@ At each ground-truth timestamp:
 | `num_unmatched_confirmed_tracks` | confirmed/coasting track IDs that were never matched in any frame. Formerly `num_false_tracks`; renamed because many are duplicates, not spurious objects | count of track IDs |
 | `num_duplicate_tracks` | unmatched confirmed track IDs that, in at least one frame, were unmatched while a ground-truth object lay within the matching gate | count of track IDs |
 | `duplicate_track_samples` | evaluated track snapshots left unmatched in a frame while a ground-truth object lay within the matching gate (the object was claimed by another track) | count of track samples, a subset of `unmatched_track_samples` |
+| `num_duplicate_tracks_gate_1m`, `_2m`, `_3m` | `num_duplicate_tracks` recomputed with a 1.0, 2.0 or 3.0 m matching gate (fixed in advance); the 2 m value equals the headline when the headline gate is 2.0 m | count of track IDs |
 | `num_tracks` | unique track IDs that appear in any snapshot, including tentative/deleted | count of track IDs |
 | `num_confirmed_tracks` | unique track IDs that were ever confirmed or coasting | count of track IDs |
 | `track_fragmentation` | total interruptions: frames where a matched object goes unmatched and is matched again later, summed over objects; `None` if no object is ever matched | count of interruptions, over objects matched at least once |

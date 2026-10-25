@@ -412,6 +412,10 @@ class EvaluationResult(BaseModel):
     num_confirmed_tracks: int = 0
     num_unmatched_confirmed_tracks: int = 0
     num_duplicate_tracks: int = 0
+    # Duplicate-track sensitivity to the matching gate (fixed, preregistered gates)
+    num_duplicate_tracks_gate_1m: int = 0
+    num_duplicate_tracks_gate_2m: int = 0
+    num_duplicate_tracks_gate_3m: int = 0
     duplicate_track_samples: int = 0
 
     # Raw data for detailed analysis
