@@ -20,10 +20,15 @@ quality or uncertainty calibration, and when it does not.
 
 ## Seeds
 
-- **Development seeds**: 0–24. The checked-in benchmark uses **1–5**.
+- **Development seeds**: 0–24. The checked-in benchmark uses **all 25** (0–24).
 - **Reserved held-out seeds**: 25–49. They have **not** been run for this
   repair. No held-out result or generalization claim is made.
 - The benchmark artifact records its seed group and the exact seed list.
+- The reserved seeds come from the same generator, scenarios and code as the
+  development seeds. A held-out run is therefore only as blind as the freeze
+  discipline around it (code, scenarios and metrics frozen first, run once, no
+  changes afterwards); it is not blind in the sense of a hidden test set, and it
+  says nothing about other generators or real data.
 
 Development results include choices made while repairing the code. They are
 useful for debugging and regression detection, not for a confirmatory claim.
@@ -41,7 +46,11 @@ For each scenario and seed:
 4. Run the `fused` tracker (range plus vision observations).
 5. Evaluate both against the same ground-truth states using per-epoch
    snapshots.
-6. Repeat over seeds and aggregate with mean and sample standard deviation.
+6. Repeat over seeds and aggregate with mean and sample standard deviation;
+   also report per-metric paired differences (fused minus range-only) with a
+   two-sided 95% t interval over seeds. The interval describes seed-to-seed
+   variation, not generalisation, and macro means across heterogeneous
+   scenarios are not reported.
 
 The fused run adds vision observations only; it does not receive a different
 world or a different range-sensor stream. Tracker management parameters are

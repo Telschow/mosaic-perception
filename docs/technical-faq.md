@@ -80,7 +80,7 @@ existing tracks when fusion is enabled, but range-bearing observations are
 required to initiate them.
 
 **Q: Are the checked-in results held out?**
-A: No. The benchmark uses development seeds 1–5. Seeds 25–49 are reserved and
+A: No. The benchmark uses development seeds 0–24. Seeds 25–49 are reserved and
 have not been run. The published v0.1.0 numbers are invalid and superseded; do
 not use them as a baseline.
 

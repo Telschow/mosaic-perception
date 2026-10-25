@@ -1,6 +1,6 @@
 # Scenarios
 
-Mosaic has 13 implemented presets. A scenario changes sensor parameters and/or
+Mosaic has 15 implemented presets. A scenario changes sensor parameters and/or
 the observer trajectory; world generation, tracker management and evaluation
 logic stay identical so that comparisons between scenarios and methods remain
 meaningful. Every preset has a stated hypothesis and a list of metrics that can
@@ -30,6 +30,8 @@ All presets resolve to two sensor groups:
 | `sensor_disagreement_within_gate_low` | Preregistered sweep value: vision bearing bias 0.010 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
 | `sensor_disagreement_within_gate` | Vision bearing bias 0.015 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
 | `sensor_disagreement_within_gate_high` | Preregistered sweep value: vision bearing bias 0.020 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
+| `crossing_targets` | Constant-velocity targets at 2 m/s on distinct headings crossing at mid-run; adjacent targets 0.5 m apart at the crossing | Near-coincident targets make association ambiguous: identity switches, unmatched confirmed tracks and fragmentation can rise. Applies to a single crossing of a few targets under GNN association. |
+| `dense_clutter` | Poisson false alarms per frame: 4.0 (range-bearing, 4x `false_observations`), 8.0 (vision, about 2.7x `false_observations`) | Clutter inside the gates produces spurious candidates; gate rejection is not a defence against clutter that falls inside the gate. |
 | `moving_observer` | Observer follows a circular trajectory with changing heading and velocity | Correct sensor-frame models and observer-velocity handling keep error comparable to the static case. |
 
 Random seed, duration, step size and object count are supplied by the caller;
@@ -40,9 +42,9 @@ they are not part of the preset identity.
 ```bash
 uv run mosaic run --scenario nominal --seed 42
 uv run mosaic compare --scenario nominal --seeds 1,2,3
-uv run mosaic benchmark --scenario all --seeds 1-5 --duration 10.0
+uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
 In the Streamlit app, scenarios are selected from the sidebar. The checked-in
-benchmark covers all 10 presets with development seeds 1–5; held-out seeds
+benchmark covers all 15 presets with all development seeds 0–24; held-out seeds
 25–49 are reserved and were not run.

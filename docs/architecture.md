@@ -68,7 +68,12 @@ Key properties:
     snapshots and delivery statistics;
   - no broad exception swallowing and no ground-truth identity use.
 
-### Evaluation layer (`evaluation/metrics.py`)
+### Evaluation layer (`evaluation/frames.py`, `evaluation/metrics.py`)
+
+`frames.py` matches evaluated tracks to ground truth once per frame and returns
+one `FrameMatch` per world state. Every metric in `metrics.py` is a function of
+that list, so a metric can be tested on hand-built frames; `TrackingEvaluator`
+only orchestrates them.
 
 - Snapshot-based, not final-state-based.
 - One-to-one gated Hungarian matching per timestamp; confirmed/coasting only.
@@ -84,6 +89,12 @@ Key properties:
 - Reuses the same range-sensor random stream; fused adds vision only.
 - Clears evaluator-only object IDs before processing.
 - Wraps the evaluator and optional git-commit metadata.
+
+### Reporting (`reporting/markdown.py`)
+
+`render_report(payload)` is a pure function from the benchmark payload to
+Markdown, independent of the command-line layer and testable on a hand-built
+payload.
 
 ### CLI (`cli/main.py`)
 

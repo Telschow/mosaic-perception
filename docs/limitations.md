@@ -16,8 +16,12 @@
   produce lag or bias.
 - EKF linearisation and Gaussian assumptions are approximations.
 - Association is gated Hungarian assignment within each measurement group, not
-  MHT, JPDA or learned association. Ambiguous crossings and dense false alarms
-  can still produce identity errors.
+  MHT, JPDA, random-finite-set or learned association; those are out of scope
+  for this workbench. The `crossing_targets` (one crossing of a few targets)
+  and `dense_clutter` scenarios exercise ambiguity and clutter, but only for
+  global-nearest-neighbour association, so no claim is made about how other
+  associators would compare. The other scenarios use sparse, well-separated
+  targets, and their association results should be read as such.
 - Track initiation uses range-bearing observations only, with a simple
   velocity guess from range rate and observer velocity. Vision-only initiation
   is unsupported because a bearing does not determine range.
@@ -27,18 +31,18 @@
   when no object is ever matched and says nothing about identity (see
   `identity_switches`).
 - Duplicate-track counts depend on the matching gate. In the development
-  benchmark the fused count in `uncertainty_miscalibration` was 26.8, 30.0 and
-  30.6 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 0.8 and
-  2.0, so the choice of gate changes both the size and the ranking of the
+  benchmark the fused count in `uncertainty_miscalibration` was 22.8, 26.1 and
+  26.3 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 0.5 and
+  1.4, so the choice of gate changes both the size and the ranking of the
   effect. None of the gates is validated as the right one.
 - Class accuracy is evaluated over matched samples with a known estimate and a
   known true class only. Classes come from a synthetic confusion model, so the
   number says nothing about real classifiers; range-only runs have no class
   information (`N/A`). The scenario value is an unweighted mean of per-seed
   accuracies and can rest on very few samples: in
-  `sensor_disagreement_large_bias` only 13.8 samples per seed are classified
-  (3 of 5 seeds have any, 4.7% of matched samples), so its unweighted 0.333 is
-  not a precise estimate; the pooled value is 0.043. The report shows the
+  `sensor_disagreement_large_bias` only 12.0 samples per seed are classified
+  (7 of 25 seeds have any, 4.0% of matched samples), so its unweighted 0.429 is
+  not a precise estimate; the pooled value is 0.298. The report shows the
   unweighted mean, the pooled accuracy and the classified fraction side by side.
 
 ## Timing and delivery
@@ -83,7 +87,7 @@
 
 ## Evaluation
 
-- The checked-in benchmark uses **development seeds 1–5 only**. Seeds 25–49 are
+- The checked-in benchmark uses **development seeds 0–24 only**. Seeds 25–49 are
   reserved and have not been run, so no held-out or generalization claim is
   made.
 - Matching uses a 2.0 m Euclidean gate at each timestamp. Different gates can

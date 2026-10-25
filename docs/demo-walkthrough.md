@@ -80,6 +80,6 @@ uv run streamlit run app/streamlit_app.py
 - Synthetic 2-D world; simplified sensor models; no hardware validation.
 - Vision-only track initiation is unsupported.
 - Observations older than one tracker epoch are rejected, not replayed.
-- The benchmark uses development seeds 1–5 only. Held-out seeds 25–49 are
+- The benchmark uses development seeds 0–24 only. Held-out seeds 25–49 are
   reserved and were not run; no held-out or real-world claim is made.
 - The published v0.1.0 benchmark numbers are invalid and superseded.

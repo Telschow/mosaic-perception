@@ -22,6 +22,7 @@ class ScenarioPreset:
     hypothesis: str
     relevant_metrics: list[str] = field(default_factory=list)
     observer_trajectory: str = "static"
+    target_layout: str = "random"
     range_overrides: dict[str, Any] = field(default_factory=dict)
     vision_overrides: dict[str, Any] = field(default_factory=dict)
 
@@ -200,6 +201,48 @@ PRESETS: dict[str, ScenarioPreset] = {
     "sensor_disagreement_within_gate_high": _within_gate_preset(
         "sensor_disagreement_within_gate_high", 0.020
     ),
+    "crossing_targets": ScenarioPreset(
+        name="crossing_targets",
+        description=(
+            "Targets move at 2 m/s on distinct headings and cross at mid-run, "
+            "adjacent targets 0.5 m apart at the crossing."
+        ),
+        hypothesis=(
+            "Near-coincident targets make association ambiguous: identity switches, "
+            "unmatched confirmed tracks and fragmentation can rise even when the "
+            "estimate of each target is accurate. Conclusions apply to a single "
+            "crossing of a few targets under global-nearest-neighbour association."
+        ),
+        relevant_metrics=[
+            "position_rmse",
+            "identity_switches",
+            "num_unmatched_confirmed_tracks",
+            "track_fragmentation",
+        ],
+        target_layout="crossing",
+    ),
+    "dense_clutter": ScenarioPreset(
+        name="dense_clutter",
+        description=(
+            "Heavy Poisson false alarms per frame: 4.0 on the range-bearing "
+            "sensor (4x false_observations) and 8.0 on the vision sensor "
+            "(about 2.7x false_observations)."
+        ),
+        hypothesis=(
+            "Dense clutter creates many spurious candidates inside the gates; "
+            "precision, unmatched confirmed tracks and lost-competition counts "
+            "should worsen, and gate rejection is not a defence against clutter "
+            "that falls inside the gate."
+        ),
+        relevant_metrics=[
+            "precision",
+            "num_unmatched_confirmed_tracks",
+            "vision_lost_competition",
+            "vision_applied",
+        ],
+        range_overrides={"false_alarm_rate": 4.0},
+        vision_overrides={"false_alarm_rate": 8.0},
+    ),
     "moving_observer": ScenarioPreset(
         name="moving_observer",
         description="Observer follows a circular trajectory with changing heading.",
@@ -255,6 +298,7 @@ def resolve_scenario(
         dt=dt,
         num_objects=num_objects,
         observer_trajectory=preset.observer_trajectory,
+        target_layout=preset.target_layout,
         sensors={
             "range_bearing": SensorConfig(**range_cfg),
             "vision_bearing": SensorConfig(**vision_cfg),

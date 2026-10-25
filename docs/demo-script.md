@@ -5,7 +5,7 @@
 ```bash
 cd mosaic-perception
 uv sync --all-extras
-uv run mosaic benchmark --scenario all --seeds 1-5 --duration 10.0
+uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
 The canonical artifacts are written to `artifacts/benchmark/`:
@@ -35,12 +35,12 @@ precision, coverage, matched samples and unmatched confirmed tracks."
 Open `artifacts/benchmark/report.md` and point to the aggregate and per-seed
 tables.
 
-"Across the 13 development scenarios and seeds 1–5, fused position RMSE is
-lower in 6 scenarios, within 0.01 m in 3, and worse in 3 (the within-gate vision
-bias scenarios, where biased data is actually fused). But fused precision
-is lower in every scenario with defined precision, and coverage is not improved
-overall. So the honest finding
-is small accuracy gains with worse association quality, not 'fusion wins'."
+"Across the 15 development scenarios and seeds 0–24, the paired fused-minus-range
+RMSE interval favours fusion in 7 scenarios by 0.013 to 0.038 m, favours range-only
+in 3 (the within-gate vision bias scenarios, where biased data is actually fused)
+and includes zero in 4. Fused precision is lower in 13 of 14 scenarios with defined
+precision, and coverage is not improved overall. So the honest finding is small
+accuracy gains with worse association quality, not 'fusion wins'."
 
 Show the `out_of_sequence` row: accuracy is `N/A` because observations older
 than one epoch are rejected and counted, not silently used.

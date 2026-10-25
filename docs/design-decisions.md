@@ -47,7 +47,7 @@
 - **Determinism**: explicit seeds, deterministic IDs, paired runs, no
   wall-clock timestamps in artifacts, generated Markdown.
 - **Development versus held-out seeds**: the checked-in benchmark uses
-  development seeds 1–5. Held-out seeds 25–49 are reserved and were not run;
+  development seeds 0–24. Held-out seeds 25–49 are reserved and were not run;
   no held-out claim is made.
 - **Honest limitations**: document what is not modeled (raw sensing, occlusion,
   full out-of-sequence replay, advanced association, real calibration) rather

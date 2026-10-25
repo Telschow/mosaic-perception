@@ -45,14 +45,14 @@ uv run mosaic compare --scenario nominal --seeds 1,2,3,4,5
 ### Generate the benchmark / evaluation artifacts
 
 ```bash
-uv run mosaic benchmark --scenario all --seeds 1-5 --duration 10.0
+uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
 `mosaic evaluate` is implemented and writes the same canonical artifacts as
 `benchmark` (they differ only in the recorded command name):
 
 ```bash
-uv run mosaic evaluate --scenario all --seeds 1-5 --output results/
+uv run mosaic evaluate --scenario all --seeds 0-24 --output results/
 ```
 
 ### Interactive workbench
@@ -108,22 +108,26 @@ Full definitions, matching rules and denominators are in
 
 ## Current development benchmark
 
-The checked-in benchmark is generated with `--scenario all --seeds 1-5
---duration 10.0`, i.e. **development seeds only**. The reserved held-out range
-25–49 has **not** been run, and no held-out claim is made.
+The checked-in benchmark is generated with `--scenario all --seeds 0-24
+--duration 10.0`, i.e. **all 25 development seeds and no held-out seed**. The reserved held-out range
+25–49 has **not** been run, and no held-out claim is made. When it is run, it
+will only be as blind as the freeze discipline around it: the reserved seeds
+come from the same generator and code, so it is not a hidden test set.
 
 See [artifacts/benchmark/report.md](artifacts/benchmark/report.md) for the
 generated tables and [artifacts/benchmark/benchmark.json](artifacts/benchmark/benchmark.json)
 for the machine-readable record (protocol, per-seed metrics, git commit).
 Headline observations from the current development benchmark:
 
-- Fused position RMSE is lower in 6 of the 12 scenarios with defined accuracy,
-  within 0.01 m in 3, and worse in 3 (the three within-gate bias scenarios).
-  The differences are generally small. Unweighted macro means over the
-  scenarios where the metric is defined (development seeds, descriptive only):
-  RMSE 0.365 m range-only vs 0.362 m fused (n=12); recall 0.850 vs 0.896
-  (n=13); precision 0.818 vs 0.624 (n=12).
-- Fused **precision is lower in every scenario with defined precision**.
+- Paired position-RMSE differences (fused minus range-only, 25 seeds, 95% t
+  interval over seeds): the interval excludes zero in favour of fusion in 7 of
+  the 14 scenarios with defined accuracy, excludes zero against fusion in 3
+  (the three within-gate bias scenarios), and includes zero in 4
+  (`crossing_targets`, `sensor_disagreement_large_bias`,
+  `uncertainty_miscalibration`, `vision_dropout`). The favourable differences
+  are small (0.013 to 0.038 m). No macro mean over scenarios is reported.
+- Fused **precision is lower in 13 of the 14 scenarios with defined precision**
+  (interval excludes zero); `sensor_disagreement_large_bias` is the exception.
   Precision is sample-based (matched samples / all confirmed-or-coasting track
   samples), and the extra "unmatched confirmed tracks" are confirmed tracks never matched to
   a true object. The report's `Duplicate tracks` column counts those that were
@@ -132,15 +136,23 @@ Headline observations from the current development benchmark:
   tracks in the benchmark are such duplicates (see the report).
 - The sensor-disagreement scenarios test different things.
   `sensor_disagreement_large_bias` (0.12 rad) is a **gate-rejection**
-  experiment: about 92% of delivered vision observations were rejected by the
-  gate (mean 253.8 of 276.4 per seed), and fused RMSE matched range-only
-  within noise. The **within-gate** scenarios apply a bias small enough to be
-  fused. At the three preregistered values the gate rejected a mean 17.8, 24.2
-  and 50.8 of 276.4 observations per seed (0.010, 0.015, 0.020 rad), and fused
-  RMSE was worse than range-only each time (0.268, 0.285 and 0.293 m vs
-  0.229 m), as was precision (0.550, 0.524, 0.518 vs 0.804). 95% coverage fell
-  from 0.836 to 0.440, 0.497 and 0.534. This is a single synthetic world with
-  development seeds; it does not establish real-world fusion performance.
+  experiment: about 96% of delivered vision observations were rejected by the
+  gate (mean 264.7 of 275.2 per seed; 10.2 still applied), and the paired RMSE
+  interval includes zero. The **within-gate** scenarios apply a bias small
+  enough to be fused. At the three preregistered values the gate rejected a
+  mean 20.8, 30.8 and 52.8 of 275.2 observations per seed (0.010, 0.015,
+  0.020 rad), and fused RMSE was worse than range-only each time (paired
+  difference +0.042, +0.060, +0.065 m, intervals excluding zero), as was
+  precision (0.617, 0.560, 0.535 vs 0.826) and 95% coverage (0.427, 0.478,
+  0.597 vs 0.851). This is a single synthetic world with development seeds; it
+  does not establish real-world fusion performance.
+- `crossing_targets` (one crossing of three targets) and `dense_clutter` are
+  tested under global-nearest-neighbour association only. In
+  `crossing_targets` fused has more identity switches (6.8 vs 4.4 per seed) and
+  a paired RMSE interval that includes zero. In `dense_clutter` fused precision
+  is 0.338 vs 0.816 with 71.0 unmatched confirmed tracks per seed (6.3 of them
+  duplicates under the 2 m gate), and RMSE is slightly lower for fusion
+  (-0.013 m). No claim is made about other associators.
 - 95% coverage is not improved by fusion overall, and remains far below the
   nominal 0.95 in the miscalibration scenario.
 - The `out_of_sequence` scenario has no matched samples: observations older
