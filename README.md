@@ -98,8 +98,9 @@ Metrics and denominators:
   position covariance, using χ²(2, 0.95) = 5.991 and χ²(2, 0.68) ≈ 2.279.
 - **Age of information**: mean processing age of observations admitted by the
   staleness policy.
-- **Track fragmentation**: not implemented; reported as `N/A`/`None`, never as
-  a fabricated zero.
+- **Track fragmentation**: interruptions in an object's matched frames (a gap
+  of one or more frames between two matched frames counts once), summed over
+  objects; `N/A` if no object is ever matched, never a fabricated zero.
 
 Full definitions, matching rules and denominators are in
 [docs/metrics.md](docs/metrics.md) and
@@ -179,7 +180,6 @@ been superseded; they are not preserved as a baseline for comparison.**
   approximation whose displacement scale is ~speed x age under constant
   velocity, not a strict bound.
 - Association is gated Hungarian within each measurement group, not MHT/JPDA.
-- Track fragmentation is not implemented.
 - Only development seeds have been run; no held-out evaluation is claimed.
 - Reported covariance and empirical coverage can disagree; calibration is
   measured, not assumed.

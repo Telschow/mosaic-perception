@@ -374,7 +374,7 @@ class EvaluationResult(BaseModel):
     precision: float | None = None  # matched samples / confirmed track samples
     recall: float | None = None  # matched samples / ground-truth object samples
     identity_switches: int | None = None
-    track_fragmentation: float | None = None  # unsupported in v0.1
+    track_fragmentation: float | None = None  # matched-frame interruptions, summed over objects
     matched_samples: int = 0
     ground_truth_samples: int = 0
     confirmed_track_samples: int = 0

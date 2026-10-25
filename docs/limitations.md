@@ -21,7 +21,11 @@
 - Track initiation uses range-bearing observations only, with a simple
   velocity guess from range rate and observer velocity. Vision-only initiation
   is unsupported because a bearing does not determine range.
-- `track_fragmentation` is not implemented and is reported as `None`/`N/A`.
+- `track_fragmentation` counts gaps in an object's matched frames (not track
+  breaks as such): a gap of one or more evaluated frames between two matched
+  frames is one interruption, regardless of which track resumes. It is `N/A`
+  when no object is ever matched and says nothing about identity (see
+  `identity_switches`).
 - Class estimates are stored but not evaluated.
 
 ## Timing and delivery

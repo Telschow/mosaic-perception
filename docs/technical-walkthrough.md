@@ -59,7 +59,7 @@ trade-off in a controlled synthetic setting with paired comparisons.
   ground-truth object samples; precision over all confirmed/coasting track
   samples; identity switches; unmatched confirmed tracks; 95%/68% coverage with χ²(2, ·)
   thresholds; delivery statistics and mean AoI.
-- **Honesty**: `track_fragmentation` is `None`/`N/A`; undefined metrics are not
+- **Honesty**: `track_fragmentation` is `N/A` only when no object is ever matched; undefined metrics are not
   fabricated zeros; the development-versus-held-out distinction is recorded.
 
 ## 5) Current development benchmark
@@ -105,7 +105,6 @@ final-state evaluation. Its numbers are invalid and have been superseded; see
 - Vision-only initiation is unsupported.
 - Stale observations are rejected, not replayed; stale-data fusion is not
   evaluated.
-- `track_fragmentation` is unimplemented.
 - Only development seeds have been run; a future frozen-code held-out run is
   needed before any generalization claim.
 - Coverage remains poor under miscalibration; calibration is an open problem.

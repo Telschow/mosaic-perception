@@ -66,8 +66,8 @@ Definitions and denominators are in [metrics.md](metrics.md).
   seed list, duration, step size, object count, methods, gates and protocol.
 - No wall-clock timestamps are written; repeated runs with the same commit and
   seed list are byte-identical.
-- `N/A` is used for undefined metrics. Unsupported metrics such as
-  `track_fragmentation` are explicitly `None`.
+- `N/A` is used for undefined metrics. Undefined metrics, such as
+  `track_fragmentation` when no object is ever matched, are explicitly `None`.
 - Canonical artifacts are `benchmark.json`, `per_seed.csv` and `report.md` under
   the output directory (default `artifacts/benchmark/`).
 - The report states whether the seeds are development or held-out and whether

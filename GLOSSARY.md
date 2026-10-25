@@ -52,6 +52,10 @@ _Avoid_: False track, ghost track
 **Duplicate track**:
 An unmatched confirmed track that, in at least one frame, was left unmatched while a true object lay inside the matching gate because another track had claimed it.
 
+**Interruption**:
+A gap of one or more evaluated frames between two frames in which a true object is matched; summed over objects it is track fragmentation.
+_Avoid_: Break, dropout (a sensor concept)
+
 **Range-only baseline**:
 The method that uses only the range-bearing sensor; vision observations never reach it.
 _Avoid_: Baseline (alone), non-fused

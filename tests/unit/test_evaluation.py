@@ -41,7 +41,7 @@ def test_exact_rmse_matching_and_coverage():
     assert result.num_tracks == 2
     assert result.num_confirmed_tracks == 2
     assert result.num_unmatched_confirmed_tracks == 0
-    assert result.track_fragmentation is None
+    assert result.track_fragmentation == 0
     assert result.per_frame_metrics[0]["matched"] == 2
 
 
@@ -232,3 +232,71 @@ def test_track_matched_in_another_frame_is_not_counted_as_duplicate_track():
     result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world0, world1])
     assert result.duplicate_track_samples == 1
     assert result.num_duplicate_tracks == 0
+
+
+def _frames(matched_flags, track_ids=None):
+    """One object at the origin over len(flags) frames; track present only when flagged."""
+    worlds = [
+        make_world_state(round(0.1 * i, 6), {"a": ((0.0, 0.0), (0.0, 0.0))})
+        for i in range(len(matched_flags))
+    ]
+    snapshots = []
+    for i, present in enumerate(matched_flags):
+        if present:
+            track_id = track_ids[i] if track_ids else "track_a"
+            snapshots.append(make_snapshot(round(0.1 * i, 6), track_id, (0.1, 0.0)))
+    return snapshots, worlds
+
+
+def test_uninterrupted_track_has_zero_fragmentation():
+    snapshots, worlds = _frames([True, True, True, True])
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.track_fragmentation == 0
+
+
+def test_dropout_and_resume_counts_one_interruption():
+    snapshots, worlds = _frames([True, True, False, False, True, True])
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.track_fragmentation == 1
+
+
+def test_two_gaps_count_two_interruptions():
+    snapshots, worlds = _frames([True, False, True, False, True])
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.track_fragmentation == 2
+
+
+def test_late_start_and_early_end_are_not_interruptions():
+    snapshots, worlds = _frames([False, False, True, True, False])
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.track_fragmentation == 0
+
+
+def test_never_matched_object_has_undefined_fragmentation():
+    snapshots, worlds = _frames([False, False, False])
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.track_fragmentation is None
+
+
+def test_identity_switch_without_gap_is_not_fragmentation():
+    snapshots, worlds = _frames(
+        [True, True, True, True], ["track_a", "track_a", "track_b", "track_b"]
+    )
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.identity_switches == 1
+    assert result.track_fragmentation == 0
+
+
+def test_fragmentation_sums_over_objects():
+    worlds = [
+        make_world_state(
+            round(0.1 * i, 6),
+            {"a": ((0.0, 0.0), (0.0, 0.0)), "b": ((10.0, 0.0), (0.0, 0.0))},
+        )
+        for i in range(4)
+    ]
+    snapshots = [make_snapshot(round(0.1 * i, 6), "track_a", (0.1, 0.0)) for i in (0, 1, 2, 3)] + [
+        make_snapshot(round(0.1 * i, 6), "track_b", (10.1, 0.0)) for i in (0, 3)
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.track_fragmentation == 1

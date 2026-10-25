@@ -109,9 +109,10 @@ class TrackingEvaluator:
         duplicate_track_ids: set[str] = set()
         duplicate_track_samples = 0
         assignments_by_object: dict[str, list[tuple[float, str]]] = {}
+        matched_frames_by_object: dict[str, list[int]] = {}
 
         result.evaluated_frames = len(world_states)
-        for world_state in world_states:
+        for frame_index, world_state in enumerate(world_states):
             key = round(float(world_state.time), 9)
             frame_tracks = [
                 snapshot
@@ -142,6 +143,7 @@ class TrackingEvaluator:
                 assignments_by_object.setdefault(object_id, []).append(
                     (float(world_state.time), snapshot.track_id)
                 )
+                matched_frames_by_object.setdefault(object_id, []).append(frame_index)
 
                 covariance = snapshot.position_cov()
                 try:
@@ -189,7 +191,7 @@ class TrackingEvaluator:
             result.position_coverage_68 = coverage_hits_68 / coverage_samples
 
         result.identity_switches = self._count_identity_switches(assignments_by_object)
-        result.track_fragmentation = None  # unsupported; not silently reported as zero
+        result.track_fragmentation = self._count_interruptions(matched_frames_by_object)
 
         result.num_tracks = len(all_track_ids)
         result.num_confirmed_tracks = len(ever_confirmed)
@@ -212,8 +214,10 @@ class TrackingEvaluator:
                 "sample.",
                 "Coverage: matched position errors against the reported 2x2 covariance; "
                 f"95% threshold chi2(2,0.95)={_COVERAGE_95:.3f}.",
-                "track_fragmentation is unsupported and reported as None; "
-                "identity_switches is the supported continuity metric.",
+                "track_fragmentation: total interruptions, i.e. frames where a matched "
+                "object goes unmatched and is matched again later, summed over objects "
+                "(None if no object was ever matched). identity_switches counts track ID "
+                "changes between consecutive matched frames and is independent of gaps.",
             ]
         )
         return result
@@ -260,6 +264,26 @@ class TrackingEvaluator:
             len(objects) - len(paired_columns),
             duplicate_tracks=duplicates,
         )
+
+    @staticmethod
+    def _count_interruptions(matched_frames_by_object: dict[str, list[int]]) -> float | None:
+        """Count matched-to-unmatched-to-matched interruptions summed over objects.
+
+        An object contributes one interruption per gap of at least one evaluated
+        frame between two of its matched frames. Leading and trailing unmatched
+        frames are not interruptions.
+        """
+        if not matched_frames_by_object:
+            return None
+        interruptions = 0
+        for frames in matched_frames_by_object.values():
+            ordered = sorted(frames)
+            interruptions += sum(
+                1
+                for previous, current in zip(ordered[:-1], ordered[1:], strict=True)
+                if current - previous > 1
+            )
+        return float(interruptions)
 
     @staticmethod
     def _count_identity_switches(

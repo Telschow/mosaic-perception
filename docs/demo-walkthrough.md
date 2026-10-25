@@ -72,7 +72,7 @@ uv run streamlit run app/streamlit_app.py
   same epoch; within each group matching is one-to-one.
 - **Stale data is rejected explicitly.** The `out_of_sequence` scenario reports
   `N/A` accuracy because stale observations are rejected and counted.
-- **Unsupported metrics are not faked.** `track_fragmentation` is `N/A`.
+- **Undefined metrics are not faked.** `track_fragmentation` is `N/A` only when no object is ever matched.
 - **Reproducible.** Explicit seeds, deterministic IDs and paired runs.
 
 ## Limitations to note
@@ -80,7 +80,6 @@ uv run streamlit run app/streamlit_app.py
 - Synthetic 2-D world; simplified sensor models; no hardware validation.
 - Vision-only track initiation is unsupported.
 - Observations older than one tracker epoch are rejected, not replayed.
-- `track_fragmentation` is not implemented.
 - The benchmark uses development seeds 1–5 only. Held-out seeds 25–49 are
   reserved and were not run; no held-out or real-world claim is made.
 - The published v0.1.0 benchmark numbers are invalid and superseded.
