@@ -76,8 +76,8 @@ def test_delivery_delay_is_processed_or_counted_not_dropped():
     assert result.pending_observations >= 0
 
 
-def test_out_of_sequence_observations_are_explicitly_rejected():
-    scenario = resolve_scenario("out_of_sequence", seed=2, duration=2.0)
+def test_stale_observations_are_explicitly_rejected():
+    scenario = resolve_scenario("stale_rejection", seed=2, duration=2.0)
     pair = run_pair(scenario)
     result = pair.range_only.result
     assert result.rejected_out_of_sequence > 0
@@ -128,3 +128,17 @@ def test_cli_version():
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
     assert "Mosaic version" in result.output
+
+
+def test_retrodiction_scenario_runs_and_reports_the_same_delivery_statistics():
+    from mosaic_perception.experiment import run_pair
+
+    base = run_pair(resolve_scenario("delivery_delay", seed=2, duration=3.0)).fused.result
+    retro = run_pair(
+        resolve_scenario("delivery_delay_retrodiction", seed=2, duration=3.0)
+    ).fused.result
+    # Same sensors, same delays: the same observations are delivered and admitted.
+    assert retro.delivered_observations == base.delivered_observations
+    assert retro.rejected_out_of_sequence == base.rejected_out_of_sequence
+    assert retro.age_samples == base.age_samples
+    assert retro.position_rmse is not None

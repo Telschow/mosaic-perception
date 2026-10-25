@@ -39,7 +39,7 @@ release. The v0.1.0 benchmark numbers are invalid and have been replaced; see
 - **Frame rate**: sensors now honour `frame_rate` instead of emitting on every
   simulation step.
 - **Scenarios**: scenario names now resolve to real sensor/observer overrides;
-  added `delivery_delay`, `out_of_sequence` and `moving_observer` presets.
+  added `delivery_delay`, `out_of_sequence` (later renamed `stale_rejection`) and `moving_observer` presets.
 - **Evaluation**: evaluation uses per-epoch track snapshots, confirmed/coasting
   tracks only, and one-to-one gated Hungarian matching at each timestamp. The
   hard-coded 0.85 coverage was replaced with χ²(2, 0.95) = 5.991. Recall and
@@ -68,7 +68,7 @@ release. The v0.1.0 benchmark numbers are invalid and have been replaced; see
 - Canonical artifacts are `artifacts/benchmark/benchmark.json`,
   `per_seed.csv` and `report.md`. The duplicate `summary.json` and
   `benchmark_report.md` aliases were removed.
-- The checked-in benchmark uses all 15 scenarios and development seeds 0–24 at
+- The checked-in benchmark uses all 16 scenarios and development seeds 0–24 at
   10 s. Held-out seeds 25–49 are reserved and were **not** run.
 
 ### Documentation

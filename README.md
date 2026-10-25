@@ -175,7 +175,7 @@ Headline observations from the current development benchmark:
   about other associators.
 - 95% coverage is not improved by fusion overall, and remains far below the
   nominal 0.95 in the miscalibration scenario.
-- The `out_of_sequence` scenario has no matched samples: observations older
+- The `stale_rejection` scenario has no matched samples: observations older
   than the one-epoch staleness bound are rejected and counted. Its accuracy
   metrics are `N/A`, not zero.
 

@@ -39,8 +39,8 @@ def test_moving_observer_preset_uses_circle():
     assert scenario.observer_trajectory == "circle"
 
 
-def test_out_of_sequence_preset_exceeds_one_epoch_delay():
-    scenario = resolve_scenario("out_of_sequence", seed=1, duration=2.0)
+def test_stale_rejection_preset_exceeds_one_epoch_delay():
+    scenario = resolve_scenario("stale_rejection", seed=1, duration=2.0)
     assert scenario.sensors["range_bearing"].delivery_delay_mean == pytest.approx(0.25)
 
 
@@ -115,3 +115,14 @@ def test_crossing_and_dense_clutter_presets_are_constructed_as_documented():
     assert dense.sensors["range_bearing"].false_alarm_rate == 4.0
     assert dense.sensors["vision_bearing"].false_alarm_rate == 8.0
     assert dense.target_layout == "random"
+
+
+def test_retrodiction_preset_differs_from_delivery_delay_only_in_the_update_mode():
+    plain = resolve_scenario("delivery_delay", seed=1, duration=2.0)
+    retro = resolve_scenario("delivery_delay_retrodiction", seed=1, duration=2.0)
+    assert plain.delayed_update == "delivery_time"
+    assert retro.delayed_update == "retrodiction"
+    for key in ("range_bearing", "vision_bearing"):
+        assert plain.sensors[key].delivery_delay_mean == retro.sensors[key].delivery_delay_mean
+        assert plain.sensors[key].delivery_delay_std == retro.sensors[key].delivery_delay_std
+    assert resolve_scenario("nominal", seed=1, duration=2.0).delayed_update == "delivery_time"

@@ -314,3 +314,126 @@ def test_delayed_observation_of_accelerating_target_state_error(acceleration):
     # Lateral position error a*tau^2/2 equals the 0.25 m along-track error at
     # a = 50 m/s^2, so acceleration only dominates beyond that for this age.
     assert (abs(error[1]) < abs(error[0])) == (acceleration < 50.0)
+
+
+# --- one-step-lag retrodiction (opt-in) ------------------------------------------------
+
+from mosaic_perception.tracking.ekf import ExtendedKalmanFilter  # noqa: E402
+
+
+def _ekf_update(ekf, state, cov, obs):
+    """Independent EKF update of a state with one observation (capture-time pose)."""
+    pose = obs.observer_pose
+    if obs.measurement_group() == "range_bearing":
+        z = np.array(
+            [obs.measurements["range"], obs.measurements["bearing"], obs.measurements["range_rate"]]
+        )
+        h = ekf.measurement_range_bearing(state, pose)
+        jac = ekf.jacobian_range_bearing(state, pose)
+        angle = (1,)
+    else:
+        z = np.array([obs.measurements["bearing"]])
+        h = ekf.measurement_bearing(state, pose)
+        jac = ekf.jacobian_bearing(state, pose)
+        angle = (0,)
+    return ekf.update(state, cov, z, jac, obs.get_measurement_cov(), h, angle_indices=angle)
+
+
+def _tracker_with_track(delayed_update, velocity=(5.0, 0.0)):
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True, delayed_update=delayed_update)
+    track = make_track(velocity=velocity, status=TrackStatus.CONFIRMED)
+    track.covariance = np.diag([0.25, 0.25, 0.01, 0.01]).tolist()
+    tracker.tracks[track.track_id] = track
+    return tracker, track
+
+
+def test_delayed_update_defaults_to_delivery_time_and_rejects_unknown_values():
+    assert MultiSensorTracker(dt=0.1).delayed_update == "delivery_time"
+    with pytest.raises(ValueError):
+        MultiSensorTracker(dt=0.1, delayed_update="rewind")
+
+
+def test_retrodiction_equals_the_time_ordered_replay_of_the_delayed_observation():
+    tracker, track = _tracker_with_track("retrodiction")
+    ekf = ExtendedKalmanFilter(dt=0.1)
+    x0, p0 = track.state_array().copy(), track.cov_array().copy()
+    obs = range_observation(
+        "late", distance=10.0, bearing=0.0, range_rate=5.0, capture_time=0.0, delivery_time=0.05
+    )
+
+    tracker.process_observations([obs], 0.0)
+    tracker.process_observations([], 0.1)
+
+    # Replay: update the t=0 posterior with the t=0 measurement, then predict to t=0.1.
+    x_up, p_up = _ekf_update(ekf, x0, p0, obs)
+    expected_x, expected_p = ekf.predict_over(x_up, p_up, 0.1)
+    np.testing.assert_allclose(track.state_array(), expected_x, atol=1e-9)
+    np.testing.assert_allclose(track.cov_array(), expected_p, atol=1e-9)
+    # The measurement agrees with the t=0 state, so nothing is pulled back: x = 10.5.
+    assert track.state_array()[0] == pytest.approx(10.5, abs=1e-9)
+    assert obs.associated_track_id == track.track_id
+    assert tracker.statistics().mean_age_of_information == pytest.approx(0.1)
+
+
+def test_delivery_time_update_remains_the_default_and_pulls_the_state_back():
+    tracker, track = _tracker_with_track("delivery_time")
+    obs = range_observation(
+        "late", distance=10.0, bearing=0.0, range_rate=5.0, capture_time=0.0, delivery_time=0.05
+    )
+    tracker.process_observations([obs], 0.0)
+    tracker.process_observations([], 0.1)
+    assert track.state_array()[0] == pytest.approx(10.249975, abs=1e-5)
+
+
+def test_retrodiction_removes_the_along_track_error_but_not_unmodelled_acceleration():
+    """Same set-up as the accelerating-target test: truth at t=0.1 is x=10.5, y=a*tau^2/2."""
+    tau, accel = 0.1, 20.0
+    tracker, track = _tracker_with_track("retrodiction")
+    obs = range_observation(
+        "late", distance=10.0, bearing=0.0, range_rate=5.0, capture_time=0.0, delivery_time=0.05
+    )
+    tracker.process_observations([obs], 0.0)
+    tracker.process_observations([], 0.1)
+    truth = np.array([10.5, 0.5 * accel * tau**2, 5.0, accel * tau])
+    error = track.state_array() - truth
+    assert error[0] == pytest.approx(0.0, abs=1e-9)  # delivery-time update leaves -0.25
+    assert error[1] == pytest.approx(-0.5 * accel * tau**2, abs=1e-9)  # acceleration unmodelled
+    assert error[3] == pytest.approx(-accel * tau, abs=1e-9)
+
+
+def test_retrodiction_replays_earlier_on_time_updates_in_capture_time_order():
+    tracker, track = _tracker_with_track("retrodiction", velocity=(0.0, 0.0))
+    ekf = ExtendedKalmanFilter(dt=0.1)
+    x0, p0 = track.state_array().copy(), track.cov_array().copy()
+    on_time = range_observation(
+        "range-now", distance=10.0, bearing=0.0, range_rate=0.0, capture_time=0.1, delivery_time=0.1
+    )
+    late = vision_observation("vision-late", bearing=0.002, capture_time=0.05, delivery_time=0.08)
+
+    tracker.process_observations([on_time, late], 0.0)
+    tracker.process_observations([], 0.1)
+
+    # The range group is applied first (on time); the delayed vision observation then
+    # triggers a replay from the stored t=0 posterior in capture-time order.
+    x, p = ekf.predict_over(x0, p0, 0.05)
+    x, p = _ekf_update(ekf, x, p, late)
+    x, p = ekf.predict_over(x, p, 0.05)
+    x, p = _ekf_update(ekf, x, p, on_time)
+    np.testing.assert_allclose(track.state_array(), x, atol=1e-9)
+    np.testing.assert_allclose(track.cov_array(), p, atol=1e-9)
+    assert late.associated_track_id == track.track_id
+    assert on_time.associated_track_id == track.track_id
+
+
+def test_retrodiction_keeps_the_one_epoch_staleness_limit():
+    tracker, track = _tracker_with_track("retrodiction")
+    stale = range_observation(
+        "stale", distance=10.0, bearing=0.0, range_rate=5.0, capture_time=0.0, delivery_time=0.15
+    )
+    tracker.process_observations([stale], 0.0)
+    tracker.process_observations([], 0.1)
+    tracker.process_observations([], 0.2)  # age 0.2 > one epoch
+    stats = tracker.statistics()
+    assert stats.rejected_out_of_sequence == 1
+    assert stats.age_samples == 0
+    assert stale.associated_track_id is None

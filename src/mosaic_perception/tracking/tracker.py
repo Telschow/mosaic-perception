@@ -14,6 +14,8 @@ observer poses, and configuration are available here.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from ..domain.models import (
@@ -29,6 +31,15 @@ from .association import GatedHungarianAssociator, GroupAssociation
 from .ekf import ExtendedKalmanFilter
 
 _GROUP_ORDER = ("range_bearing", "vision_bearing")
+_DELAYED_UPDATE_MODES = ("delivery_time", "retrodiction")
+
+
+@dataclass(frozen=True)
+class _UpdateResult:
+    state: np.ndarray
+    covariance: np.ndarray
+    nis: float
+    dof: int
 
 
 class MultiSensorTracker:
@@ -51,15 +62,25 @@ class MultiSensorTracker:
         min_hits_confirm: int = 3,
         max_misses_coast: int = 2,
         max_misses_delete: int = 5,
+        delayed_update: str = "delivery_time",
     ):
         if dt <= 0:
             raise ValueError("dt must be positive")
+        if delayed_update not in _DELAYED_UPDATE_MODES:
+            raise ValueError(f"delayed_update must be one of {_DELAYED_UPDATE_MODES}")
         if min_hits_confirm < 1:
             raise ValueError("min_hits_confirm must be at least 1")
         if max_misses_coast < 1 or max_misses_delete <= max_misses_coast:
             raise ValueError("miss thresholds must satisfy 1 <= coast < delete")
 
         self.dt = float(dt)
+        # How an admitted delayed observation is applied: to the delivery-time state
+        # (default, an approximation) or by replaying the epoch from the stored previous
+        # posterior (one-step-lag retrodiction).
+        self.delayed_update = delayed_update
+        self._now = 0.0
+        self._prev_posterior: dict[str, tuple[np.ndarray, np.ndarray, float]] = {}
+        self._epoch_applied: dict[str, list[SensorObservation]] = {}
         self.use_vision = bool(use_vision)
         self.ekf = ExtendedKalmanFilter(dt=self.dt, accel_noise_std=accel_noise_std)
         self.associator = GatedHungarianAssociator(gates=gates)
@@ -112,6 +133,8 @@ class MultiSensorTracker:
         now = float(current_time)
         if not np.isfinite(now):
             raise ValueError("current_time must be finite")
+        self._now = now
+        self._epoch_applied = {}
         self._advance_time(now)
         self._enqueue(observations)
         due = self._take_due(now)
@@ -248,6 +271,8 @@ class MultiSensorTracker:
 
     def reset(self) -> None:
         """Reset all tracker state, snapshots and counters."""
+        self._prev_posterior = {}
+        self._epoch_applied = {}
         self.tracks = {}
         self.snapshots = []
         self.next_track_id = 0
@@ -287,10 +312,17 @@ class MultiSensorTracker:
         steps = int(round(steps_float))
         if steps < 1 or abs(steps_float - steps) > 1e-6:
             raise ValueError(f"tracker time step {elapsed} is not a multiple of dt={self.dt}")
-        for _ in range(steps):
+        for step in range(steps):
             for track in self.tracks.values():
                 if track.status == TrackStatus.DELETED:
                     continue
+                if self.delayed_update == "retrodiction" and step == steps - 1:
+                    # Posterior before the last prediction step, for one-step-lag replay.
+                    self._prev_posterior[track.track_id] = (
+                        track.state_array().copy(),
+                        track.cov_array().copy(),
+                        now - self.dt,
+                    )
                 state, covariance = self.ekf.predict(track.state_array(), track.cov_array())
                 track.state = state.tolist()
                 track.covariance = covariance.tolist()
@@ -334,20 +366,20 @@ class MultiSensorTracker:
     # ------------------------------------------------------------------
     # Updates and track management
     # ------------------------------------------------------------------
-    def _apply_observation(self, track: TrackEstimate, observation: SensorObservation) -> None:
+    def _update_state(
+        self, state: np.ndarray, covariance: np.ndarray, observation: SensorObservation
+    ) -> _UpdateResult:
+        """EKF update of ``state`` with one observation (capture-time observer pose)."""
         pose = observation.observer_pose
         if pose is None:
             raise ValueError("observation has no observer pose")
         covariance_measurement = observation.get_measurement_cov()
         if covariance_measurement is None:
             raise ValueError("observation has no measurement covariance")
-        state = track.state_array()
-        covariance = track.cov_array()
         group = observation.measurement_group()
 
         if group == "range_bearing":
-            has_range_rate = "range_rate" in observation.measurements
-            if has_range_rate:
+            if "range_rate" in observation.measurements:
                 measurement = np.array(
                     [
                         observation.measurements["range"],
@@ -390,7 +422,7 @@ class MultiSensorTracker:
             nis = float(residual @ np.linalg.solve(innovation_cov, residual))
         except np.linalg.LinAlgError:
             nis = float("nan")  # diagnostic only: never let it break the update
-        state, covariance = self.ekf.update(
+        new_state, new_covariance = self.ekf.update(
             state,
             covariance,
             measurement,
@@ -399,14 +431,65 @@ class MultiSensorTracker:
             predicted,
             angle_indices=angle_indices,
         )
-        if np.isfinite(nis):
-            self._nis_sum += nis
-            self._nis_dof_sum += int(residual.size)
+        return _UpdateResult(
+            state=np.asarray(new_state, dtype=float),
+            covariance=np.asarray(new_covariance, dtype=float),
+            nis=nis,
+            dof=int(residual.size),
+        )
+
+    def _record_nis(self, result: _UpdateResult) -> None:
+        if np.isfinite(result.nis):
+            self._nis_sum += result.nis
+            self._nis_dof_sum += result.dof
             self._nis_updates += 1
+
+    def _is_delayed(self, observation: SensorObservation) -> bool:
+        return observation.capture_time < self._now - 1e-9
+
+    def _apply_observation(self, track: TrackEstimate, observation: SensorObservation) -> None:
+        stored = self._prev_posterior.get(track.track_id)
+        if self.delayed_update == "retrodiction" and self._is_delayed(observation) and stored:
+            state, covariance = self._replay_epoch(track, observation, stored)
+        else:
+            result = self._update_state(track.state_array(), track.cov_array(), observation)
+            self._record_nis(result)
+            state, covariance = result.state, result.covariance
 
         track.state = np.asarray(state, dtype=float).tolist()
         track.covariance = np.asarray(covariance, dtype=float).tolist()
         track.associated_observations.append(observation.observation_id)
+        self._epoch_applied.setdefault(track.track_id, []).append(observation)
+
+    def _replay_epoch(
+        self,
+        track: TrackEstimate,
+        observation: SensorObservation,
+        stored: tuple[np.ndarray, np.ndarray, float],
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """One-step-lag update: replay this epoch from the stored previous posterior.
+
+        Starting from the posterior stored before this epoch's prediction, the
+        observations applied so far this epoch plus the delayed one are processed in
+        capture-time order, predicting over the exact interval between them, and the
+        state is finally predicted to the current processing time. Only the delayed
+        observation's innovation is added to the NIS statistics.
+        """
+        state, covariance, time = stored
+        ordered = sorted(
+            [*self._epoch_applied.get(track.track_id, []), observation],
+            key=lambda item: (item.capture_time, item.observation_id),
+        )
+        for item in ordered:
+            state, covariance = self.ekf.predict_over(
+                state, covariance, max(item.capture_time - time, 0.0)
+            )
+            time = max(time, item.capture_time)
+            result = self._update_state(state, covariance, item)
+            state, covariance = result.state, result.covariance
+            if item is observation:
+                self._record_nis(result)
+        return self.ekf.predict_over(state, covariance, max(self._now - time, 0.0))
 
     def _initiate_track(self, observation: SensorObservation, now: float) -> TrackEstimate | None:
         """Initiate a track from an unassociated range-bearing observation."""

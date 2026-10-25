@@ -48,9 +48,9 @@
 ## Timing and delivery
 
 - Observations older than one tracker epoch (`dt + 1e-6`) are explicitly
-  rejected and counted; they are not replayed against historical state. The
-  potential benefit of careful out-of-sequence fusion is therefore not
-  measured.
+  rejected and counted; they are not replayed against historical state, in
+  either update mode. Fusion of observations older than one epoch is therefore
+  not measured.
 - **Delayed-observation state alignment (bounded-staleness approximation):**
   Observations whose capture time is at most one epoch in the past are admitted
   to the tracker. When an observation is processed, the tracker has already
@@ -76,8 +76,17 @@
     4 m/s², 0.5 m at 100 m/s²) and a velocity error of a·τ. For this age,
     acceleration only exceeds the along-track term above about 50 m/s². These
     are results for one geometry and one covariance, not a bound.
-  - No claim of full out-of-sequence measurement fusion (retroactive state
-    update) is justified by this implementation.
+  - **Opt-in one-step-lag retrodiction** (`delayed_update="retrodiction"`, scenario
+    `delivery_delay_retrodiction`): the tracker stores each track's posterior from
+    before the last prediction step and, when a delayed observation is applied,
+    replays that epoch in capture-time order (predicting over the exact intervals
+    between observations) before predicting to the processing time. For the
+    observations it admits (age up to one epoch) this removes the delivery-time
+    approximation: a hand-built test reproduces the independently computed replay
+    exactly and removes the 0.25 m along-track error, leaving only the unmodelled
+    acceleration. It still gates the observation against the delivery-time state
+    (association is not retrodicted), it is off by default, and it covers only the
+    one-epoch lag, so it is not general out-of-sequence measurement fusion.
 - Processing occurs on the discrete tracker epoch grid. Mean age of information
   is quantised by `dt` and is not a sub-epoch latency measurement.
 - `delivery_delay` with a 0.05 s mean is generally applied at the next 0.1 s
@@ -132,7 +141,7 @@
   while fused precision is lower in every scenario with defined precision.
   Accuracy alone is not
   evidence that fusion improved the tracker.
-- The `out_of_sequence` scenario has no matched samples because its observations
+- The `stale_rejection` scenario has no matched samples because its observations
   exceed the staleness bound and are rejected. Accuracy is `N/A`; this is an
   explicit non-result, not a zero-error result.
 

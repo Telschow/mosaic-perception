@@ -175,3 +175,44 @@ def test_wrap_angle_boundaries():
     assert abs(wrap_angle(np.pi + 0.1) - (-np.pi + 0.1)) < 1e-12
     assert abs(wrap_angle(-np.pi - 0.1) - (np.pi - 0.1)) < 1e-12
     assert abs(abs(wrap_angle(3.0 * np.pi)) - np.pi) < 1e-12
+
+
+def test_predict_over_the_nominal_step_equals_predict():
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    ekf = ExtendedKalmanFilter(dt=0.1, accel_noise_std=0.5)
+    state = np.array([1.0, 2.0, 3.0, -1.0])
+    covariance = np.diag([0.5, 0.4, 0.3, 0.2])
+    expected = ekf.predict(state, covariance)
+    actual = ekf.predict_over(state, covariance, 0.1)
+    np.testing.assert_allclose(actual[0], expected[0], atol=1e-12)
+    np.testing.assert_allclose(actual[1], expected[1], atol=1e-12)
+
+
+def test_predict_over_a_fractional_interval_uses_that_interval():
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    ekf = ExtendedKalmanFilter(dt=0.1, accel_noise_std=0.5)
+    state = np.array([0.0, 0.0, 4.0, 2.0])
+    covariance = np.zeros((4, 4))
+    x, p = ekf.predict_over(state, covariance, 0.05)
+    np.testing.assert_allclose(x, [0.2, 0.1, 4.0, 2.0])
+    # Discrete white-noise-acceleration process noise for dt = 0.05, q = 0.25.
+    dt = 0.05
+    q = 0.25
+    assert p[0, 0] == pytest.approx(q * dt**4 / 4)
+    assert p[0, 2] == pytest.approx(q * dt**3 / 2)
+    assert p[2, 2] == pytest.approx(q * dt**2)
+
+
+def test_predict_over_zero_interval_is_the_identity_and_negative_is_rejected():
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    ekf = ExtendedKalmanFilter(dt=0.1)
+    state = np.array([1.0, 2.0, 3.0, 4.0])
+    covariance = np.eye(4)
+    x, p = ekf.predict_over(state, covariance, 0.0)
+    np.testing.assert_allclose(x, state)
+    np.testing.assert_allclose(p, covariance)
+    with pytest.raises(ValueError):
+        ekf.predict_over(state, covariance, -0.1)

@@ -23,6 +23,7 @@ class ScenarioPreset:
     relevant_metrics: list[str] = field(default_factory=list)
     observer_trajectory: str = "static"
     target_layout: str = "random"
+    delayed_update: str = "delivery_time"
     range_overrides: dict[str, Any] = field(default_factory=dict)
     vision_overrides: dict[str, Any] = field(default_factory=dict)
 
@@ -135,8 +136,25 @@ PRESETS: dict[str, ScenarioPreset] = {
         range_overrides={"delivery_delay_mean": 0.05, "delivery_delay_std": 0.02},
         vision_overrides={"delivery_delay_mean": 0.05, "delivery_delay_std": 0.02},
     ),
-    "out_of_sequence": ScenarioPreset(
-        name="out_of_sequence",
+    "delivery_delay_retrodiction": ScenarioPreset(
+        name="delivery_delay_retrodiction",
+        description=(
+            "Same delays as delivery_delay (0.05 +- 0.02 s) but delayed observations "
+            "are applied by one-step-lag retrodiction instead of at delivery time."
+        ),
+        hypothesis=(
+            "Replaying the epoch from the stored previous posterior removes the "
+            "delivery-time approximation error, so accuracy should be no worse than "
+            "delivery_delay; any difference measures the approximation. Association still "
+            "gates delayed observations against the delivery-time state."
+        ),
+        relevant_metrics=["position_rmse", "mean_age_of_information", "mota", "idf1"],
+        delayed_update="retrodiction",
+        range_overrides={"delivery_delay_mean": 0.05, "delivery_delay_std": 0.02},
+        vision_overrides={"delivery_delay_mean": 0.05, "delivery_delay_std": 0.02},
+    ),
+    "stale_rejection": ScenarioPreset(
+        name="stale_rejection",
         description="Observations arrive 0.25+-0.05 s after capture (older than one epoch).",
         hypothesis=(
             "Observations older than the bounded one-epoch staleness policy "
@@ -299,6 +317,7 @@ def resolve_scenario(
         num_objects=num_objects,
         observer_trajectory=preset.observer_trajectory,
         target_layout=preset.target_layout,
+        delayed_update=preset.delayed_update,
         sensors={
             "range_bearing": SensorConfig(**range_cfg),
             "vision_bearing": SensorConfig(**vision_cfg),

@@ -124,6 +124,7 @@ def run_method(
     tracker = MultiSensorTracker(
         dt=scenario.dt,
         use_vision=method == "fused",
+        delayed_update=scenario.delayed_update,
     )
 
     for world_state in states:

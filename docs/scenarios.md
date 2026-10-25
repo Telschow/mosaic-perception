@@ -1,6 +1,6 @@
 # Scenarios
 
-Mosaic has 15 implemented presets. A scenario changes sensor parameters and/or
+Mosaic has 16 implemented presets. A scenario changes sensor parameters and/or
 the observer trajectory; world generation, tracker management and evaluation
 logic stay identical so that comparisons between scenarios and methods remain
 meaningful. Every preset has a stated hypothesis and a list of metrics that can
@@ -23,7 +23,8 @@ All presets resolve to two sensor groups:
 | `range_dropout` | Range detection probability 0.55 | Vision cannot initiate tracks, so the fused method may not recover the missing range detections. |
 | `measurement_bias` | Range bias +1.5 m, range-rate bias +0.3 m/s | Bias degrades the baseline and is only partially corrected by bearings; errors remain biased. |
 | `delivery_delay` | Delivery delay 0.05 ± 0.02 s | A bounded one-epoch delay is queued and applied at delivery; AoI rises instead of observations being dropped. |
-| `out_of_sequence` | Delivery delay 0.25 ± 0.05 s, older than one epoch | Stale observations are rejected and counted; accuracy becomes `N/A`, not silently computed from stale data. |
+| `delivery_delay_retrodiction` | Same delays as `delivery_delay` (0.05 ± 0.02 s); delayed observations are applied by one-step-lag retrodiction (opt-in tracker option) | Replaying the epoch from the stored previous posterior removes the delivery-time approximation error; the difference to `delivery_delay` measures that error. Association still gates delayed observations against the delivery-time state. |
+| `stale_rejection` | Delivery delay 0.25 ± 0.05 s, older than one epoch | Stale observations are rejected and counted; accuracy becomes `N/A`, not silently computed from stale data. |
 | `false_observations` | Range false-alarm rate 1.0, vision 3.0 per step | False alarms create spurious tentative tracks and can steal associations; precision and false tracks should worsen. |
 | `uncertainty_miscalibration` | Reported covariance 20× too small (scale 0.05) | Overconfident measurements are over-trusted; empirical 95% coverage falls below nominal. |
 | `sensor_disagreement_large_bias` | Vision bearing bias 0.12 rad (well outside 1-DOF gate), range unbiased | A sufficiently large bias should be rejected by the gate rather than corrupting the fused estimate. |
@@ -46,5 +47,5 @@ uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
 In the Streamlit app, scenarios are selected from the sidebar. The checked-in
-benchmark covers all 15 presets with all development seeds 0–24; held-out seeds
+benchmark covers all 16 presets with all development seeds 0–24; held-out seeds
 25–49 are reserved and were not run.

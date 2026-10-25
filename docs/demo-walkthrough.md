@@ -60,7 +60,7 @@ uv run streamlit run app/streamlit_app.py
 3. Inspect the metrics table and the 2-D plot of ground truth and final
    confirmed/coasting tracks.
 4. Try `moving_observer`, `measurement_bias`, `uncertainty_miscalibration` and
-   `out_of_sequence` to see different failure modes.
+   `stale_rejection` to see different failure modes.
 
 ## Key takeaways
 
@@ -70,7 +70,7 @@ uv run streamlit run app/streamlit_app.py
   miscalibration scenario remains badly calibrated.
 - **Association is per group.** A track can receive range and vision in the
   same epoch; within each group matching is one-to-one.
-- **Stale data is rejected explicitly.** The `out_of_sequence` scenario reports
+- **Stale data is rejected explicitly.** The `stale_rejection` scenario reports
   `N/A` accuracy because stale observations are rejected and counted.
 - **Undefined metrics are not faked.** `track_fragmentation` is `N/A` only when no object is ever matched.
 - **Reproducible.** Explicit seeds, deterministic IDs and paired runs.

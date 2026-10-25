@@ -87,6 +87,11 @@ target state has been propagated to **delivery time**. The tracker applies the
 observation to this delivery-time state without rewinding to the capture time.
 This is a deliberate approximation, not a capture-time-aligned estimation.
 
+An opt-in alternative, one-step-lag retrodiction (`delayed_update="retrodiction"`),
+replays the epoch from the stored previous posterior in capture-time order, which
+removes this approximation for observations up to one epoch old. See
+`docs/limitations.md` for what it does and does not cover.
+
 - Under a constant-velocity approximation, the target-state displacement
   between capture and delivery is approximately `speed × observation_age`.
   Acceleration and observer-motion effects are not accounted for in this

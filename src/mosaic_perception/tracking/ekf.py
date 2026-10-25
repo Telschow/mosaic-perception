@@ -76,6 +76,43 @@ class ExtendedKalmanFilter:
             ]
         )
 
+    def predict_over(
+        self, state: np.ndarray, covariance: np.ndarray, interval: float
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Predict over an arbitrary interval with the same motion and noise model.
+
+        ``predict_over(x, P, dt)`` equals :meth:`predict`. A zero interval returns the
+        inputs; a negative interval is rejected.
+        """
+        if interval < 0:
+            raise ValueError("interval must be non-negative")
+        x = self._as_state(state)
+        cov = self._as_covariance(covariance)
+        if interval == 0:
+            return x, cov
+        t2 = interval * interval
+        t3 = t2 * interval
+        t4 = t2 * t2
+        q = self.accel_noise_std**2
+        process_noise = q * np.array(
+            [
+                [t4 / 4.0, 0.0, t3 / 2.0, 0.0],
+                [0.0, t4 / 4.0, 0.0, t3 / 2.0],
+                [t3 / 2.0, 0.0, t2, 0.0],
+                [0.0, t3 / 2.0, 0.0, t2],
+            ]
+        )
+        transition = np.array(
+            [
+                [1.0, 0.0, interval, 0.0],
+                [0.0, 1.0, 0.0, interval],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ]
+        )
+        cov_pred = transition @ cov @ transition.T + process_noise
+        return transition @ x, self._ensure_positive_semidefinite(cov_pred)
+
     @staticmethod
     def _as_state(state: np.ndarray) -> np.ndarray:
         x = np.asarray(state, dtype=float).reshape(-1)

@@ -198,7 +198,7 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             "  ground-truth object across consecutive matched frames.",
             "- Coverage is empirical and only defined over matched samples; its",
             "  denominator is reported in `per_seed.csv` and `benchmark.json`.",
-            "- Scenarios with no matched samples (for example `out_of_sequence`)",
+            "- Scenarios with no matched samples (for example `stale_rejection`)",
             "  report `N/A` accuracy because their observations are rejected as stale;",
             "  that is an explicit non-result, not a zero-error result.",
             seed_note,

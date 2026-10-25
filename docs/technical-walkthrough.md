@@ -11,7 +11,7 @@ trade-off in a controlled synthetic setting with paired comparisons.
 
 1. **Synthetic world** (`simulation/world.py`) — deterministic 2-D trajectories
    on an exact time grid, with analytic observer heading/velocity.
-2. **Scenarios** (`scenarios.py`) — 15 presets that override sensor parameters
+2. **Scenarios** (`scenarios.py`) — 16 presets that override sensor parameters
    or the observer trajectory.
 3. **Sensors** (`sensors/*`) — range-bearing (range, sensor-frame bearing,
    relative range rate) and vision-bearing (bearing + class probabilities).
@@ -64,7 +64,7 @@ trade-off in a controlled synthetic setting with paired comparisons.
 
 ## 5) Current development benchmark
 
-From `artifacts/benchmark/report.md` (all 15 scenarios, development seeds 0–24,
+From `artifacts/benchmark/report.md` (all 16 scenarios, development seeds 0–24,
 10 s; see the artifact for the exact commit):
 
 - Accuracy depends on the matcher. Paired position-RMSE differences (fused
@@ -100,7 +100,7 @@ From `artifacts/benchmark/report.md` (all 15 scenarios, development seeds 0–24
   0.816 and MOTA -0.977 vs 0.732.
 - Coverage is not improved overall and remains far below 0.95 under reported
   covariance miscalibration (χ²(2, 0.95) = 5.991).
-- The `out_of_sequence` scenario has zero matched samples because stale
+- The `stale_rejection` scenario has zero matched samples because stale
   observations are rejected; accuracy is `N/A`.
 - These are development results, not a held-out evaluation. Seeds 25–49 were
   not run.

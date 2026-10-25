@@ -182,6 +182,8 @@ class ScenarioConfig(BaseModel):
     num_objects: int = 3
     observer_trajectory: str = "static"
     target_layout: str = "random"
+    # How the tracker applies admitted delayed observations ("delivery_time" or "retrodiction")
+    delayed_update: str = "delivery_time"
     sensors: dict[str, SensorConfig] = Field(default_factory=dict)
 
 

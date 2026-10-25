@@ -35,7 +35,7 @@ precision, coverage, matched samples and unmatched confirmed tracks."
 Open `artifacts/benchmark/report.md` and point to the aggregate and per-seed
 tables.
 
-"Across the 15 development scenarios and seeds 0–24, whether fusion improves
+"Across the 16 development scenarios and seeds 0–24, whether fusion improves
 accuracy depends on how matched samples are paired: with a distance-only matcher the
 paired RMSE interval favours fusion in 7 scenarios and goes against it in 3, with the
 continuity-preferring headline matcher it favours fusion in 1 and goes against it in 5.
@@ -44,7 +44,7 @@ GOSPA are worse in 13 of 14 scenarios, and consistency is poor, with position NE
 above its interval everywhere. So the honest finding is that fusion raises recall but
 costs association quality, not 'fusion wins'."
 
-Show the `out_of_sequence` row: accuracy is `N/A` because observations older
+Show the `stale_rejection` row: accuracy is `N/A` because observations older
 than one epoch are rejected and counted, not silently used.
 
 ### 4) Limitations and wrap-up (30–40 s)
