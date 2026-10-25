@@ -90,6 +90,12 @@ only orchestrates them.
 - Clears evaluator-only object IDs before processing.
 - Wraps the evaluator and optional git-commit metadata.
 
+### Reporting (`reporting/markdown.py`)
+
+`render_report(payload)` is a pure function from the benchmark payload to
+Markdown, independent of the command-line layer and testable on a hand-built
+payload.
+
 ### CLI (`cli/main.py`)
 
 - Commands: `run`, `compare`, `benchmark`, `evaluate`, `version`.
