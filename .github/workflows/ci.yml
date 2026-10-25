@@ -46,11 +46,23 @@ jobs:
           test -s /tmp/mosaic-compare/benchmark.json
           test -s /tmp/mosaic-compare/per_seed.csv
           test -s /tmp/mosaic-compare/report.md
-      - name: CLI smoke test (benchmark)
+      - name: CLI smoke test (benchmark, multiple scenarios)
         run: |
           uv run --python ${{ matrix.python-version }} mosaic benchmark \
-            --scenario nominal --seeds 1 --duration 0.5 --num-objects 1 \
+            --scenario nominal,sensor_disagreement_large_bias,sensor_disagreement_within_gate \
+            --seeds 1 --duration 0.5 --num-objects 1 \
             --output /tmp/mosaic-benchmark
           test -s /tmp/mosaic-benchmark/benchmark.json
           test -s /tmp/mosaic-benchmark/per_seed.csv
           test -s /tmp/mosaic-benchmark/report.md
+          for name in nominal sensor_disagreement_large_bias sensor_disagreement_within_gate; do
+            grep -q "| $name |" /tmp/mosaic-benchmark/report.md
+          done
+      - name: CLI smoke test (benchmark rejects unknown scenario)
+        run: |
+          if uv run --python ${{ matrix.python-version }} mosaic benchmark \
+            --scenario nominal,not_a_scenario --seeds 1 --duration 0.5 \
+            --output /tmp/mosaic-benchmark-bad; then
+            echo "benchmark accepted an unknown scenario" >&2
+            exit 1
+          fi

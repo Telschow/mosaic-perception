@@ -129,8 +129,9 @@ In particular, this project does **not** claim:
 - Supported CI (`.github/workflows/ci.yml`) runs, on Python 3.12:
   `ruff check src tests`, `ruff format --check .` (full tree), `mypy src`,
   `pytest`, and smoke tests of `mosaic run`, `evaluate`, `compare` and
-  `benchmark` (the last two also check that the three canonical artifacts are
-  written).
+  `benchmark` (the last two check that the three canonical artifacts are
+  written; `benchmark` runs three scenarios, checks each appears in the report
+  and checks that an unknown scenario name is rejected).
 - Type checking uses `scipy-stubs` from the dev dependencies; no
   `type: ignore` comments or config-level suppressions are used for the source
   package.
