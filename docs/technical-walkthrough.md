@@ -67,30 +67,37 @@ trade-off in a controlled synthetic setting with paired comparisons.
 From `artifacts/benchmark/report.md` (all 15 scenarios, development seeds 0–24,
 10 s; see the artifact for the exact commit):
 
-- Paired position-RMSE differences (fused minus range-only, 25 seeds, 95% t
-  interval over seeds): the interval favours fusion in 7 of 14 scenarios with
-  defined accuracy, favours range-only in 3 (the within-gate bias scenarios)
-  and includes zero in 4. Favourable differences are small (0.013 to 0.038 m).
-- Fused precision is lower in 13 of 14 scenarios with defined precision. The
-  metric is sample-based, and the extra unmatched confirmed tracks are confirmed
-  tracks never matched to a true object. The `Duplicate tracks` column shows
-  how many of them sat inside the matching gate of an already-claimed object
-  (26.1 of 26.5 per seed in `uncertainty_miscalibration`).
+- Accuracy depends on the matcher. Paired position-RMSE differences (fused
+  minus range-only, 25 seeds, 95% t interval over seeds) under the headline
+  continuity-preferring matcher: favours fusion in 1 of 14 scenarios with defined
+  accuracy, goes against it in 5, includes zero in 8. Under a distance-only matcher
+  (`position_rmse_distance_only`) it favours fusion in 7, goes against it in 3 and
+  includes zero in 4. Neither matcher settles the accuracy question.
+- Association quality is worse for fusion under both matchers: precision, MOTA and
+  GOSPA are worse in 13 of 14 scenarios, IDF1 favours fusion in 2, goes against it in
+  5 and is inconclusive in 8, and recall is better in 11. Unmatched confirmed tracks
+  are mostly duplicates (38.9 of 39.3 per seed in `uncertainty_miscalibration`), but
+  not in `dense_clutter` (8.6 of 73.4).
+- Identity switches depend on the matcher: continuity cuts the summed per-seed mean
+  from 351.6 to 217.6 and changes the fused-versus-range ordering in some scenarios.
+- Position NEES per degree of freedom is above its 95% interval in all 14 scenarios
+  for both methods (overconfident); NIS per degree of freedom is below its interval in
+  13, as expected for gated updates. Intervals are optimistic (correlated samples).
 - **Large bias, rejected by the gate vs. smaller bias, fused.**
   `sensor_disagreement_large_bias` (0.12 rad) shows the gate working: ~265 of
   ~275 delivered vision observations per seed are gate-rejected and the paired
-  RMSE interval includes zero. The three preregistered within-gate biases
-  (0.010, 0.015, 0.020 rad) pass the gate for ~222-254 observations per seed,
-  and in each the fused estimate is worse than range-only (paired RMSE
-  difference +0.042, +0.060, +0.065 m; precision 0.617, 0.560, 0.535 vs
-  0.826). The vision acceptance table separates generated, delivered,
-  gate-rejected, lost-competition, other-unassigned, stale/invalid and applied
-  observations. None of these scenarios supports a claim about real-world
-  sensor-fusion performance.
+  RMSE interval includes zero under both matchers. The three preregistered
+  within-gate biases (0.010, 0.015, 0.020 rad) pass the gate for ~222-254
+  observations per seed, and in each the fused estimate is worse than range-only
+  (precision 0.617, 0.560, 0.535 vs 0.826; MOTA 0.332, 0.169, 0.092 vs 0.746; paired
+  RMSE interval against fusion under both matchers). The vision acceptance table
+  separates generated, delivered, gate-rejected, lost-competition,
+  other-unassigned, stale/invalid and applied observations. None of these
+  scenarios supports a claim about real-world sensor-fusion performance.
 - `crossing_targets` and `dense_clutter` exercise association ambiguity and
-  clutter under GNN only: fused has more identity switches in the crossing
-  (6.8 vs 4.4 per seed) and a much lower precision in dense clutter (0.338 vs
-  0.816).
+  clutter under GNN only: in the crossing fused has lower MOTA (0.573 vs 0.804) and
+  an RMSE interval that includes zero; in dense clutter fused precision is 0.338 vs
+  0.816 and MOTA -0.977 vs 0.732.
 - Coverage is not improved overall and remains far below 0.95 under reported
   covariance miscalibration (χ²(2, 0.95) = 5.991).
 - The `out_of_sequence` scenario has zero matched samples because stale

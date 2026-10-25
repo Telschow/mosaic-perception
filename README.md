@@ -121,40 +121,58 @@ generated tables and [artifacts/benchmark/benchmark.json](artifacts/benchmark/be
 for the machine-readable record (protocol, per-seed metrics, git commit).
 Headline observations from the current development benchmark:
 
-- Paired position-RMSE differences (fused minus range-only, 25 seeds, 95% t
-  interval over seeds): the interval excludes zero in favour of fusion in 7 of
-  the 14 scenarios with defined accuracy, excludes zero against fusion in 3
-  (the three within-gate bias scenarios), and includes zero in 4
-  (`crossing_targets`, `sensor_disagreement_large_bias`,
-  `uncertainty_miscalibration`, `vision_dropout`). The favourable differences
-  are small (0.013 to 0.038 m). No macro mean over scenarios is reported.
-- Fused **precision is lower in 13 of the 14 scenarios with defined precision**
-  (interval excludes zero); `sensor_disagreement_large_bias` is the exception.
-  Precision is sample-based (matched samples / all confirmed-or-coasting track
-  samples), and the extra "unmatched confirmed tracks" are confirmed tracks never matched to
-  a true object. The report's `Duplicate tracks` column counts those that were
-  left unmatched while a true object lay inside the 2 m matching gate (the
-  object was already claimed by another track). Most unmatched confirmed
-  tracks in the benchmark are such duplicates (see the report).
+- **Accuracy depends on the matcher.** Paired position-RMSE differences (fused
+  minus range-only, 25 seeds, 95% t interval over seeds) under the headline
+  continuity-preferring matcher: the interval excludes zero in favour of fusion
+  in 1 of the 14 scenarios with defined accuracy, against fusion in 5, and
+  includes zero in 8. Under a distance-only matcher (reported alongside as
+  `position_rmse_distance_only`) it favours fusion in 7, goes against it in 3
+  and includes zero in 4. The continuity preference can keep an object paired
+  with a farther duplicate track, which fused runs have more of, so neither
+  matcher settles whether fusion improves accuracy. No macro mean over
+  scenarios is reported.
+- **Association quality is worse for fusion under both matchers.** Fused
+  precision, MOTA and GOSPA are worse (interval excludes zero) in 13 of the 14
+  scenarios with defined values, and the remaining one or two are inconclusive.
+  Recall is better for fusion in 11 and inconclusive in 4. IDF1 favours fusion
+  in 2, goes against it in 5 and is inconclusive in 8. Precision is sample-based
+  (matched samples / all confirmed-or-coasting track samples), and the extra
+  "unmatched confirmed tracks" are confirmed tracks never matched to a true
+  object. The report's `Duplicate tracks` column counts those that were left
+  unmatched while a true object lay inside the 2 m matching gate: most are
+  duplicates in most scenarios (for example 38.9 of 39.3 per seed in
+  `uncertainty_miscalibration`), but in `dense_clutter` only 8.6 of 73.4.
+- Identity switches also depend on the matcher: the continuity preference cuts
+  the summed per-seed mean from 351.6 to 217.6 (about 38%) and changes the
+  fused-versus-range ordering in some scenarios (for example `nominal`: 6.1 for
+  range-only and 4.7 for fused with continuity, 8.9 and 10.6 distance-only).
+- **Consistency.** Position NEES per degree of freedom is above its 95% interval
+  in all 14 scenarios for both methods (overconfident; for example 1.85 range-only
+  and 2.48 fused in `nominal`, 72.99 fused in `measurement_bias`); velocity NEES
+  is above in 13. NIS per degree of freedom is below its interval in 13 for both
+  methods, as expected for gated updates (0.81 and 0.77 in `nominal`). Intervals
+  assume independent samples and are optimistic.
 - The sensor-disagreement scenarios test different things.
   `sensor_disagreement_large_bias` (0.12 rad) is a **gate-rejection**
   experiment: about 96% of delivered vision observations were rejected by the
   gate (mean 264.7 of 275.2 per seed; 10.2 still applied), and the paired RMSE
-  interval includes zero. The **within-gate** scenarios apply a bias small
-  enough to be fused. At the three preregistered values the gate rejected a
-  mean 20.8, 30.8 and 52.8 of 275.2 observations per seed (0.010, 0.015,
-  0.020 rad), and fused RMSE was worse than range-only each time (paired
-  difference +0.042, +0.060, +0.065 m, intervals excluding zero), as was
-  precision (0.617, 0.560, 0.535 vs 0.826) and 95% coverage (0.427, 0.478,
-  0.597 vs 0.851). This is a single synthetic world with development seeds; it
-  does not establish real-world fusion performance.
+  interval includes zero under both matchers. The **within-gate** scenarios
+  apply a bias small enough to be fused. At the three preregistered values the
+  gate rejected a mean 20.8, 30.8 and 52.8 of 275.2 observations per seed
+  (0.010, 0.015, 0.020 rad). Fused precision is 0.617, 0.560 and 0.535 against
+  0.826 for range-only, MOTA 0.332, 0.169 and 0.092 against 0.746, and the
+  paired RMSE interval goes against fusion under both matchers (headline
+  +0.101, +0.148, +0.233 m; distance-only +0.042, +0.060, +0.065 m). This is a
+  single synthetic world with development seeds; it does not establish
+  real-world fusion performance.
 - `crossing_targets` (one crossing of three targets) and `dense_clutter` are
-  tested under global-nearest-neighbour association only. In
-  `crossing_targets` fused has more identity switches (6.8 vs 4.4 per seed) and
-  a paired RMSE interval that includes zero. In `dense_clutter` fused precision
-  is 0.338 vs 0.816 with 71.0 unmatched confirmed tracks per seed (6.3 of them
-  duplicates under the 2 m gate), and RMSE is slightly lower for fusion
-  (-0.013 m). No claim is made about other associators.
+  tested under global-nearest-neighbour association only. In `crossing_targets`
+  fused has 0.8 identity switches per seed against 1.2 for range-only with
+  continuity (6.8 against 4.4 distance-only), lower MOTA (0.573 against 0.804)
+  and a paired RMSE interval that includes zero. In `dense_clutter` fused
+  precision is 0.338 against 0.816, MOTA -0.977 against 0.732, with 73.4
+  unmatched confirmed tracks per seed (8.6 of them duplicates). No claim is made
+  about other associators.
 - 95% coverage is not improved by fusion overall, and remains far below the
   nominal 0.95 in the miscalibration scenario.
 - The `out_of_sequence` scenario has no matched samples: observations older

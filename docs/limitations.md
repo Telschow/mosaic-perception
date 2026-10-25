@@ -31,18 +31,18 @@
   when no object is ever matched and says nothing about identity (see
   `identity_switches`).
 - Duplicate-track counts depend on the matching gate. In the development
-  benchmark the fused count in `uncertainty_miscalibration` was 22.8, 26.1 and
-  26.3 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 0.5 and
-  1.4, so the choice of gate changes both the size and the ranking of the
+  benchmark the fused count in `uncertainty_miscalibration` was 34.2, 38.9 and
+  39.3 per seed at 1, 2 and 3 m, but in `measurement_bias` it was 0.0, 1.8 and
+  5.7, so the choice of gate changes both the size and the ranking of the
   effect. None of the gates is validated as the right one.
 - Class accuracy is evaluated over matched samples with a known estimate and a
   known true class only. Classes come from a synthetic confusion model, so the
   number says nothing about real classifiers; range-only runs have no class
   information (`N/A`). The scenario value is an unweighted mean of per-seed
   accuracies and can rest on very few samples: in
-  `sensor_disagreement_large_bias` only 12.0 samples per seed are classified
-  (7 of 25 seeds have any, 4.0% of matched samples), so its unweighted 0.429 is
-  not a precise estimate; the pooled value is 0.298. The report shows the
+  `sensor_disagreement_large_bias` only 12.8 samples per seed are classified
+  (7 of 25 seeds have any, 4.3% of matched samples), so its unweighted 0.429 is
+  not a precise estimate; the pooled value is 0.320. The report shows the
   unweighted mean, the pooled accuracy and the classified fraction side by side.
 
 ## Timing and delivery
