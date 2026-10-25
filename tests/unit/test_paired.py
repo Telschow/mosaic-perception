@@ -51,3 +51,12 @@ def test_identical_differences_give_a_degenerate_interval():
 def test_length_mismatch_is_rejected():
     with pytest.raises(ValueError):
         paired_difference([1.0, 2.0], [1.0])
+
+
+def test_non_finite_values_are_treated_as_undefined():
+    result = paired_difference(
+        [1.0, float("nan"), 3.0, 4.0, float("inf")], [0.9, 2.0, 2.7, float("nan"), 1.0]
+    )
+    assert result.n == 2
+    assert result.mean == pytest.approx((-0.1 + -0.3) / 2)
+    assert np.isfinite(result.low) and np.isfinite(result.high)

@@ -175,6 +175,7 @@ def _aggregate(results: list[EvaluationResult]) -> dict[str, Any]:
     return aggregate
 
 
+_BASELINE, _TREATMENT = METHODS  # paired comparison: treatment minus baseline
 _PAIRED_METRICS = ("position_rmse", "recall", "precision", "position_coverage_95")
 
 
@@ -183,8 +184,8 @@ def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
     summary: dict[str, dict[str, Any]] = {}
     for metric in _PAIRED_METRICS:
         difference = paired_difference(
-            [run["range_only"].get(metric) for run in runs],
-            [run["fused"].get(metric) for run in runs],
+            [run[_BASELINE].get(metric) for run in runs],
+            [run[_TREATMENT].get(metric) for run in runs],
         )
         summary[metric] = {
             "n": difference.n,
@@ -274,6 +275,7 @@ def _run_experiment(
             "num_objects": num_objects,
             "methods": list(METHODS),
             "paired": "same world states and range-sensor random stream per seed",
+            "paired_comparison": {"baseline": _BASELINE, "treatment": _TREATMENT},
             "paired_difference_interval": (
                 "two-sided 95% t interval over seeds of (fused - range_only); "
                 "descriptive seed-to-seed variation, not a generalisation claim"

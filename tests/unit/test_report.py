@@ -96,3 +96,49 @@ def test_paired_difference_section_renders_intervals_and_na():
     assert "| toy | position_rmse | 5 | -0.100 | [-0.200, +0.000] |" in text
     assert "| toy | precision | 1 | +0.050 | N/A |" in text
     assert "| toy | recall | 0 | N/A | N/A |" in text
+
+
+def _with_paired(rmse_row, precision_row=None):
+    payload = _payload()
+    payload["protocol"]["paired_comparison"] = {"baseline": "range_only", "treatment": "fused"}
+    paired = payload["scenarios"][0]["paired_differences"]
+    paired["position_rmse"] = rmse_row
+    if precision_row is not None:
+        paired["precision"] = precision_row
+    return payload
+
+
+def _interval(mean, low, high, n=25):
+    return {"n": n, "mean": mean, "ci95_low": low, "ci95_high": high}
+
+
+def test_findings_count_a_win_only_when_the_paired_interval_excludes_zero():
+    spanning = render_report(_with_paired(_interval(-0.05, -0.20, 0.10)))
+    assert "paired interval excludes zero in favour of fusion in 0 scenario(s)" in spanning
+    assert "includes zero (or has fewer than two seeds) in 1 scenario(s)" in spanning
+
+    favourable = render_report(_with_paired(_interval(-0.05, -0.08, -0.02)))
+    assert "in favour of fusion in 1 scenario(s)" in favourable
+
+
+def test_findings_count_a_loss_when_the_interval_is_entirely_positive_rmse_difference():
+    text = render_report(_with_paired(_interval(0.06, 0.04, 0.08)))
+    assert "against fusion in 1 scenario(s)" in text
+
+
+def test_precision_tally_uses_the_paired_interval_too():
+    text = render_report(_with_paired(_interval(-0.05, -0.08, -0.02), _interval(-0.1, -0.2, -0.05)))
+    assert "Fused precision is lower (interval excludes zero) in 1" in text
+
+
+def test_seed_prose_follows_the_seed_group():
+    development = render_report(_payload())
+    assert "development seeds" in development
+    assert "no held-out claim is made" in development
+
+    other = _payload()
+    other["protocol"]["seed_group"] = "custom_or_held_out"
+    other["protocol"]["seeds"] = [30, 31]
+    text = render_report(other)
+    assert "includes seeds outside the development range" in text
+    assert "no held-out claim is made" not in text

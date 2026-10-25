@@ -225,7 +225,8 @@ PRESETS: dict[str, ScenarioPreset] = {
         name="dense_clutter",
         description=(
             "Heavy Poisson false alarms per frame: 4.0 on the range-bearing "
-            "sensor and 8.0 on the vision sensor (4x false_observations)."
+            "sensor (4x false_observations) and 8.0 on the vision sensor "
+            "(about 2.7x false_observations)."
         ),
         hypothesis=(
             "Dense clutter creates many spurious candidates inside the gates; "

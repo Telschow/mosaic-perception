@@ -16,9 +16,30 @@ def format_number(value: float | None, digits: int = 3) -> str:
     return "N/A" if value is None else f"{value:.{digits}f}"
 
 
+def _tally(payload: dict[str, Any], metric: str, lower_is_better: bool) -> tuple[int, int, int]:
+    """Count scenarios where the paired interval favours, opposes or does not settle fusion."""
+    better = worse = inconclusive = 0
+    for scenario_report in payload["scenarios"]:
+        row = scenario_report.get("paired_differences", {}).get(metric)
+        if not row or row["n"] == 0:
+            continue
+        if row["ci95_low"] is None:
+            inconclusive += 1
+        elif row["ci95_high"] < 0:
+            better, worse = (better + 1, worse) if lower_is_better else (better, worse + 1)
+        elif row["ci95_low"] > 0:
+            better, worse = (better, worse + 1) if lower_is_better else (better + 1, worse)
+        else:
+            inconclusive += 1
+    return better, worse, inconclusive
+
+
 def render_report(payload: dict[str, Any]) -> str:
     protocol = payload["protocol"]
     methods = tuple(protocol["methods"])
+    paired_comparison = protocol.get("paired_comparison", {})
+    paired_baseline = str(paired_comparison.get("baseline", "range_only")).replace("_", "-")
+    paired_treatment = str(paired_comparison.get("treatment", "fused")).replace("_", "-")
     code = payload["code"]
     lines = [
         "# Mosaic Benchmark Report",
@@ -89,7 +110,7 @@ def render_report(payload: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "## Paired differences (fused minus range-only)",
+            f"## Paired differences ({paired_treatment} minus {paired_baseline})",
             "",
             "Mean per-seed difference with a two-sided 95% t interval over seeds. Seeds with",
             "an undefined value on either side are dropped (`n` is the number kept). A",
@@ -269,52 +290,40 @@ def render_report(payload: dict[str, Any]) -> str:
         value = scenario_report["aggregate"][method].get(field)
         return None if value is None else float(value)
 
-    wins = 0
-    losses = 0
-    ties = 0
-    for scenario_report in payload["scenarios"]:
-        range_rmse = mean_metric(scenario_report, "range_only", "position_rmse")
-        fused_rmse = mean_metric(scenario_report, "fused", "position_rmse")
-        if range_rmse is None or fused_rmse is None:
-            continue
-        if abs(fused_rmse - range_rmse) < 0.01:
-            ties += 1
-        elif fused_rmse < range_rmse:
-            wins += 1
-        else:
-            losses += 1
-
-    precision_wins = 0
-    precision_losses = 0
-    coverage_wins = 0
-    coverage_losses = 0
-    for scenario_report in payload["scenarios"]:
-        range_precision = mean_metric(scenario_report, "range_only", "precision")
-        fused_precision = mean_metric(scenario_report, "fused", "precision")
-        if range_precision is not None and fused_precision is not None:
-            if fused_precision > range_precision:
-                precision_wins += 1
-            elif fused_precision < range_precision:
-                precision_losses += 1
-        range_coverage = mean_metric(scenario_report, "range_only", "position_coverage_95")
-        fused_coverage = mean_metric(scenario_report, "fused", "position_coverage_95")
-        if range_coverage is not None and fused_coverage is not None:
-            if fused_coverage > range_coverage:
-                coverage_wins += 1
-            elif fused_coverage < range_coverage:
-                coverage_losses += 1
+    rmse_better, rmse_worse, rmse_inconclusive = _tally(payload, "position_rmse", True)
+    precision_better, precision_worse, _ = _tally(payload, "precision", False)
+    coverage_better, coverage_worse, _ = _tally(payload, "position_coverage_95", False)
+    seed_group = protocol.get("seed_group", "unknown")
+    if seed_group == "development":
+        seed_note = (
+            f"- This report uses {len(protocol['seeds'])} development seed(s). The reserved "
+            "held-out range (25-49) is not included here and no held-out claim is made."
+        )
+        seed_limit = (
+            "- Results on development seeds include choices made while building the "
+            "workbench and are not confirmatory. A held-out evaluation exists only when the "
+            "reserved seeds (25-49) appear in the `Seeds` line above."
+        )
+    else:
+        seed_note = (
+            f"- This run includes seeds outside the development range ({seed_group}); "
+            "do not read it as the development benchmark. A held-out evaluation requires "
+            "a single run on frozen code, reported separately."
+        )
+        seed_limit = (
+            "- This run uses seeds outside the development range; whether it is a "
+            "held-out evaluation depends on how the code was frozen before it."
+        )
+    if len(protocol["seeds"]) < 2:
+        seed_note += " Intervals need at least two seeds, so they are `N/A` here."
 
     lines.extend(
         [
             "",
             "## Findings",
             "",
-            f"- On the aggregate position RMSE, fused was better in {wins} scenario(s),",
-            f"  worse in {losses} scenario(s), and within 0.01 m in {ties} scenario(s).",
-            f"- Fused precision was higher in {precision_wins} scenario(s) and lower",
-            f"  in {precision_losses}. Fused 95% coverage was higher in {coverage_wins}",
-            f"  scenario(s) and lower in {coverage_losses}. Accuracy alone does not",
-            "  establish that fusion improved association or calibration.",
+            f"- Position RMSE: the paired interval excludes zero in favour of fusion in {rmse_better} scenario(s) and against fusion in {rmse_worse} scenario(s); it includes zero (or has fewer than two seeds) in {rmse_inconclusive} scenario(s).",
+            f"- Fused precision is lower (interval excludes zero) in {precision_worse} scenario(s) and higher in {precision_better}; fused 95% coverage is lower in {coverage_worse} and higher in {coverage_better}. Accuracy alone does not establish that fusion improved association or calibration.",
             "- Fusion is not guaranteed to improve accuracy. Systematic sensor bias,",
             "  miscalibrated uncertainty, missed detections, false observations and",
             "  association errors can all reverse the comparison.",
@@ -332,7 +341,7 @@ def render_report(payload: dict[str, Any]) -> str:
             "  enough to pass the gate often, so it measures what happens when biased",
             "  vision data is actually fused. Neither scenario establishes real-world",
             "  sensor-fusion performance; both are descriptive synthetic results on",
-            "  development seeds, not statistical or held-out claims.",
+            "  results; intervals reflect seed-to-seed variation only.",
             "- `track_fragmentation` counts interruptions in an object's matched frames, summed",
             "  over objects; it is independent of identity switches.",
             "- `identity_switches` counts changes of matched track ID for the same",
@@ -342,8 +351,7 @@ def render_report(payload: dict[str, Any]) -> str:
             "- Scenarios with no matched samples (for example `out_of_sequence`)",
             "  report `N/A` accuracy because their observations are rejected as stale;",
             "  that is an explicit non-result, not a zero-error result.",
-            "- This report uses the seeds shown above. The reserved held-out range",
-            "  (25-49) is not included here and no held-out claim is made.",
+            seed_note,
             "",
             "## Limitations",
             "",
@@ -353,9 +361,7 @@ def render_report(payload: dict[str, Any]) -> str:
             "- Out-of-sequence observations older than one tracker epoch are explicitly",
             "  rejected and counted, not silently dropped. Their accuracy impact is",
             "  therefore not represented as a successful fusion result.",
-            "- Development seeds are used for debugging. The documented held-out seed",
-            "  range (25-49) is only a held-out evaluation when those seeds are actually",
-            "  present in the `Seeds` line above.",
+            seed_limit,
             "",
         ]
     )

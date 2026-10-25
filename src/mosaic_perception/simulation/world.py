@@ -117,7 +117,9 @@ class SyntheticWorld:
         pi / num_objects) and passes the seeded crossing point at
         ``duration / 2``. Target ``i`` is offset by ``0.5 * (i - (n - 1) / 2)``
         m along the x axis at that instant, so adjacent targets are 0.5 m
-        apart there, well inside the 2 m matching gate.
+        apart there and targets ``k`` apart are ``0.5 * k`` m apart, all inside
+        the 2 m matching gate for up to five targets. With one target this is
+        just a straight line.
         """
         speed = 2.0
         crossing_time = self.duration / 2.0

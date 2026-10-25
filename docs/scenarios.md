@@ -31,7 +31,7 @@ All presets resolve to two sensor groups:
 | `sensor_disagreement_within_gate` | Vision bearing bias 0.015 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
 | `sensor_disagreement_within_gate_high` | Preregistered sweep value: vision bearing bias 0.020 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
 | `crossing_targets` | Constant-velocity targets at 2 m/s on distinct headings crossing at mid-run; adjacent targets 0.5 m apart at the crossing | Near-coincident targets make association ambiguous: identity switches, unmatched confirmed tracks and fragmentation can rise. Applies to a single crossing of a few targets under GNN association. |
-| `dense_clutter` | Poisson false alarms per frame: 4.0 (range-bearing), 8.0 (vision), 4x `false_observations` | Clutter inside the gates produces spurious candidates; gate rejection is not a defence against clutter that falls inside the gate. |
+| `dense_clutter` | Poisson false alarms per frame: 4.0 (range-bearing, 4x `false_observations`), 8.0 (vision, about 2.7x `false_observations`) | Clutter inside the gates produces spurious candidates; gate rejection is not a defence against clutter that falls inside the gate. |
 | `moving_observer` | Observer follows a circular trajectory with changing heading and velocity | Correct sensor-frame models and observer-velocity handling keep error comparable to the static case. |
 
 Random seed, duration, step size and object count are supplied by the caller;

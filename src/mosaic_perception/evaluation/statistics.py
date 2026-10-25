@@ -26,21 +26,19 @@ def paired_difference(
 ) -> PairedDifference:
     """Paired difference (treatment - baseline) with a 95% t interval.
 
-    Pairs where either side is undefined are dropped. With fewer than two
+    Pairs where either side is undefined or non-finite are dropped. With fewer than two
     pairs there is a mean but no interval; with none, everything is ``None``.
     The interval treats seeds as independent samples; it is a descriptive
     summary of seed-to-seed variation, not a claim about other worlds.
     """
     if len(baseline) != len(treatment):
         raise ValueError("baseline and treatment must have the same length")
-    differences = np.array(
-        [
-            t - b
-            for b, t in zip(baseline, treatment, strict=True)
-            if b is not None and t is not None
-        ],
-        dtype=float,
-    )
+    pairs = [
+        (b, t)
+        for b, t in zip(baseline, treatment, strict=True)
+        if b is not None and t is not None and np.isfinite(b) and np.isfinite(t)
+    ]
+    differences = np.array([t - b for b, t in pairs], dtype=float)
     n = int(differences.size)
     if n == 0:
         return PairedDifference(0, None, None, None)

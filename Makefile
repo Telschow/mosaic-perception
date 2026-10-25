@@ -30,7 +30,7 @@ compare:
 	uv run mosaic compare --scenario nominal --seeds 1,2,3
 
 evaluate:
-	uv run mosaic evaluate --scenario all --seeds 1-5 --output results/
+	uv run mosaic evaluate --scenario all --seeds 0-24 --output results/
 
 benchmark:
 	uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
