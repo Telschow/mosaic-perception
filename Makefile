@@ -1,4 +1,4 @@
-.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app
+.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check
 
 install:
 	uv sync --locked --all-extras
@@ -37,3 +37,15 @@ benchmark:
 
 app:
 	uv run streamlit run app/streamlit_app.py
+
+trackeval-reference:
+	uv run python -m tests.crosscheck.regenerate_reference
+
+benchmark-golden:
+	uv run python scripts/check_benchmark_golden.py --update
+
+benchmark-golden-check:
+	uv run python scripts/check_benchmark_golden.py
+
+provenance-check:
+	uv run python scripts/check_artifact_provenance.py
