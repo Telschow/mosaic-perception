@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `6aa20ecd29732afb7e5bb052c5f1410d7d20ff06`
+- Git commit: `ce33d3c00f365357e7bc793a78efd54c21207d5d`
 - Seeds: 1, 2, 3, 4, 5
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -24,7 +24,7 @@ Values are mean ± sample standard deviation across seeds. `N/A` means the
 metric was not defined for any seed (for example, no matched tracks); it is
 never a fabricated zero.
 
-| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | False tracks |
+| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks |
 |---|---|---|---|---|---|---|---|---|
 | delivery_delay | range_only | 0.279 ± 0.050 | 0.341 | 0.969 | 0.808 | 0.502 | 294/303 | 2.6 |
 | delivery_delay | fused | 0.235 ± 0.015 | 0.278 | 0.970 | 0.671 | 0.463 | 294/303 | 4.0 |
@@ -180,7 +180,7 @@ observations behind each mean age of information.
   association errors can all reverse the comparison.
 - Precision is sample-based: matched samples over all confirmed/coasting
   track samples. A second confirmed track near a true object (a duplicate)
-  counts against precision and appears in `False tracks` (confirmed track
+  counts against precision and appears in `Unmatched confirmed tracks` (confirmed track
   IDs never matched to a ground-truth object). An ad hoc check of the
   development seeds found every such track within 5 m (median) of a true
   object, consistent with duplicates rather than distant clutter; that
