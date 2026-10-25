@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from mosaic_perception.domain.models import (
+    ObjectClass,
     ObjectState,
     Pose2D,
     SensorObservation,
@@ -113,6 +114,7 @@ def make_snapshot(
     *,
     status: TrackStatus = TrackStatus.CONFIRMED,
     covariance: np.ndarray | None = None,
+    class_estimate: ObjectClass = ObjectClass.UNKNOWN,
 ) -> TrackSnapshot:
     state = [position[0], position[1], velocity[0], velocity[1]]
     return TrackSnapshot(
@@ -121,12 +123,14 @@ def make_snapshot(
         status=status,
         state=state,
         covariance=(covariance if covariance is not None else np.eye(4)).tolist(),
+        class_estimate=class_estimate,
     )
 
 
 def make_world_state(
     time: float,
     objects: dict[str, tuple[tuple[float, float], tuple[float, float]]],
+    true_classes: dict[str, ObjectClass] | None = None,
 ) -> WorldState:
     return WorldState(
         time=time,
@@ -135,6 +139,7 @@ def make_world_state(
                 object_id=object_id,
                 position=Vector2(x=position[0], y=position[1]),
                 velocity=Vector2(x=velocity[0], y=velocity[1]),
+                true_class=(true_classes or {}).get(object_id, ObjectClass.UNKNOWN),
             )
             for object_id, (position, velocity) in objects.items()
         },

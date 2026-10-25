@@ -313,6 +313,7 @@ class TrackSnapshot(BaseModel):
     misses: int = 0
     age: int = 0
     updated_this_epoch: bool = False
+    class_estimate: ObjectClass = ObjectClass.UNKNOWN
 
     def state_array(self) -> np.ndarray:
         return np.array(self.state, dtype=float)
@@ -412,6 +413,10 @@ class EvaluationResult(BaseModel):
     num_confirmed_tracks: int = 0
     num_unmatched_confirmed_tracks: int = 0
     num_duplicate_tracks: int = 0
+    # Class estimate accuracy over matched samples with a known estimate and known truth
+    class_classified_samples: int = 0
+    class_correct_samples: int = 0
+    class_accuracy: float | None = None
     # Duplicate-track sensitivity to the matching gate (fixed, preregistered gates)
     num_duplicate_tracks_gate_1m: int = 0
     num_duplicate_tracks_gate_2m: int = 0

@@ -328,3 +328,63 @@ def test_sensitivity_fields_are_independent_of_the_headline_gate():
         assert result.num_duplicate_tracks_gate_1m == 0
         assert result.num_duplicate_tracks_gate_2m == 1
         assert result.num_duplicate_tracks_gate_3m == 1
+
+
+def _class_world(true_classes):
+    return make_world_state(
+        0.0,
+        {"a": ((0.0, 0.0), (0.0, 0.0)), "b": ((10.0, 0.0), (0.0, 0.0))},
+        true_classes=true_classes,
+    )
+
+
+def test_class_accuracy_counts_correct_and_incorrect_estimates():
+    from mosaic_perception.domain.models import ObjectClass
+
+    world = _class_world({"a": ObjectClass.VEHICLE, "b": ObjectClass.PEDESTRIAN})
+    snapshots = [
+        make_snapshot(0.0, "t_a", (0.1, 0.0), class_estimate=ObjectClass.VEHICLE),
+        make_snapshot(0.0, "t_b", (10.1, 0.0), class_estimate=ObjectClass.CYCLIST),
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.class_classified_samples == 2
+    assert result.class_correct_samples == 1
+    assert result.class_accuracy == pytest.approx(0.5)
+
+
+def test_unknown_class_estimates_are_excluded_from_the_denominator():
+    from mosaic_perception.domain.models import ObjectClass
+
+    world = _class_world({"a": ObjectClass.VEHICLE, "b": ObjectClass.PEDESTRIAN})
+    snapshots = [
+        make_snapshot(0.0, "t_a", (0.1, 0.0), class_estimate=ObjectClass.VEHICLE),
+        make_snapshot(0.0, "t_b", (10.1, 0.0)),  # estimate stays UNKNOWN
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.matched_samples == 2
+    assert result.class_classified_samples == 1
+    assert result.class_correct_samples == 1
+    assert result.class_accuracy == pytest.approx(1.0)
+
+
+def test_class_accuracy_is_undefined_without_any_classified_sample():
+    from mosaic_perception.domain.models import ObjectClass
+
+    world = _class_world({"a": ObjectClass.VEHICLE, "b": ObjectClass.PEDESTRIAN})
+    snapshots = [make_snapshot(0.0, "t_a", (0.1, 0.0)), make_snapshot(0.0, "t_b", (10.1, 0.0))]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.class_classified_samples == 0
+    assert result.class_accuracy is None
+
+
+def test_objects_with_unknown_true_class_are_not_scored():
+    from mosaic_perception.domain.models import ObjectClass
+
+    world = _class_world({"a": ObjectClass.VEHICLE})  # b has UNKNOWN true class
+    snapshots = [
+        make_snapshot(0.0, "t_a", (0.1, 0.0), class_estimate=ObjectClass.VEHICLE),
+        make_snapshot(0.0, "t_b", (10.1, 0.0), class_estimate=ObjectClass.VEHICLE),
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.class_classified_samples == 1
+    assert result.class_accuracy == pytest.approx(1.0)

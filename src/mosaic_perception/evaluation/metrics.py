@@ -18,6 +18,7 @@ from scipy.stats import chi2
 
 from ..domain.models import (
     EvaluationResult,
+    ObjectClass,
     ObservationStatistics,
     TrackSnapshot,
     TrackStatus,
@@ -114,6 +115,8 @@ class TrackingEvaluator:
         matched_track_ids: set[str] = set()
         duplicate_track_ids: set[str] = set()
         duplicate_track_samples = 0
+        class_classified_samples = 0
+        class_correct_samples = 0
         assignments_by_object: dict[str, list[tuple[float, str]]] = {}
         matched_frames_by_object: dict[str, list[int]] = {}
 
@@ -150,6 +153,12 @@ class TrackingEvaluator:
                     (float(world_state.time), snapshot.track_id)
                 )
                 matched_frames_by_object.setdefault(object_id, []).append(frame_index)
+                if (
+                    snapshot.class_estimate != ObjectClass.UNKNOWN
+                    and truth.true_class != ObjectClass.UNKNOWN
+                ):
+                    class_classified_samples += 1
+                    class_correct_samples += int(snapshot.class_estimate == truth.true_class)
 
                 covariance = snapshot.position_cov()
                 try:
@@ -184,6 +193,10 @@ class TrackingEvaluator:
         result.unmatched_track_samples = unmatched_track_samples
         result.coverage_samples = coverage_samples
         result.duplicate_track_samples = duplicate_track_samples
+        result.class_classified_samples = class_classified_samples
+        result.class_correct_samples = class_correct_samples
+        if class_classified_samples:
+            result.class_accuracy = class_correct_samples / class_classified_samples
 
         if position_squared_errors:
             result.position_rmse = float(np.sqrt(np.mean(position_squared_errors)))
@@ -227,6 +240,9 @@ class TrackingEvaluator:
                 "tentative and deleted tracks are excluded.",
                 "Recall denominator: every ground-truth object in every simulated frame.",
                 "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+                "Class accuracy: matched samples whose track class estimate and ground-truth "
+                "class are both known (not UNKNOWN); correct / classified. None if no sample "
+                "qualifies, so a range-only run never reports a fabricated zero.",
                 "Duplicate track sample: an evaluated track left unmatched in a frame while "
                 f"a ground-truth object lay within the {self.match_gate_m:.2f} m matching gate "
                 "(the object was claimed by another track). A duplicate track is a confirmed "

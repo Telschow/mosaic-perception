@@ -49,6 +49,9 @@ _RESULT_FIELDS = [
     "num_confirmed_tracks",
     "num_unmatched_confirmed_tracks",
     "num_duplicate_tracks",
+    "class_classified_samples",
+    "class_correct_samples",
+    "class_accuracy",
     "num_duplicate_tracks_gate_1m",
     "num_duplicate_tracks_gate_2m",
     "num_duplicate_tracks_gate_3m",
@@ -326,6 +329,32 @@ def _render_report(payload: dict[str, Any]) -> str:
                     unmatched=_fmt(aggregate.get("num_unmatched_confirmed_tracks"), 1),
                     duplicates=_fmt(aggregate.get("num_duplicate_tracks"), 1),
                     fragmentation=_fmt(aggregate.get("track_fragmentation"), 1),
+                )
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Class estimate accuracy",
+            "",
+            "Correct / classified over matched samples where both the track's class estimate",
+            "and the ground-truth class are known. Range-only runs carry no class",
+            "information, so their accuracy is `N/A`, not zero. `Classified` is the mean",
+            "number of such samples per seed, out of the matched samples in the results table.",
+            "",
+            "| Scenario | Method | Class accuracy | Classified (mean) |",
+            "|---|---|---|---|",
+        ]
+    )
+    for scenario_report in payload["scenarios"]:
+        for method in METHODS:
+            aggregate = scenario_report["aggregate"][method]
+            lines.append(
+                "| {name} | {method} | {accuracy} | {classified} |".format(
+                    name=scenario_report["scenario"]["name"],
+                    method=method,
+                    accuracy=_fmt(aggregate.get("class_accuracy")),
+                    classified=_fmt(aggregate.get("class_classified_samples"), 1),
                 )
             )
 

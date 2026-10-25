@@ -26,7 +26,10 @@
   frames is one interruption, regardless of which track resumes. It is `N/A`
   when no object is ever matched and says nothing about identity (see
   `identity_switches`).
-- Class estimates are stored but not evaluated.
+- Class accuracy is evaluated over matched samples with a known estimate and a
+  known true class only. Classes come from a synthetic confusion model, so the
+  number says nothing about real classifiers; range-only runs have no class
+  information (`N/A`).
 
 ## Timing and delivery
 

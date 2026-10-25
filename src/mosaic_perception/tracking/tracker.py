@@ -532,6 +532,7 @@ class MultiSensorTracker:
                     misses=track.misses,
                     age=track.age,
                     updated_this_epoch=track.track_id in updated_track_ids,
+                    class_estimate=track.class_estimate,
                 )
             )
             if track.status == TrackStatus.DELETED:
