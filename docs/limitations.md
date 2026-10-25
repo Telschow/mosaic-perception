@@ -37,7 +37,9 @@
   information (`N/A`). The scenario value is an unweighted mean of per-seed
   accuracies and can rest on very few samples: in
   `sensor_disagreement_large_bias` only 13.8 samples per seed are classified
-  (3 of 5 seeds have any), so its 0.333 is not a precise estimate.
+  (3 of 5 seeds have any, 4.7% of matched samples), so its unweighted 0.333 is
+  not a precise estimate; the pooled value is 0.043. The report shows the
+  unweighted mean, the pooled accuracy and the classified fraction side by side.
 
 ## Timing and delivery
 

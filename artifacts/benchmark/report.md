@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `0fe2b80290c9f1e2deee93eed0d52a71842b1a13`
+- Git commit: `6859fbdd3cf0538ceabdd22a99ad9185ebe30505`
 - Seeds: 1, 2, 3, 4, 5
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -59,45 +59,47 @@ Correct / classified over matched samples where both the track's class estimate
 and the ground-truth class are known. Range-only runs carry no class
 information, so their accuracy is `N/A`, not zero. `Classified` is the mean
 number of such samples per seed, out of the matched samples in the results table.
-Class accuracy is an unweighted mean of per-seed accuracies; seeds with no
-classified sample are excluded, so read it together with `Classified`. When few
-vision observations are applied (for example under a large bias) it rests on
-very few samples.
+`Class accuracy` is an unweighted mean of per-seed accuracies (seeds with no
+classified sample are excluded). `Pooled` is total correct / total classified
+over all seeds, and `Classified fraction` is classified / matched samples, so a
+method that classifies rarely cannot look accurate on its own: read the three
+together.
 
-| Scenario | Method | Class accuracy | Classified (mean) |
-|---|---|---|---|
-| delivery_delay | range_only | N/A | 0.0 |
-| delivery_delay | fused | 1.000 | 214.0 |
-| false_observations | range_only | N/A | 0.0 |
-| false_observations | fused | 1.000 | 213.6 |
-| measurement_bias | range_only | N/A | 0.0 |
-| measurement_bias | fused | 0.996 | 202.4 |
-| moving_observer | range_only | N/A | 0.0 |
-| moving_observer | fused | 0.999 | 217.8 |
-| nominal | range_only | N/A | 0.0 |
-| nominal | fused | 1.000 | 214.8 |
-| out_of_sequence | range_only | N/A | 0.0 |
-| out_of_sequence | fused | N/A | 0.0 |
-| range_dropout | range_only | N/A | 0.0 |
-| range_dropout | fused | 1.000 | 215.4 |
-| sensor_disagreement_large_bias | range_only | N/A | 0.0 |
-| sensor_disagreement_large_bias | fused | 0.333 | 13.8 |
-| sensor_disagreement_within_gate | range_only | N/A | 0.0 |
-| sensor_disagreement_within_gate | fused | 0.981 | 198.2 |
-| sensor_disagreement_within_gate_high | range_only | N/A | 0.0 |
-| sensor_disagreement_within_gate_high | fused | 0.972 | 177.8 |
-| sensor_disagreement_within_gate_low | range_only | N/A | 0.0 |
-| sensor_disagreement_within_gate_low | fused | 0.979 | 210.2 |
-| uncertainty_miscalibration | range_only | N/A | 0.0 |
-| uncertainty_miscalibration | fused | 1.000 | 200.2 |
-| vision_dropout | range_only | N/A | 0.0 |
-| vision_dropout | fused | 1.000 | 213.2 |
+| Scenario | Method | Class accuracy | Pooled | Classified fraction | Classified (mean) |
+|---|---|---|---|---|---|
+| delivery_delay | range_only | N/A | N/A | 0.000 | 0.0 |
+| delivery_delay | fused | 1.000 | 1.000 | 0.728 | 214.0 |
+| false_observations | range_only | N/A | N/A | 0.000 | 0.0 |
+| false_observations | fused | 1.000 | 1.000 | 0.719 | 213.6 |
+| measurement_bias | range_only | N/A | N/A | 0.000 | 0.0 |
+| measurement_bias | fused | 0.996 | 0.995 | 0.717 | 202.4 |
+| moving_observer | range_only | N/A | N/A | 0.000 | 0.0 |
+| moving_observer | fused | 0.999 | 0.999 | 0.735 | 217.8 |
+| nominal | range_only | N/A | N/A | 0.000 | 0.0 |
+| nominal | fused | 1.000 | 1.000 | 0.723 | 214.8 |
+| out_of_sequence | range_only | N/A | N/A | N/A | 0.0 |
+| out_of_sequence | fused | N/A | N/A | N/A | 0.0 |
+| range_dropout | range_only | N/A | N/A | 0.000 | 0.0 |
+| range_dropout | fused | 1.000 | 1.000 | 0.733 | 215.4 |
+| sensor_disagreement_large_bias | range_only | N/A | N/A | 0.000 | 0.0 |
+| sensor_disagreement_large_bias | fused | 0.333 | 0.043 | 0.047 | 13.8 |
+| sensor_disagreement_within_gate | range_only | N/A | N/A | 0.000 | 0.0 |
+| sensor_disagreement_within_gate | fused | 0.981 | 0.973 | 0.668 | 198.2 |
+| sensor_disagreement_within_gate_high | range_only | N/A | N/A | 0.000 | 0.0 |
+| sensor_disagreement_within_gate_high | fused | 0.972 | 0.961 | 0.599 | 177.8 |
+| sensor_disagreement_within_gate_low | range_only | N/A | N/A | 0.000 | 0.0 |
+| sensor_disagreement_within_gate_low | fused | 0.979 | 0.971 | 0.708 | 210.2 |
+| uncertainty_miscalibration | range_only | N/A | N/A | 0.000 | 0.0 |
+| uncertainty_miscalibration | fused | 1.000 | 1.000 | 0.703 | 200.2 |
+| vision_dropout | range_only | N/A | N/A | 0.000 | 0.0 |
+| vision_dropout | fused | 1.000 | 1.000 | 0.719 | 213.2 |
 
 ## Duplicate-track sensitivity to the matching gate
 
 Mean number of duplicate tracks per seed when the evaluation matching gate is
-1.0, 2.0 or 3.0 m. The gates were fixed before any run. The 2.0 m column is the
-headline gate used everywhere else in this report; the others show how much the
+1.0, 2.0 or 3.0 m. The three gates were chosen before running (see the project issue
+tracker). The 2.0 m column is the headline gate used everywhere else in this
+report when it is the evaluator gate; the others show how much the
 duplicate count depends on that choice, not which gate is correct.
 
 | Scenario | Method | 1.0 m | 2.0 m | 3.0 m |
