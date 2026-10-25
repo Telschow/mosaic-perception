@@ -1,5 +1,9 @@
 # Core Validity Audit (pre-fix baseline)
 
+> **Status: historical.** This is a pre-fix record, not a description of the
+> current code. For current state see
+> [implementation-status.md](implementation-status.md).
+
 **Branch:** `fix/core-validity` (from published `main` @ `ae518f7`)
 **Date:** 2026-10-25
 
