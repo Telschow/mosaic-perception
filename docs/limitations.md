@@ -90,6 +90,12 @@
 - The checked-in benchmark uses **development seeds 0–24 only**. Seeds 25–49 are
   reserved and have not been run, so no held-out or generalization claim is
   made.
+- Position RMSE also depends on the matcher: the continuity preference can keep an
+  object paired with a farther duplicate track, which raises RMSE, while a
+  distance-only matcher picks the nearest track and flatters accuracy when
+  duplicates exist. Both are reported (`position_rmse`,
+  `position_rmse_distance_only`) with paired differences, and neither matcher
+  is ground truth.
 - Identity switches depend on the matcher: a distance-only matcher flipped between
   nearby tracks and reported about 38% more switches than the continuity-preferring
   matcher adopted as the headline (351.6 vs 217.6, summed per-seed means over the 15

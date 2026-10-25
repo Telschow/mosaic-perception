@@ -27,6 +27,7 @@ At each ground-truth timestamp:
 | Metric | Definition | Denominator |
 |---|---|---|
 | `position_rmse` | `sqrt(mean(||p_est - p_true||^2))` over matched samples, metres | matched samples |
+| `position_rmse_distance_only` | `position_rmse` recomputed under a distance-only matcher (each object paired with its nearest in-gate track). It differs from `position_rmse` because the continuity preference can keep a farther track; a gap between the two means the accuracy conclusion depends on the matcher | matched samples (distance-only pairing) |
 | `velocity_rmse` | `sqrt(mean(||v_est - v_true||^2))` over matched samples, m/s | matched samples |
 
 `None`/`N/A` means there were no matched samples. It is not reported as zero.

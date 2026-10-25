@@ -431,6 +431,7 @@ class EvaluationResult(BaseModel):
     num_duplicate_tracks: int = 0
     # Standard aggregate tracking scores (CLEAR-MOT, identity, GOSPA)
     identity_switches_distance_only: int | None = None
+    position_rmse_distance_only: float | None = None
     mota: float | None = None
     idf1: float | None = None
     idp: float | None = None

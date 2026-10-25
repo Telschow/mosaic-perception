@@ -474,3 +474,15 @@ def test_distance_only_matching_can_be_selected_explicitly():
     assert result.matching_continuity is False
     assert result.identity_switches == 1
     assert result.identity_switches_distance_only == 1
+
+
+def test_distance_only_rmse_is_reported_next_to_the_headline_rmse():
+    snapshots, worlds = _flip_inputs()
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    # Continuity pairs t1 in both frames (errors 0.1, 0.6); distance-only pairs t1 then t2
+    # (errors 0.1, 0.5).
+    assert result.position_rmse == pytest.approx(((0.1**2 + 0.6**2) / 2) ** 0.5)
+    assert result.position_rmse_distance_only == pytest.approx(((0.1**2 + 0.5**2) / 2) ** 0.5)
+
+    plain = TrackingEvaluator(match_gate_m=2.0, continuity=False).evaluate(snapshots, worlds)
+    assert plain.position_rmse == pytest.approx(plain.position_rmse_distance_only)

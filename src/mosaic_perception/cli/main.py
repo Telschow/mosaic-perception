@@ -176,6 +176,7 @@ def _aggregate(
 _BASELINE, _TREATMENT = METHODS  # paired comparison: treatment minus baseline
 _PAIRED_METRICS = (
     "position_rmse",
+    "position_rmse_distance_only",
     "recall",
     "precision",
     "position_coverage_95",

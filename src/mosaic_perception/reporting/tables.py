@@ -92,6 +92,7 @@ RESULTS_TABLE = TableSpec(
     ),
     columns=(
         Column("Pos RMSE (m)", "position_rmse", with_std=True),
+        Column("Pos RMSE, distance-only matcher (m)", "position_rmse_distance_only"),
         Column("Vel RMSE (m/s)", "velocity_rmse"),
         Column("Recall", "recall"),
         Column("Precision", "precision"),

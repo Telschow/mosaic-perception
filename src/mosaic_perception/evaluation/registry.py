@@ -69,6 +69,7 @@ class PooledChiSquare:
 # CSV column order follows this tuple.
 RESULT_METRICS: tuple[MetricSpec, ...] = (
     MetricSpec("position_rmse"),
+    MetricSpec("position_rmse_distance_only"),
     MetricSpec("velocity_rmse"),
     MetricSpec("precision"),
     MetricSpec("recall"),

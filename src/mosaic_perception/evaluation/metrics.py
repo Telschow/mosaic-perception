@@ -415,8 +415,14 @@ class TrackingEvaluator:
         if self.continuity:
             distance_only = match_frames(snapshots_by_time, world_states, self.match_gate_m)
             result.identity_switches_distance_only = identity_switches(distance_only)
+            plain_errors = matched_errors(distance_only)
+            if plain_errors.position_squared:
+                result.position_rmse_distance_only = float(
+                    np.sqrt(np.mean(plain_errors.position_squared))
+                )
         else:
             result.identity_switches_distance_only = result.identity_switches
+            result.position_rmse_distance_only = result.position_rmse
         result.mota = mota(frames)
         ids = idf1_scores(frames, self.match_gate_m)
         result.idf1, result.idp, result.idr = ids.idf1, ids.idp, ids.idr
@@ -453,8 +459,10 @@ class TrackingEvaluator:
                     if self.continuity
                     else " (distance only)."
                 ),
-                "identity_switches_distance_only: identity switches under distance-only "
-                "matching, shown to expose how much the continuity preference matters.",
+                "identity_switches_distance_only and position_rmse_distance_only: the same "
+                "metrics under distance-only matching, shown to expose how much the matcher "
+                "choice matters (a continuity preference can pair an object with a farther "
+                "track, which raises RMSE; distance-only picks the nearest).",
                 "Evaluated tracks: confirmed and coasting snapshots only; "
                 "tentative and deleted tracks are excluded.",
                 "Recall denominator: every ground-truth object in every simulated frame.",
