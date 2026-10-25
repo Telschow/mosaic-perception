@@ -267,3 +267,50 @@ def test_delayed_observation_with_moving_observer_uses_capture_time_pose():
     assert rewind[1] == pytest.approx(0.3, abs=1e-9)
     # Using the delivery-time observer pose instead would give y~0.2038 (observer moved 0.2 m).
     assert wrong_pose[1] == pytest.approx(0.203829, abs=1e-5)
+
+
+@pytest.mark.parametrize("acceleration", [0.0, 4.0, 20.0, 100.0])
+def test_delayed_observation_of_accelerating_target_state_error(acceleration):
+    """Delayed capture-time range measurement of a target accelerating laterally.
+
+    Truth: starts at (10, 0) with velocity (5, 0) and acceleration (0, a). The
+    observation is captured at t=0 (truth range 10, bearing 0, range rate 5) and
+    processed at t=0.1 (age tau=0.1 s). The tracker is constant-velocity and
+    unaware of the acceleration, so it predicts (10.5, 0) and then applies the
+    capture-time measurement to that delivery-time state.
+
+    Measured against truth at the processing epoch:
+    - along-track error is -0.25 m for every acceleration: the stale measurement
+      pulls the estimate back by about half of speed x age (0.5 m);
+    - lateral position error is -a*tau^2/2 and lateral velocity error is -a*tau,
+      i.e. the unmodelled acceleration adds to, and does not replace, the
+      speed x age term. Neither is a strict bound.
+    """
+    tau = 0.1
+    tracker = MultiSensorTracker(dt=0.1, use_vision=False)
+    track = make_track(velocity=(5.0, 0.0), status=TrackStatus.CONFIRMED)
+    track.covariance = np.diag([0.25, 0.25, 0.01, 0.01]).tolist()
+    tracker.tracks[track.track_id] = track
+    obs = range_observation(
+        "accelerating",
+        distance=10.0,
+        bearing=0.0,
+        range_rate=5.0,
+        capture_time=0.0,
+        delivery_time=0.05,
+    )
+
+    tracker.process_observations([obs], 0.0)
+    tracker.process_observations([], 0.1)
+
+    assert obs.associated_track_id == track.track_id
+    assert tracker.statistics().mean_age_of_information == pytest.approx(tau)
+    truth = np.array([10.0 + 5.0 * tau, 0.5 * acceleration * tau**2, 5.0, acceleration * tau])
+    error = track.state_array() - truth
+
+    assert error[0] == pytest.approx(-0.25, abs=1e-4)
+    assert error[1] == pytest.approx(-0.5 * acceleration * tau**2, abs=1e-6)
+    assert error[3] == pytest.approx(-acceleration * tau, abs=1e-6)
+    # Lateral position error a*tau^2/2 equals the 0.25 m along-track error at
+    # a = 50 m/s^2, so acceleration only dominates beyond that for this age.
+    assert (abs(error[1]) < abs(error[0])) == (acceleration < 50.0)

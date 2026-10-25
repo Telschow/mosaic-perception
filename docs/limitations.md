@@ -47,6 +47,14 @@
     time between capture and delivery, not the estimation alignment error.
   - Observations older than the staleness limit are rejected rather than
     replayed.
+  - Measured effect of acceleration (deterministic test, age 0.1 s, target at
+    5 m/s accelerating laterally): the stale capture-time measurement leaves a
+    0.25 m along-track error against truth at the processing epoch, about half
+    of speed x age, for every acceleration tested (0 to 100 m/s²). Unmodelled
+    lateral acceleration adds a lateral position error of a·τ²/2 (0.02 m at
+    4 m/s², 0.5 m at 100 m/s²) and a velocity error of a·τ. For this age,
+    acceleration only exceeds the along-track term above about 50 m/s². These
+    are results for one geometry and one covariance, not a bound.
   - No claim of full out-of-sequence measurement fusion (retroactive state
     update) is justified by this implementation.
 - Processing occurs on the discrete tracker epoch grid. Mean age of information
