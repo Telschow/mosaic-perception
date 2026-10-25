@@ -48,6 +48,8 @@ _RESULT_FIELDS = [
     "num_tracks",
     "num_confirmed_tracks",
     "num_unmatched_confirmed_tracks",
+    "num_duplicate_tracks",
+    "duplicate_track_samples",
     "mean_age_of_information",
     "rejected_observations",
     "rejected_out_of_sequence",
@@ -290,8 +292,8 @@ def _render_report(payload: dict[str, Any]) -> str:
         "metric was not defined for any seed (for example, no matched tracks); it is",
         "never a fabricated zero.",
         "",
-        "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks | Duplicate tracks |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for scenario_report in payload["scenarios"]:
         scenario_name = scenario_report["scenario"]["name"]
@@ -308,7 +310,7 @@ def _render_report(payload: dict[str, Any]) -> str:
             )
             lines.append(
                 "| {scenario} | {method} | {rmse} | {vel} | {recall} | {precision} | "
-                "{coverage} | {matched}/{gt} | {unmatched} |".format(
+                "{coverage} | {matched}/{gt} | {unmatched} | {duplicates} |".format(
                     scenario=scenario_name,
                     method=method,
                     rmse=rmse_text,
@@ -319,6 +321,7 @@ def _render_report(payload: dict[str, Any]) -> str:
                     matched=_fmt(aggregate.get("matched_samples"), 0),
                     gt=_fmt(aggregate.get("ground_truth_samples"), 0),
                     unmatched=_fmt(aggregate.get("num_unmatched_confirmed_tracks"), 1),
+                    duplicates=_fmt(aggregate.get("num_duplicate_tracks"), 1),
                 )
             )
 
@@ -466,12 +469,11 @@ def _render_report(payload: dict[str, Any]) -> str:
             "  miscalibrated uncertainty, missed detections, false observations and",
             "  association errors can all reverse the comparison.",
             "- Precision is sample-based: matched samples over all confirmed/coasting",
-            "  track samples. A second confirmed track near a true object (a duplicate)",
-            "  counts against precision and appears in `Unmatched confirmed tracks` (confirmed track",
-            "  IDs never matched to a ground-truth object). An ad hoc check of the",
-            "  development seeds found every such track within 5 m (median) of a true",
-            "  object, consistent with duplicates rather than distant clutter; that",
-            "  check is not part of the canonical artifacts.",
+            "  track samples. `Unmatched confirmed tracks` are confirmed track IDs never",
+            "  matched to a ground-truth object. `Duplicate tracks` is the subset that, in",
+            "  at least one frame, was left unmatched while a ground-truth object lay",
+            "  within the matching gate (the object had been claimed by another track).",
+            "  The rest were never near an unclaimed object under that gate.",
             "- `sensor_disagreement_large_bias` (0.12 rad) is a gate-rejection",
             "  experiment: see the vision acceptance table for how many biased",
             "  observations the gate rejected versus applied. It does not measure the",

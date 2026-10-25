@@ -46,11 +46,11 @@ _Avoid_: Accepted, fused (ambiguous before assignment)
 ## Tracks and evaluation
 
 **Unmatched confirmed track**:
-A confirmed track that was never matched to a true object in any frame; many are duplicates near true objects.
+A confirmed track that was never matched to a true object in any frame; many are duplicate tracks.
 _Avoid_: False track, ghost track
 
 **Duplicate track**:
-A second confirmed track near a true object that already has a matched track.
+An unmatched confirmed track that, in at least one frame, was left unmatched while a true object lay inside the matching gate because another track had claimed it.
 
 **Range-only baseline**:
 The method that uses only the range-bearing sensor; vision observations never reach it.

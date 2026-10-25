@@ -65,11 +65,12 @@
   change precision, recall and the set of matched samples.
 - Precision is defined per confirmed/coasting track sample, not per track
   object. The exact denominators are reported with every result.
-- Precision is sample-based, and many of the unmatched confirmed ("false")
-  tracks, notably in `uncertainty_miscalibration`, are confirmed tracks near
-  true objects, consistent with duplicates. An ad hoc check on the development
-  seeds found all of them within 5 m (median) of a true object; this is
-  proximity evidence, not proof of identity, and is not a canonical artifact.
+- Precision is sample-based. Many unmatched confirmed tracks, notably in
+  `uncertainty_miscalibration`, are duplicates: in at least one frame they were
+  unmatched while a true object lay within the 2.0 m matching gate. The
+  `num_duplicate_tracks` metric counts them. It depends on the matching gate
+  and cannot tell a duplicate of the right object from a track that merely
+  passed near one.
 - The two sensor-disagreement scenarios are single, hand-chosen bias values on
   a synthetic world. `sensor_disagreement_large_bias` (0.12 rad) mainly tests
   gate rejection (most, but not all, biased observations are rejected: see the

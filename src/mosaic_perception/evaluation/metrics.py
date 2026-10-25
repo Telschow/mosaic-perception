@@ -10,7 +10,7 @@ Metrics and their denominators are documented in ``docs/metrics.md``.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -35,6 +35,9 @@ class _FrameMatch:
     matched_pairs: list[tuple[TrackSnapshot, str]]
     unmatched_tracks: int
     unmatched_objects: int
+    # Unmatched evaluated tracks that had a ground-truth object inside the
+    # matching gate: the object was claimed by another track (a duplicate).
+    duplicate_tracks: list[TrackSnapshot] = field(default_factory=list)
 
 
 class TrackingEvaluator:
@@ -103,6 +106,8 @@ class TrackingEvaluator:
         unmatched_ground_truth_samples = 0
         unmatched_track_samples = 0
         matched_track_ids: set[str] = set()
+        duplicate_track_ids: set[str] = set()
+        duplicate_track_samples = 0
         assignments_by_object: dict[str, list[tuple[float, str]]] = {}
 
         result.evaluated_frames = len(world_states)
@@ -121,6 +126,8 @@ class TrackingEvaluator:
             unmatched_track_samples += frame.unmatched_tracks
             unmatched_ground_truth_samples += frame.unmatched_objects
             matched_samples += len(frame.matched_pairs)
+            duplicate_track_samples += len(frame.duplicate_tracks)
+            duplicate_track_ids.update(track.track_id for track in frame.duplicate_tracks)
 
             frame_errors: list[float] = []
             for snapshot, object_id in frame.matched_pairs:
@@ -168,6 +175,7 @@ class TrackingEvaluator:
         result.unmatched_ground_truth_samples = unmatched_ground_truth_samples
         result.unmatched_track_samples = unmatched_track_samples
         result.coverage_samples = coverage_samples
+        result.duplicate_track_samples = duplicate_track_samples
 
         if position_squared_errors:
             result.position_rmse = float(np.sqrt(np.mean(position_squared_errors)))
@@ -185,7 +193,9 @@ class TrackingEvaluator:
 
         result.num_tracks = len(all_track_ids)
         result.num_confirmed_tracks = len(ever_confirmed)
-        result.num_unmatched_confirmed_tracks = len(ever_confirmed - matched_track_ids)
+        unmatched_confirmed = ever_confirmed - matched_track_ids
+        result.num_unmatched_confirmed_tracks = len(unmatched_confirmed)
+        result.num_duplicate_tracks = len(unmatched_confirmed & duplicate_track_ids)
 
         result.notes.extend(
             [
@@ -195,6 +205,10 @@ class TrackingEvaluator:
                 "tentative and deleted tracks are excluded.",
                 "Recall denominator: every ground-truth object in every simulated frame.",
                 "Precision denominator: every confirmed/coasting track snapshot in every frame.",
+                "Duplicate track sample: an evaluated track left unmatched in a frame while "
+                f"a ground-truth object lay within the {self.match_gate_m:.2f} m matching gate "
+                "(the object was claimed by another track). A duplicate track is a confirmed "
+                "track never matched in any frame that has at least one duplicate sample.",
                 "Coverage: matched position errors against the reported 2x2 covariance; "
                 f"95% threshold chi2(2,0.95)={_COVERAGE_95:.3f}.",
                 "track_fragmentation is unsupported and reported as None; "
@@ -231,11 +245,17 @@ class TrackingEvaluator:
                 paired_rows.add(int(row))
                 paired_columns.add(int(column))
                 matched_pairs.append((tracks[row], objects[column].object_id))
+        duplicates = [
+            tracks[row]
+            for row in range(len(tracks))
+            if row not in paired_rows and bool(np.any(finite[row]))
+        ]
         return _FrameMatch(
             time,
             matched_pairs,
             len(tracks) - len(paired_rows),
             len(objects) - len(paired_columns),
+            duplicates,
         )
 
     @staticmethod

@@ -125,9 +125,10 @@ Headline observations from the current development benchmark:
 - Fused **precision is lower in every scenario with defined precision**.
   Precision is sample-based (matched samples / all confirmed-or-coasting track
   samples), and the extra "unmatched confirmed tracks" are confirmed tracks never matched to
-  a true object. An ad hoc check found all of them within 5 m (median) of a
-  true object, consistent with duplicate confirmed tracks rather than distant
-  clutter (not part of the canonical artifacts).
+  a true object. The report's `Duplicate tracks` column counts those that were
+  left unmatched while a true object lay inside the 2 m matching gate (the
+  object was already claimed by another track). Most unmatched confirmed
+  tracks in the benchmark are such duplicates (see the report).
 - The two sensor-disagreement scenarios test different things.
   `sensor_disagreement_large_bias` (0.12 rad) is a **gate-rejection**
   experiment: about 92% of delivered vision observations were rejected by the

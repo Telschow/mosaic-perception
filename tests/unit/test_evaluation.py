@@ -182,3 +182,53 @@ def test_observation_statistics_are_propagated():
     assert result.pending_observations == 3
     assert result.age_samples == 7
     assert result.mean_age_of_information == pytest.approx(0.05)
+
+
+def test_duplicate_track_is_unmatched_track_near_a_claimed_object():
+    world = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "track_main", (0.1, 0.0)),
+        make_snapshot(0.0, "track_dup", (0.9, 0.0)),  # within 2 m gate, object already claimed
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.matched_samples == 1
+    assert result.num_unmatched_confirmed_tracks == 1
+    assert result.num_duplicate_tracks == 1
+    assert result.duplicate_track_samples == 1
+
+
+def test_distant_spurious_track_is_not_a_duplicate():
+    world = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "track_main", (0.1, 0.0)),
+        make_snapshot(0.0, "track_far", (30.0, 0.0)),
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.num_unmatched_confirmed_tracks == 1
+    assert result.num_duplicate_tracks == 0
+    assert result.duplicate_track_samples == 0
+
+
+def test_correctly_matched_tracks_have_no_duplicates():
+    world = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0)), "b": ((10.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "track_a", (0.1, 0.0)),
+        make_snapshot(0.0, "track_b", (10.1, 0.0)),
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
+    assert result.num_unmatched_confirmed_tracks == 0
+    assert result.num_duplicate_tracks == 0
+    assert result.duplicate_track_samples == 0
+
+
+def test_track_matched_in_another_frame_is_not_counted_as_duplicate_track():
+    world0 = make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    world1 = make_world_state(0.1, {"a": ((0.0, 0.0), (0.0, 0.0))})
+    snapshots = [
+        make_snapshot(0.0, "track_x", (0.1, 0.0)),
+        make_snapshot(0.0, "track_y", (0.5, 0.0)),  # duplicate sample in frame 0
+        make_snapshot(0.1, "track_y", (0.1, 0.0)),  # but matched in frame 1
+    ]
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world0, world1])
+    assert result.duplicate_track_samples >= 1
+    assert result.num_duplicate_tracks == 0

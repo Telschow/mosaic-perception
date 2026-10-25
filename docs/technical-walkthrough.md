@@ -71,9 +71,9 @@ From `artifacts/benchmark/report.md` (all 11 scenarios, development seeds 1–5,
   within 0.01 m in 3, and worse in 1 (`sensor_disagreement_within_gate`).
   Differences are small.
 - Fused precision is lower in every scenario with defined precision. The
-  metric is sample-based, and the extra unmatched confirmed tracks are confirmed tracks never
-  matched to a true object, all of which an ad hoc check found near true
-  objects (consistent with duplicates).
+  metric is sample-based, and the extra unmatched confirmed tracks are confirmed
+  tracks never matched to a true object. The `Duplicate tracks` column shows
+  how many of them sat inside the matching gate of an already-claimed object.
 - **Large bias, rejected by the gate vs. smaller bias, fused.**
   `sensor_disagreement_large_bias` (0.12 rad) shows the gate working: ~254 of
   ~276 delivered vision observations per seed are gate-rejected and fused
