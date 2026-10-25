@@ -230,5 +230,5 @@ def test_track_matched_in_another_frame_is_not_counted_as_duplicate_track():
         make_snapshot(0.1, "track_y", (0.1, 0.0)),  # but matched in frame 1
     ]
     result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world0, world1])
-    assert result.duplicate_track_samples >= 1
+    assert result.duplicate_track_samples == 1
     assert result.num_duplicate_tracks == 0

@@ -293,7 +293,7 @@ def _render_report(payload: dict[str, Any]) -> str:
         "never a fabricated zero.",
         "",
         "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks | Duplicate tracks |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for scenario_report in payload["scenarios"]:
         scenario_name = scenario_report["scenario"]["name"]

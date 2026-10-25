@@ -208,7 +208,8 @@ class TrackingEvaluator:
                 "Duplicate track sample: an evaluated track left unmatched in a frame while "
                 f"a ground-truth object lay within the {self.match_gate_m:.2f} m matching gate "
                 "(the object was claimed by another track). A duplicate track is a confirmed "
-                "track never matched in any frame that has at least one duplicate sample.",
+                "track that was never matched in any frame and has at least one duplicate "
+                "sample.",
                 "Coverage: matched position errors against the reported 2x2 covariance; "
                 f"95% threshold chi2(2,0.95)={_COVERAGE_95:.3f}.",
                 "track_fragmentation is unsupported and reported as None; "
@@ -245,17 +246,19 @@ class TrackingEvaluator:
                 paired_rows.add(int(row))
                 paired_columns.add(int(column))
                 matched_pairs.append((tracks[row], objects[column].object_id))
+        claimed_columns = np.zeros(len(objects), dtype=bool)
+        claimed_columns[list(paired_columns)] = True
         duplicates = [
             tracks[row]
             for row in range(len(tracks))
-            if row not in paired_rows and bool(np.any(finite[row]))
+            if row not in paired_rows and bool(np.any(finite[row] & claimed_columns))
         ]
         return _FrameMatch(
             time,
             matched_pairs,
             len(tracks) - len(paired_rows),
             len(objects) - len(paired_columns),
-            duplicates,
+            duplicate_tracks=duplicates,
         )
 
     @staticmethod

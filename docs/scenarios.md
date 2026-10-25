@@ -27,9 +27,9 @@ All presets resolve to two sensor groups:
 | `false_observations` | Range false-alarm rate 1.0, vision 3.0 per step | False alarms create spurious tentative tracks and can steal associations; precision and false tracks should worsen. |
 | `uncertainty_miscalibration` | Reported covariance 20× too small (scale 0.05) | Overconfident measurements are over-trusted; empirical 95% coverage falls below nominal. |
 | `sensor_disagreement_large_bias` | Vision bearing bias 0.12 rad (well outside 1-DOF gate), range unbiased | A sufficiently large bias should be rejected by the gate rather than corrupting the fused estimate. |
-| `sensor_disagreement_within_gate_low` | Vision bearing bias 0.010 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
+| `sensor_disagreement_within_gate_low` | Preregistered sweep value: vision bearing bias 0.010 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
 | `sensor_disagreement_within_gate` | Vision bearing bias 0.015 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
-| `sensor_disagreement_within_gate_high` | Vision bearing bias 0.020 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
+| `sensor_disagreement_within_gate_high` | Preregistered sweep value: vision bearing bias 0.020 rad (within 1-DOF gate), range unbiased | A bias that passes the gate will be fused and may degrade accuracy; measures the acceptance/degradation trade-off. |
 | `moving_observer` | Observer follows a circular trajectory with changing heading and velocity | Correct sensor-frame models and observer-velocity handling keep error comparable to the static case. |
 
 Random seed, duration, step size and object count are supplied by the caller;
