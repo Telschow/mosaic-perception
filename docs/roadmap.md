@@ -1,6 +1,7 @@
 # Roadmap
 
-## v0.1 (Current Target)
+## v0.1.0 (published, superseded)
+
 - [x] Synthetic world generation
 - [x] Range-bearing sensor model
 - [x] Vision-bearing sensor model
@@ -15,16 +16,42 @@
 - [x] Unit tests
 - [x] CI workflow
 
-## v0.2 (Future)
-- [ ] More sophisticated scenarios (all 8 degradation types)
-- [ ] Improved uncertainty coverage evaluation
-- [ ] Oracle association diagnostic
-- [ ] Better track initiation from multiple observations
-- [ ] 3D tracking support
-- [ ] More visualization features
-- [ ] Performance benchmarking
+## Correctness and evaluation repair (current branch, unreleased)
 
-## Out of Scope
+- [x] Per-group gated Hungarian association; one track may receive range and
+      vision in the same epoch
+- [x] Range-only mode ignores vision completely
+- [x] One explicit sensor-frame measurement convention across sensors, EKF,
+      gating and initiation
+- [x] Observer heading and velocity support; real moving-observer tests
+- [x] Sequential EKF updates with Joseph form, wrapped angles and PSD checks
+- [x] Pending delivery queue with documented stale-rejection policy
+- [x] Frame-rate honoring
+- [x] Snapshot-based evaluation with one-to-one gated matching
+- [x] Explicit metric denominators; χ²(2, 0.95) = 5.991 coverage
+- [x] `track_fragmentation` explicitly unsupported (`None`)
+- [x] Deterministic IDs and artifact generation
+- [x] Paired same-world/same-range-stream comparison
+- [x] Implemented `mosaic evaluate`
+- [x] 77 tests, Ruff clean, locked CI with tests
+- [x] Regenerated development benchmark; old numbers declared invalid
+
+## Next (not done here)
+
+- [ ] Run the reserved held-out seeds 25–49 once, after freezing code and
+      protocol, and report them separately
+- [ ] Implement track fragmentation with a documented definition
+- [ ] Add out-of-sequence historical replay and measure stale-data fusion
+- [ ] Investigate why fused precision and false-track counts are worse
+- [ ] Improve calibration under reported-covariance miscalibration
+- [ ] Add an oracle-association diagnostic to separate association errors from
+      estimation errors
+- [ ] Multi-object crossing scenarios and association stress tests
+- [ ] Optional 3-D extension
+- [ ] Performance profiling without mixing it with correctness claims
+
+## Out of scope
+
 - Real sensor integration
 - Deep learning
 - Military/tactical applications

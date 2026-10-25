@@ -1,4 +1,17 @@
-# Mosaic Audit Report
+# Mosaic Audit Report (historical)
+
+> **Status: historical and superseded.**
+>
+> This report describes the initial v0.1.0 implementation at commit `6782de4`.
+> It is retained for context only. It is **not** a description of the current
+> branch and must not be used as a current status report. Several findings were
+> subsequently confirmed as core defects and repaired on `fix/core-validity`;
+> see [core-validity-audit.md](core-validity-audit.md) for the reproduced
+> baseline defects, resolution status and current verification commands.
+>
+> In particular, the benchmark values quoted below were produced with the
+> defects V1–V5 from the core-validity audit and are invalid as a fusion
+> comparison. They are not preserved as a baseline.
 
 **Date:** 2026-10-24  
 **Auditor:** AI Assistant  
