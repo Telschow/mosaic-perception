@@ -89,3 +89,25 @@ See [docs/limitations.md](docs/limitations.md) for details.
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+*Note: The `mosaic evaluate` command shown above is planned for future implementation. Use `mosaic run` and `mosaic compare` for current functionality.*
+
+## Implementation notes (v0.1 hardening)
+
+- **Observer pose**: The tracker uses observer/sensor pose from observations/world context (passed via `sensor_pos` or `observation.observer_pose`). For moving observers this is required for correct range/bearing in world frames.
+- **EKF updates**: A single canonical `ExtendedKalmanFilter.update(x_pred, P_pred, z, H, R, h_pred=...)` is used; the tracker relies on it. Angular residuals are wrapped.
+- **Track lifecycle**: Misses are counted per tracking epoch (after prediction/association/updates) — tracks not updated in an epoch increment misses once. Multiple updates in the same epoch count as one successful update event for miss-reset purposes as implemented.
+- **Vision-only initiation**: A single vision-bearing observation does not uniquely determine 2D range/position; the tracker does **not** initiate tracks from vision-only observations. Vision can update existing tracks when fusion is enabled.
+- **Timing**: Observations are filtered by `delivery_time <= current_time + eps`. Proper out-of-sequence historical replay is not implemented in v0.1; behavior is explicit and tested.
+
+## Reproducible benchmark
+Generate a full benchmark with report and artifacts:
+```bash
+PYTHONPATH=src python3 -c "from mosaic_perception.cli.main import app; app(['benchmark','--scenario','nominal','--seeds','1,2,3,4,5','--duration','10.0','--output','artifacts/benchmark'])"
+```
+See `artifacts/benchmark/report.md` for results. All values are generated from code.
+
+## Demo
+See [docs/demo-script.md](docs/demo-script.md) for a 2-minute walkthrough using actual artifacts.

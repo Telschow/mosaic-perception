@@ -6,14 +6,14 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..domain.models import ObjectState, ObjectClass, Pose2D, Vector2, WorldState
+from ..domain.models import ObjectClass, ObjectState, Pose2D, Vector2, WorldState
 
 
 class SyntheticWorld:
     """
     Deterministic 2D synthetic environment with known ground truth.
     """
-    
+
     def __init__(
         self,
         seed: int = 42,
@@ -27,34 +27,34 @@ class SyntheticWorld:
         self.dt = dt
         self.num_objects = num_objects
         self.observer_trajectory = observer_trajectory
-        
+
         self.rng = np.random.RandomState(seed)
         self.time_steps = np.arange(0, duration + dt, dt)
-        
+
         # Generate trajectories
         self.object_trajectories = self._generate_trajectories()
         self.observer_trajectories = self._generate_observer_trajectory()
-    
+
     def _generate_trajectories(self) -> dict[str, list[ObjectState]]:
         """Generate deterministic object trajectories."""
         trajectories = {}
         classes = [ObjectClass.UNKNOWN, ObjectClass.VEHICLE, ObjectClass.PEDESTRIAN]
-        
+
         for i in range(self.num_objects):
             obj_id = f"obj_{i:03d}"
             states = []
-            
+
             # Random initial position
             x0 = float(self.rng.uniform(-20, 20))
             y0 = float(self.rng.uniform(-20, 20))
             # Random initial velocity
             vx0 = float(self.rng.uniform(-2, 2))
             vy0 = float(self.rng.uniform(-2, 2))
-            
+
             # Create different trajectory types
             traj_type = self.rng.choice(["constant_vel", "sinusoid", "turning"])
             obj_class = classes[self.rng.randint(0, len(classes))]
-            
+
             for t in self.time_steps:
                 if traj_type == "constant_vel":
                     x, y, vx, vy = x0 + vx0 * t, y0 + vy0 * t, vx0, vy0
@@ -87,7 +87,7 @@ class SyntheticWorld:
                         y += vy_t * self.dt
                 else:
                     x, y, vx, vy = x0 + vx0 * t, y0 + vy0 * t, vx0, vy0
-                
+
                 obj_state = ObjectState(
                     object_id=obj_id,
                     position=Vector2(x=float(x), y=float(y)),
@@ -96,11 +96,11 @@ class SyntheticWorld:
                     visible=True,
                 )
                 states.append(obj_state)
-            
+
             trajectories[obj_id] = states
-        
+
         return trajectories
-    
+
     def _generate_observer_trajectory(self) -> list[Pose2D]:
         """Generate observer trajectory."""
         poses = []
@@ -118,7 +118,7 @@ class SyntheticWorld:
                 pose = Pose2D(position=Vector2(x=0.0, y=0.0), heading=0.0)
             poses.append(pose)
         return poses
-    
+
     def get_world_state(self, t_idx: int) -> WorldState:
         """Get world state at time step index."""
         t = self.time_steps[t_idx]
@@ -127,7 +127,7 @@ class SyntheticWorld:
             objects[obj_id] = traj[t_idx]
         observer_pose = self.observer_trajectories[t_idx]
         return WorldState(time=float(t), objects=objects, observer_pose=observer_pose)
-    
+
     def get_all_states(self) -> list[WorldState]:
         """Get all world states."""
         return [self.get_world_state(i) for i in range(len(self.time_steps))]

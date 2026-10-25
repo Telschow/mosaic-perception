@@ -1,9 +1,10 @@
 """Tests for sensor models."""
 
 import numpy as np
-from mosaic_perception.simulation.world import SyntheticWorld
-from mosaic_perception.sensors import RangeBearingSensor, VisionBearingSensor
+
 from mosaic_perception.domain.models import SensorConfig
+from mosaic_perception.sensors import RangeBearingSensor, VisionBearingSensor
+from mosaic_perception.simulation.world import SyntheticWorld
 
 
 def test_range_bearing_sensor():

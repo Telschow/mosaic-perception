@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Mosaic: A reproducible workbench for multi-sensor perception, object tracking and uncertainty"
+version: 0.1.0
+date-released: 2026-10-25
+license: MIT
+authors:
+  - family-names: Telschow
+    given-names: Telschow
+repository-code: "https://github.com/Telschow/mosaic-perception"
+url: "https://github.com/Telschow/mosaic-perception"
+abstract: "A reproducible synthetic workbench for investigating when combining noisy, asynchronous sensor observations improves object state estimates and when fusion can make results worse. Includes range-only and fused EKF tracking with multi-seed benchmarks."
+keywords:
+  - tracking
+  - sensor fusion
+  - perception
+  - kalman filter
+  - uncertainty
+  - simulation

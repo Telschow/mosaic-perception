@@ -1,9 +1,11 @@
 """Tests for domain models."""
 
-import numpy as np
 from mosaic_perception.domain.models import (
-    SensorObservation, TrackEstimate, TrackStatus, WorldState,
-    ObjectState, Vector2, Pose2D, CoordinateFrame
+    CoordinateFrame,
+    ObjectState,
+    SensorObservation,
+    Vector2,
+    WorldState,
 )
 
 
