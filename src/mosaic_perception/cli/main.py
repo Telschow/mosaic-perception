@@ -247,12 +247,12 @@ def _run_experiment(
             if first_config is None:
                 first_config = scenario.model_dump(mode="json")
             pair = run_pair(scenario, include_bias_estimation=True)
-            assert pair.fused_bias_estimated is not None
+            bias_estimated = pair.record("fused_bias_estimated")
             console.print(
                 f"  {scenario_name} seed={seed}: "
                 f"range RMSE={_fmt(pair.range_only.result.position_rmse)} m, "
                 f"fused RMSE={_fmt(pair.fused.result.position_rmse)} m, "
-                f"bias-estimated RMSE={_fmt(pair.fused_bias_estimated.result.position_rmse)} m"
+                f"bias-estimated RMSE={_fmt(bias_estimated.result.position_rmse)} m"
             )
             run_payload: dict[str, Any] = {"seed": seed}
             for method in METHODS:

@@ -58,6 +58,11 @@
   runs that was coupled to the track (which is pulled toward the biased vision bearing), so
   the filter became overconfident and stuck, once at the wrong sign (-0.023 rad against a
   configured +0.015 on one seed). The bearing-difference measurement avoids the coupling.
+- The estimator learns only when a vision observation and a range-bearing observation of the
+  same confirmed track, captured at the same time from the same pose, are both applied in the
+  same processing epoch. With different delivery delays the partner can arrive in another epoch
+  and the update is skipped; the report's `Estimator updates` column shows how many updates
+  actually ran, so a method that ran few updates is visible there.
 - Only observations that pass the gate are applied, so a bias too large for the gate is never
   learned: for the 0.12 rad scenario the estimator sees 0-3 updates and its estimate is noise.
   Observability rests on the range-bearing sensor sharing the vision sensor's viewpoint.

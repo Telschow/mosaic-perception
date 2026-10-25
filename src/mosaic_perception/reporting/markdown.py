@@ -42,6 +42,13 @@ def _tally(
 
 
 def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLES) -> str:
+    for scenario_report in payload["scenarios"]:
+        differences = scenario_report.get("paired_differences") or {}
+        if any(isinstance(value, dict) and "n" in value for value in differences.values()):
+            raise ValueError(
+                "payload uses the older flat paired_differences schema; "
+                "regenerate the benchmark to render a report"
+            )
     protocol = payload["protocol"]
     methods = tuple(protocol["methods"])
     comparisons = protocol.get("paired_comparisons", _DEFAULT_COMPARISONS)

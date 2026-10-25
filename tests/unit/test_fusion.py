@@ -597,3 +597,49 @@ def test_the_estimate_does_not_depend_on_what_the_track_state_does():
     _feed(loose, 0.010, 12)
     assert tight.vision_bias_estimate == pytest.approx(0.010, abs=3e-4)
     assert loose.vision_bias_estimate == pytest.approx(0.010, abs=3e-4)
+
+
+def test_gating_and_updating_use_one_bias_correction_for_the_whole_vision_group():
+    tracker = _bias_tracker(position_var=0.01)
+    tracker.tracks["t1"] = _confirmed_track("t1", (10.0, 3.0), 0.01)
+    seen = []
+    original = tracker._update_state
+
+    def spy(state, covariance, observation, bias_correction=0.0):
+        if observation.measurement_group() == "vision_bearing":
+            seen.append(bias_correction)
+        return original(state, covariance, observation, bias_correction)
+
+    tracker._update_state = spy
+    bearing_t1 = float(np.arctan2(3.0, 10.0))
+    tracker.process_observations(
+        [
+            range_observation("r0", 10.0, 0.0, 0.0),
+            vision_observation("v0", bearing=0.01),
+            vision_observation("v1", bearing=bearing_t1 + 0.01),
+        ],
+        0.0,
+    )
+    assert len(seen) == 2
+    assert seen[0] == seen[1]
+
+
+def test_bias_correction_wraps_a_bearing_near_pi():
+    from mosaic_perception.tracking.association import GatedHungarianAssociator
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    track = _confirmed_track("t0", (-10.0, 0.0), 0.01)  # bearing +pi
+    observation = vision_observation("v", bearing=float(np.pi) - 0.001)
+    result = GatedHungarianAssociator().associate(
+        [track], [observation], ExtendedKalmanFilter(dt=0.1), bearing_correction=-0.002
+    )
+    assert list(result.matches) == ["t0"]
+
+
+def test_previous_posteriors_are_evicted_when_a_track_is_deleted():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=False, delayed_update="retrodiction")
+    tracker.tracks["gone"] = make_track("gone", status=TrackStatus.TENTATIVE)
+    for step in range(12):
+        tracker.process_observations([], 0.1 * step)
+    assert "gone" not in tracker.tracks
+    assert "gone" not in tracker._prev_posterior

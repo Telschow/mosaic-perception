@@ -23,7 +23,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.stats import chi2
 
-from ..domain.models import SensorObservation, TrackEstimate
+from ..domain.models import SensorObservation, TrackEstimate, wrap_angle
 from .ekf import ExtendedKalmanFilter
 
 
@@ -150,7 +150,7 @@ class GatedHungarianAssociator:
                     raise ValueError("observation has no observer pose at capture time")
                 measurement, angle_indices, group = self._measurement(observation)
                 if group == "vision_bearing" and bearing_correction:
-                    measurement = measurement - bearing_correction
+                    measurement = np.array([wrap_angle(float(measurement[0]) - bearing_correction)])
                 if group_name is None:
                     group_name = group
                 elif group != group_name:

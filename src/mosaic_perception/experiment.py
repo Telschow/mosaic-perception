@@ -176,7 +176,9 @@ def run_method(
     )
     # Reported next to the estimate for comparison only; never an estimator input.
     result.vision_bias_configured = (
-        float((vision_config.bias or {}).get("bearing", 0.0)) if vision_config else None
+        float((vision_config.bias or {}).get("bearing", 0.0))
+        if vision_config is not None and method in _VISION_METHODS
+        else None
     )
     result.vision_bias_estimate = tracker.vision_bias_estimate
     result.vision_bias_updates = tracker.vision_bias_updates

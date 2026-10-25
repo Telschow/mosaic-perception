@@ -206,11 +206,13 @@ class MultiSensorTracker:
             group_observations = valid_by_group.get(group)
             if not group_observations:
                 continue
+            # Frozen for the whole group so gating and updating use the same correction.
+            group_correction = self._bearing_correction() if group == "vision_bearing" else 0.0
             association = self.associator.associate(
                 active_tracks + [self.tracks[tid] for tid in sorted(initiated_track_ids)],
                 group_observations,
                 self.ekf,
-                bearing_correction=self._bearing_correction() if group == "vision_bearing" else 0.0,
+                bearing_correction=group_correction,
             )
             self._handle_invalid(association)
             for track_id, observation in association.matches.items():
@@ -218,7 +220,7 @@ class MultiSensorTracker:
                 if track is None or track.status == TrackStatus.DELETED:
                     continue
                 try:
-                    self._apply_observation(track, observation)
+                    self._apply_observation(track, observation, group_correction)
                 except (ValueError, np.linalg.LinAlgError) as exc:
                     self._reject_invalid(observation, f"measurement update failed: {exc}")
                     continue
@@ -354,6 +356,7 @@ class MultiSensorTracker:
         """Reset all tracker state, snapshots and counters."""
         self._prev_posterior = {}
         self._epoch_applied = {}
+        self._now = 0.0
         self._bias = 0.0
         self._bias_var = BIAS_INITIAL_VARIANCE
         self._bias_updates = 0
@@ -452,7 +455,11 @@ class MultiSensorTracker:
     # Updates and track management
     # ------------------------------------------------------------------
     def _update_state(
-        self, state: np.ndarray, covariance: np.ndarray, observation: SensorObservation
+        self,
+        state: np.ndarray,
+        covariance: np.ndarray,
+        observation: SensorObservation,
+        bias_correction: float = 0.0,
     ) -> _UpdateResult:
         """EKF update of ``state`` with one observation (capture-time observer pose)."""
         pose = observation.observer_pose
@@ -486,7 +493,7 @@ class MultiSensorTracker:
             angle_indices: tuple[int, ...] = (1,)
         elif group == "vision_bearing":
             measurement = np.array(
-                [observation.measurements["bearing"] - self._bearing_correction()]
+                [wrap_angle(observation.measurements["bearing"] - bias_correction)]
             )
             predicted = self.ekf.measurement_bearing(state, pose)
             jacobian = self.ekf.jacobian_bearing(state, pose)
@@ -534,12 +541,16 @@ class MultiSensorTracker:
     def _is_delayed(self, observation: SensorObservation) -> bool:
         return observation.capture_time < self._now - 1e-9
 
-    def _apply_observation(self, track: TrackEstimate, observation: SensorObservation) -> None:
+    def _apply_observation(
+        self, track: TrackEstimate, observation: SensorObservation, bias_correction: float = 0.0
+    ) -> None:
         stored = self._prev_posterior.get(track.track_id)
         if self.delayed_update == "retrodiction" and self._is_delayed(observation) and stored:
-            state, covariance, _ = self._replay_epoch(track, observation, stored)
+            state, covariance = self._replay_epoch(track, observation, stored, bias_correction)
         else:
-            result = self._update_state(track.state_array(), track.cov_array(), observation)
+            result = self._update_state(
+                track.state_array(), track.cov_array(), observation, bias_correction
+            )
             self._record_nis(result)
             state, covariance = result.state, result.covariance
 
@@ -554,36 +565,34 @@ class MultiSensorTracker:
         track: TrackEstimate,
         observation: SensorObservation,
         stored: tuple[np.ndarray, np.ndarray, float],
-    ) -> tuple[np.ndarray, np.ndarray, _UpdateResult]:
+        bias_correction: float,
+    ) -> tuple[np.ndarray, np.ndarray]:
         """One-step-lag update: replay this epoch from the stored previous posterior.
 
         Starting from the posterior stored before this epoch's prediction, the
         observations applied so far this epoch plus the delayed one are processed in
         capture-time order, predicting over the exact interval between them, and the
         state is finally predicted to the current processing time. Only the delayed
-        observation's innovation is added to the NIS statistics.
+        observation's innovation is added to the NIS statistics. Earlier observations are
+        replayed with the same correction as the delayed one; this is exact because the
+        vision group is applied last and a track receives at most one observation per
+        group, so only a range-bearing observation can be replayed before a vision one.
         """
         state, covariance, time = stored
         ordered = sorted(
             [*self._epoch_applied.get(track.track_id, []), observation],
             key=lambda item: (item.capture_time, item.observation_id),
         )
-        delayed_result: _UpdateResult | None = None
         for item in ordered:
             state, covariance = self.ekf.predict_over(
                 state, covariance, max(item.capture_time - time, 0.0)
             )
             time = max(time, item.capture_time)
-            result = self._update_state(state, covariance, item)
+            result = self._update_state(state, covariance, item, bias_correction)
             state, covariance = result.state, result.covariance
             if item is observation:
                 self._record_nis(result)
-                delayed_result = result
-        assert delayed_result is not None
-        final_state, final_covariance = self.ekf.predict_over(
-            state, covariance, max(self._now - time, 0.0)
-        )
-        return final_state, final_covariance, delayed_result
+        return self.ekf.predict_over(state, covariance, max(self._now - time, 0.0))
 
     def _initiate_track(self, observation: SensorObservation, now: float) -> TrackEstimate | None:
         """Initiate a track from an unassociated range-bearing observation."""
@@ -738,3 +747,4 @@ class MultiSensorTracker:
             )
             if track.status == TrackStatus.DELETED:
                 del self.tracks[track.track_id]
+                self._prev_posterior.pop(track.track_id, None)

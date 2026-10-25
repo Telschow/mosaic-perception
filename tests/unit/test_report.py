@@ -209,3 +209,14 @@ def test_second_comparison_gets_its_own_section_and_findings():
         "GOSPA: better in 0, worse in 1, inconclusive in 0." in text
     )
     assert "| toy | 1 | 0.300 | 0.200 | -0.100 | 0.190 |" in text
+
+
+def test_an_older_flat_paired_differences_payload_is_rejected_loudly():
+    import pytest
+
+    payload = _payload()
+    payload["scenarios"][0]["paired_differences"] = {
+        "position_rmse": {"n": 5, "mean": -0.1, "ci95_low": -0.2, "ci95_high": 0.0}
+    }
+    with pytest.raises(ValueError, match="older flat paired_differences schema"):
+        render_report(payload)

@@ -181,3 +181,15 @@ def test_run_pair_leaves_the_third_method_out_unless_requested():
 
     with pytest.raises(ValueError):
         pair.record("fused_bias_estimated")
+
+
+def test_configured_vision_bias_is_only_recorded_for_vision_methods():
+    from mosaic_perception.experiment import run_pair
+
+    pair = run_pair(
+        resolve_scenario("sensor_disagreement_within_gate", seed=1, duration=2.0),
+        include_bias_estimation=True,
+    )
+    assert pair.range_only.result.vision_bias_configured is None
+    assert pair.fused.result.vision_bias_configured == 0.015
+    assert pair.record("fused_bias_estimated").result.vision_bias_configured == 0.015
