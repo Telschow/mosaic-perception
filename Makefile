@@ -33,7 +33,7 @@ evaluate:
 	uv run mosaic evaluate --scenario all --seeds 1-5 --output results/
 
 benchmark:
-	uv run mosaic benchmark --scenario all --seeds 1-5 --duration 10.0
+	uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 
 app:
 	uv run streamlit run app/streamlit_app.py

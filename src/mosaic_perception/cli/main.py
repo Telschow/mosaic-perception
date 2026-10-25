@@ -19,6 +19,7 @@ from rich.table import Table
 
 from .. import __version__
 from ..domain.models import EvaluationResult
+from ..evaluation.statistics import paired_difference
 from ..experiment import (
     METHODS,
     PairedRun,
@@ -174,6 +175,26 @@ def _aggregate(results: list[EvaluationResult]) -> dict[str, Any]:
     return aggregate
 
 
+_PAIRED_METRICS = ("position_rmse", "recall", "precision", "position_coverage_95")
+
+
+def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Per-metric paired difference (fused - range_only) over the seeds of one scenario."""
+    summary: dict[str, dict[str, Any]] = {}
+    for metric in _PAIRED_METRICS:
+        difference = paired_difference(
+            [run["range_only"].get(metric) for run in runs],
+            [run["fused"].get(metric) for run in runs],
+        )
+        summary[metric] = {
+            "n": difference.n,
+            "mean": difference.mean,
+            "ci95_low": difference.low,
+            "ci95_high": difference.high,
+        }
+    return summary
+
+
 def _write_per_seed_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     columns = ["scenario", "seed", "method", *_RESULT_FIELDS]
     with path.open("w", newline="") as handle:
@@ -235,6 +256,7 @@ def _run_experiment(
                 "scenario": first_config,
                 "runs": runs,
                 "aggregate": {method: _aggregate(results_by_method[method]) for method in METHODS},
+                "paired_differences": _paired_differences(runs),
             }
         )
 
@@ -252,6 +274,10 @@ def _run_experiment(
             "num_objects": num_objects,
             "methods": list(METHODS),
             "paired": "same world states and range-sensor random stream per seed",
+            "paired_difference_interval": (
+                "two-sided 95% t interval over seeds of (fused - range_only); "
+                "descriptive seed-to-seed variation, not a generalisation claim"
+            ),
             "metrics_document": "docs/metrics.md",
         },
         "scenarios": scenario_reports,

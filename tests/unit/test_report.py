@@ -52,6 +52,11 @@ def _payload():
                         "fused": {"position_rmse": 0.2},
                     }
                 ],
+                "paired_differences": {
+                    "position_rmse": {"n": 5, "mean": -0.1, "ci95_low": -0.2, "ci95_high": 0.0},
+                    "precision": {"n": 1, "mean": 0.05, "ci95_low": None, "ci95_high": None},
+                    "recall": {"n": 0, "mean": None, "ci95_low": None, "ci95_high": None},
+                },
                 "aggregate": {
                     "range_only": _aggregate(0.3),
                     "fused": _aggregate(0.2, vision_generated=5.0, vision_applied=4.0),
@@ -83,3 +88,11 @@ def test_undefined_values_render_as_na_not_zero():
     assert "| toy | fused | N/A |" in text
     assert format_number(None) == "N/A"
     assert format_number(0.5, 1) == "0.5"
+
+
+def test_paired_difference_section_renders_intervals_and_na():
+    text = render_report(_payload())
+    assert "## Paired differences (fused minus range-only)" in text
+    assert "| toy | position_rmse | 5 | -0.100 | [-0.200, +0.000] |" in text
+    assert "| toy | precision | 1 | +0.050 | N/A |" in text
+    assert "| toy | recall | 0 | N/A | N/A |" in text

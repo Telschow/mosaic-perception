@@ -89,6 +89,34 @@ def render_report(payload: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## Paired differences (fused minus range-only)",
+            "",
+            "Mean per-seed difference with a two-sided 95% t interval over seeds. Seeds with",
+            "an undefined value on either side are dropped (`n` is the number kept). A",
+            "negative RMSE difference favours fusion; for recall, precision and coverage a",
+            "positive one does. The interval describes seed-to-seed variation in this",
+            "synthetic setup and is not a claim about other worlds.",
+            "",
+            "| Scenario | Metric | n | Mean diff | 95% interval |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for scenario_report in payload["scenarios"]:
+        for metric, row in scenario_report.get("paired_differences", {}).items():
+            interval = (
+                "N/A"
+                if row["ci95_low"] is None
+                else f"[{row['ci95_low']:+.3f}, {row['ci95_high']:+.3f}]"
+            )
+            mean = "N/A" if row["mean"] is None else f"{row['mean']:+.3f}"
+            lines.append(
+                f"| {scenario_report['scenario']['name']} | {metric} | {row['n']} | "
+                f"{mean} | {interval} |"
+            )
+
+    lines.extend(
+        [
+            "",
             "## Class estimate accuracy",
             "",
             "Correct / classified over matched samples where both the track's class estimate",

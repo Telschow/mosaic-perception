@@ -40,9 +40,9 @@ they are not part of the preset identity.
 ```bash
 uv run mosaic run --scenario nominal --seed 42
 uv run mosaic compare --scenario nominal --seeds 1,2,3
-uv run mosaic benchmark --scenario all --seeds 1-5 --duration 10.0
+uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
 In the Streamlit app, scenarios are selected from the sidebar. The checked-in
-benchmark covers all 10 presets with development seeds 1–5; held-out seeds
+benchmark covers all 13 presets with all development seeds 0–24; held-out seeds
 25–49 are reserved and were not run.

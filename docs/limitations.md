@@ -83,7 +83,7 @@
 
 ## Evaluation
 
-- The checked-in benchmark uses **development seeds 1–5 only**. Seeds 25–49 are
+- The checked-in benchmark uses **development seeds 0–24 only**. Seeds 25–49 are
   reserved and have not been run, so no held-out or generalization claim is
   made.
 - Matching uses a 2.0 m Euclidean gate at each timestamp. Different gates can

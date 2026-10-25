@@ -45,7 +45,7 @@ uv run mosaic compare --scenario nominal --seeds 1,2,3,4,5
 ### Generate the benchmark / evaluation artifacts
 
 ```bash
-uv run mosaic benchmark --scenario all --seeds 1-5 --duration 10.0
+uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
 `mosaic evaluate` is implemented and writes the same canonical artifacts as
@@ -108,8 +108,8 @@ Full definitions, matching rules and denominators are in
 
 ## Current development benchmark
 
-The checked-in benchmark is generated with `--scenario all --seeds 1-5
---duration 10.0`, i.e. **development seeds only**. The reserved held-out range
+The checked-in benchmark is generated with `--scenario all --seeds 0-24
+--duration 10.0`, i.e. **all 25 development seeds and no held-out seed**. The reserved held-out range
 25–49 has **not** been run, and no held-out claim is made.
 
 See [artifacts/benchmark/report.md](artifacts/benchmark/report.md) for the
