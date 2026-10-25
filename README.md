@@ -85,7 +85,9 @@ so they cannot influence association, track initiation, hits, misses, or state.
 
 At every ground-truth timestamp, confirmed and coasting track **snapshots** are
 matched one-to-one to ground-truth objects with a gated Hungarian assignment
-(2.0 m Euclidean gate by default). Tentative and deleted tracks are excluded.
+(2.0 m Euclidean gate by default) that prefers each object's previous track
+while it stays inside the gate; `identity_switches_distance_only` reports the
+count without that preference. Tentative and deleted tracks are excluded.
 Metrics and denominators:
 
 - **Position / velocity RMSE**: over matched samples only.

@@ -389,6 +389,7 @@ class EvaluationResult(BaseModel):
     coverage_samples: int = 0
     evaluated_frames: int = 0
     matching_gate_m: float = 2.0
+    matching_continuity: bool = True
 
     # Timing
     mean_age_of_information: float | None = None
@@ -429,6 +430,7 @@ class EvaluationResult(BaseModel):
     num_unmatched_confirmed_tracks: int = 0
     num_duplicate_tracks: int = 0
     # Standard aggregate tracking scores (CLEAR-MOT, identity, GOSPA)
+    identity_switches_distance_only: int | None = None
     mota: float | None = None
     idf1: float | None = None
     idp: float | None = None

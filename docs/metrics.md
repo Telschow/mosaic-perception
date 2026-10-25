@@ -10,7 +10,12 @@ At each ground-truth timestamp:
 - Candidate tracks are snapshots with status `CONFIRMED` or `COASTING`.
   `TENTATIVE` and `DELETED` snapshots are excluded.
 - Candidate objects are all ground-truth objects at that timestamp.
-- Matching is a one-to-one Hungarian assignment on Euclidean position distance.
+- Matching is a one-to-one Hungarian assignment on Euclidean position distance,
+  preferring each object's previous track while that pairing stays inside the
+  gate (the continuity preference of TrackEval's CLEAR matching). A distance-only
+  matcher flips between nearby tracks, which inflates identity switches without
+  changing which samples are matched; `identity_switches_distance_only` reports
+  the count under distance-only matching (issue #17).
 - A pair is admissible only if the distance is at most the matching gate
   (`2.0 m` by default). No object and no track can be matched more than once in
   a frame.
@@ -32,7 +37,8 @@ At each ground-truth timestamp:
 |---|---|---|
 | `recall` | matched samples / all ground-truth object samples | `ground_truth_samples` |
 | `precision` | matched samples / all confirmed-or-coasting track samples | `confirmed_track_samples` |
-| `identity_switches` | for each object, number of changes in matched track ID between consecutive matched frames | none; `None` if nothing matched |
+| `identity_switches` | for each object, number of changes in matched track ID between consecutive matched frames, under the continuity-preferring matcher | none; `None` if nothing matched |
+| `identity_switches_distance_only` | the same count under a distance-only matcher; the gap to `identity_switches` shows how much the continuity preference matters | none; `None` if nothing matched |
 | `num_unmatched_confirmed_tracks` | confirmed/coasting track IDs that were never matched in any frame. Formerly `num_false_tracks`; renamed because many are duplicates, not spurious objects | count of track IDs |
 | `num_duplicate_tracks` | unmatched confirmed track IDs that, in at least one frame, were unmatched while a ground-truth object lay within the matching gate | count of track IDs |
 | `duplicate_track_samples` | evaluated track snapshots left unmatched in a frame while a ground-truth object lay within the matching gate (the object was claimed by another track) | count of track samples, a subset of `unmatched_track_samples` |

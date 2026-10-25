@@ -331,10 +331,15 @@ def per_frame_metrics(frames: list[FrameMatch]) -> list[dict]:
 class TrackingEvaluator:
     """Evaluate per-epoch track snapshots against world ground truth."""
 
-    def __init__(self, match_gate_m: float = 2.0):
+    def __init__(self, match_gate_m: float = 2.0, continuity: bool = True):
         if match_gate_m <= 0:
             raise ValueError("match_gate_m must be positive")
         self.match_gate_m = float(match_gate_m)
+        # Prefer each object's previous track while it stays inside the gate (as TrackEval's
+        # CLEAR matching does). Adopted as the headline after measuring that a distance-only
+        # matcher inflates identity switches (issue #17); distance-only switches are still
+        # reported as identity_switches_distance_only.
+        self.continuity = continuity
 
     def evaluate(
         self,
@@ -353,6 +358,7 @@ class TrackingEvaluator:
             seed=seed,
             method_name=method_name,
             matching_gate_m=self.match_gate_m,
+            matching_continuity=self.continuity,
             config=config or {},
             git_commit=git_commit,
         )
@@ -364,7 +370,9 @@ class TrackingEvaluator:
         ever_confirmed = {
             snapshot.track_id for snapshot in snapshots if snapshot.status in EVALUATED_STATUSES
         }
-        frames = match_frames(snapshots_by_time, world_states, self.match_gate_m)
+        frames = match_frames(
+            snapshots_by_time, world_states, self.match_gate_m, continuity=self.continuity
+        )
 
         counts = sample_counts(frames)
         result.evaluated_frames = len(world_states)
@@ -404,6 +412,11 @@ class TrackingEvaluator:
             result.anees_position = nees.position / nees.samples
             result.anees_velocity = nees.velocity / nees.samples
         result.identity_switches = identity_switches(frames)
+        if self.continuity:
+            distance_only = match_frames(snapshots_by_time, world_states, self.match_gate_m)
+            result.identity_switches_distance_only = identity_switches(distance_only)
+        else:
+            result.identity_switches_distance_only = result.identity_switches
         result.mota = mota(frames)
         ids = idf1_scores(frames, self.match_gate_m)
         result.idf1, result.idp, result.idr = ids.idf1, ids.idp, ids.idr
@@ -421,7 +434,9 @@ class TrackingEvaluator:
             gate: (
                 result.num_duplicate_tracks
                 if gate == self.match_gate_m
-                else _duplicates_at_gate(gate, snapshots_by_time, world_states, ever_confirmed)
+                else _duplicates_at_gate(
+                    gate, snapshots_by_time, world_states, ever_confirmed, self.continuity
+                )
             )
             for gate in DUPLICATE_SENSITIVITY_GATES_M
         }
@@ -432,7 +447,14 @@ class TrackingEvaluator:
         result.notes.extend(
             [
                 "Matching: one-to-one Hungarian assignment per timestamp with a "
-                f"{self.match_gate_m:.2f} m Euclidean gate.",
+                f"{self.match_gate_m:.2f} m Euclidean gate"
+                + (
+                    ", preferring each object's previous track while it stays inside the gate."
+                    if self.continuity
+                    else " (distance only)."
+                ),
+                "identity_switches_distance_only: identity switches under distance-only "
+                "matching, shown to expose how much the continuity preference matters.",
                 "Evaluated tracks: confirmed and coasting snapshots only; "
                 "tentative and deleted tracks are excluded.",
                 "Recall denominator: every ground-truth object in every simulated frame.",
@@ -467,9 +489,10 @@ def _duplicates_at_gate(
     snapshots_by_time: dict[float, dict[str, TrackSnapshot]],
     world_states: list[WorldState],
     ever_confirmed: set[str],
+    continuity: bool,
 ) -> int:
     """Duplicate-track count at another matching gate, via matching only."""
-    frames = match_frames(snapshots_by_time, world_states, gate_m)
+    frames = match_frames(snapshots_by_time, world_states, gate_m, continuity=continuity)
     return len((ever_confirmed - matched_track_ids(frames)) & duplicate_track_ids(frames))
 
 

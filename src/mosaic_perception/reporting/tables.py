@@ -99,6 +99,8 @@ RESULTS_TABLE = TableSpec(
         Column("Matched/GT (mean)", render=_matched_over_ground_truth),
         Column("Unmatched confirmed tracks", "num_unmatched_confirmed_tracks"),
         Column("Duplicate tracks", "num_duplicate_tracks"),
+        Column("ID switches", "identity_switches"),
+        Column("ID switches (distance-only)", "identity_switches_distance_only"),
         Column("Fragmentation", "track_fragmentation"),
         Column("MOTA", "mota"),
         Column("IDF1", "idf1"),

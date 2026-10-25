@@ -73,6 +73,7 @@ RESULT_METRICS: tuple[MetricSpec, ...] = (
     MetricSpec("precision"),
     MetricSpec("recall"),
     MetricSpec("identity_switches", 1),
+    MetricSpec("identity_switches_distance_only", 1),
     MetricSpec("mota"),
     MetricSpec("idf1"),
     MetricSpec("idp"),

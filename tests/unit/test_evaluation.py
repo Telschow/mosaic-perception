@@ -447,3 +447,30 @@ def test_evaluate_scores_a_duplicate_track_in_idf1_and_mota():
     assert result.idp == pytest.approx(0.5)
     assert result.idr == pytest.approx(1.0)
     assert result.idf1 == pytest.approx(2 / 3)
+
+
+def _flip_inputs():
+    worlds = [make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0))}) for i in range(2)]
+    snapshots = [
+        make_snapshot(0.0, "t1", (0.1, 0.0)),
+        make_snapshot(0.0, "t2", (0.5, 0.0)),
+        make_snapshot(0.1, "t1", (0.6, 0.0)),
+        make_snapshot(0.1, "t2", (0.5, 0.0)),
+    ]
+    return snapshots, worlds
+
+
+def test_headline_matching_prefers_the_previous_track_and_reports_distance_only_switches():
+    snapshots, worlds = _flip_inputs()
+    result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, worlds)
+    assert result.matching_continuity is True
+    assert result.identity_switches == 0
+    assert result.identity_switches_distance_only == 1
+
+
+def test_distance_only_matching_can_be_selected_explicitly():
+    snapshots, worlds = _flip_inputs()
+    result = TrackingEvaluator(match_gate_m=2.0, continuity=False).evaluate(snapshots, worlds)
+    assert result.matching_continuity is False
+    assert result.identity_switches == 1
+    assert result.identity_switches_distance_only == 1

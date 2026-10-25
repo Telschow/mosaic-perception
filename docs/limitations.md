@@ -90,6 +90,12 @@
 - The checked-in benchmark uses **development seeds 0–24 only**. Seeds 25–49 are
   reserved and have not been run, so no held-out or generalization claim is
   made.
+- Identity switches depend on the matcher: a distance-only matcher flipped between
+  nearby tracks and reported about 38% more switches than the continuity-preferring
+  matcher adopted as the headline (351.6 vs 217.6, summed per-seed means over the 15
+  development scenarios and both methods), and it reversed the fused-versus-range
+  ordering in some scenarios. Both counts are reported; neither is ground truth
+  about the tracker's identity behaviour.
 - Matching uses a 2.0 m Euclidean gate at each timestamp. Different gates can
   change precision, recall and the set of matched samples.
 - Precision is defined per confirmed/coasting track sample, not per track

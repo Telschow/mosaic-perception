@@ -270,3 +270,56 @@ def test_nees_skips_samples_with_a_singular_covariance():
     sums = nees_sums([frame])
     assert sums.samples == 0
     assert sums.position == 0.0 and sums.velocity == 0.0
+
+
+# --- continuity-preferring matching ----------------------------------------------
+
+from mosaic_perception.evaluation.frames import index_snapshots, match_frames  # noqa: E402
+from tests.helpers import make_world_state  # noqa: E402
+
+
+def _flip_scenario():
+    """One object, two tracks; the nearer track swaps between frames 0 and 1."""
+    worlds = [make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0))}) for i in range(2)]
+    snapshots = [
+        make_snapshot(0.0, "t1", (0.1, 0.0)),  # frame 0: t1 nearer
+        make_snapshot(0.0, "t2", (0.5, 0.0)),
+        make_snapshot(0.1, "t1", (0.6, 0.0)),  # frame 1: t2 nearer, t1 still inside the gate
+        make_snapshot(0.1, "t2", (0.5, 0.0)),
+    ]
+    return index_snapshots(snapshots), worlds
+
+
+def test_distance_only_matching_flips_to_the_nearer_track():
+    by_time, worlds = _flip_scenario()
+    frames = match_frames(by_time, worlds, gate_m=2.0)
+    assert [pair[0].track_id for f in frames for pair in f.matched_pairs] == ["t1", "t2"]
+    assert identity_switches(frames) == 1
+
+
+def test_continuity_matching_keeps_the_previous_pairing_while_it_stays_valid():
+    by_time, worlds = _flip_scenario()
+    frames = match_frames(by_time, worlds, gate_m=2.0, continuity=True)
+    assert [pair[0].track_id for f in frames for pair in f.matched_pairs] == ["t1", "t1"]
+    assert identity_switches(frames) == 0
+
+
+def test_continuity_matching_releases_a_pairing_that_leaves_the_gate():
+    worlds = [make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0))}) for i in range(2)]
+    snapshots = [
+        make_snapshot(0.0, "t1", (0.1, 0.0)),
+        make_snapshot(0.0, "t2", (0.5, 0.0)),
+        make_snapshot(0.1, "t1", (5.0, 0.0)),  # now outside the 2 m gate
+        make_snapshot(0.1, "t2", (0.5, 0.0)),
+    ]
+    frames = match_frames(index_snapshots(snapshots), worlds, gate_m=2.0, continuity=True)
+    assert [pair[0].track_id for f in frames for pair in f.matched_pairs] == ["t1", "t2"]
+
+
+def test_continuity_does_not_change_matching_without_ambiguity():
+    worlds = [make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0))}) for i in range(3)]
+    snapshots = [make_snapshot(0.1 * i, "t1", (0.2, 0.0)) for i in range(3)]
+    by_time = index_snapshots(snapshots)
+    plain = match_frames(by_time, worlds, gate_m=2.0)
+    sticky = match_frames(by_time, worlds, gate_m=2.0, continuity=True)
+    assert [len(f.matched_pairs) for f in plain] == [len(f.matched_pairs) for f in sticky]

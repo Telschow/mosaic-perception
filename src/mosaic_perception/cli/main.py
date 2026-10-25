@@ -275,6 +275,7 @@ def _run_experiment(
         "code": {"package_version": __version__, "git_commit": commit},
         "protocol": {
             "matching_gate_m": 2.0,
+            "matching_continuity": True,
             "position_coverage_95_threshold": 5.991,
             "seed_group": ("development" if max(seeds) <= 24 else "custom_or_held_out"),
             "seeds": seeds,

@@ -58,7 +58,12 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
         "- Paired: same world states and the same range-sensor random stream per seed; "
         "the fused run only adds vision observations.",
         f"- Evaluation matching gate: {protocol['matching_gate_m']:.2f} m, "
-        "one-to-one Hungarian assignment per timestamp.",
+        "one-to-one Hungarian assignment per timestamp"
+        + (
+            ", preferring each object's previous track while it stays inside the gate."
+            if protocol.get("matching_continuity")
+            else " (distance only)."
+        ),
         "- Accuracy denominators: matched sample pairs. Recall denominator: all "
         "ground-truth object samples. Precision denominator: all confirmed/coasting "
         "track samples.",
