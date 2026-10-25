@@ -67,25 +67,30 @@ trade-off in a controlled synthetic setting with paired comparisons.
 From `artifacts/benchmark/report.md` (all 15 scenarios, development seeds 0–24,
 10 s; see the artifact for the exact commit):
 
-- Fused position RMSE is lower in 6 of the 12 scenarios with defined accuracy,
-  within 0.01 m in 3, and worse in 3 (the within-gate bias scenarios).
-  Differences are small.
-- Fused precision is lower in every scenario with defined precision. The
+- Paired position-RMSE differences (fused minus range-only, 25 seeds, 95% t
+  interval over seeds): the interval favours fusion in 7 of 14 scenarios with
+  defined accuracy, favours range-only in 3 (the within-gate bias scenarios)
+  and includes zero in 4. Favourable differences are small (0.013 to 0.038 m).
+- Fused precision is lower in 13 of 14 scenarios with defined precision. The
   metric is sample-based, and the extra unmatched confirmed tracks are confirmed
   tracks never matched to a true object. The `Duplicate tracks` column shows
   how many of them sat inside the matching gate of an already-claimed object
-  (30.0 of 30.6 per seed in `uncertainty_miscalibration`).
+  (26.1 of 26.5 per seed in `uncertainty_miscalibration`).
 - **Large bias, rejected by the gate vs. smaller bias, fused.**
-  `sensor_disagreement_large_bias` (0.12 rad) shows the gate working: ~254 of
-  ~276 delivered vision observations per seed are gate-rejected and fused
-  accuracy is essentially unchanged. The three preregistered within-gate
-  biases (0.010, 0.015, 0.020 rad) pass the gate for ~226-259 observations per
-  seed, and in each the fused estimate is worse than range-only (RMSE 0.268,
-  0.285, 0.293 m vs 0.229 m; precision 0.550, 0.524, 0.518 vs 0.804). The
-  vision acceptance table separates generated, delivered, gate-rejected,
-  lost-competition, other-unassigned, stale/invalid and applied observations.
-  None of these scenarios supports a claim about real-world sensor-fusion
-  performance.
+  `sensor_disagreement_large_bias` (0.12 rad) shows the gate working: ~265 of
+  ~275 delivered vision observations per seed are gate-rejected and the paired
+  RMSE interval includes zero. The three preregistered within-gate biases
+  (0.010, 0.015, 0.020 rad) pass the gate for ~222-254 observations per seed,
+  and in each the fused estimate is worse than range-only (paired RMSE
+  difference +0.042, +0.060, +0.065 m; precision 0.617, 0.560, 0.535 vs
+  0.826). The vision acceptance table separates generated, delivered,
+  gate-rejected, lost-competition, other-unassigned, stale/invalid and applied
+  observations. None of these scenarios supports a claim about real-world
+  sensor-fusion performance.
+- `crossing_targets` and `dense_clutter` exercise association ambiguity and
+  clutter under GNN only: fused has more identity switches in the crossing
+  (6.8 vs 4.4 per seed) and a much lower precision in dense clutter (0.338 vs
+  0.816).
 - Coverage is not improved overall and remains far below 0.95 under reported
   covariance miscalibration (χ²(2, 0.95) = 5.991).
 - The `out_of_sequence` scenario has zero matched samples because stale
