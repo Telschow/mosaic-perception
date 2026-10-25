@@ -25,13 +25,10 @@ from ..domain.models import (
     WorldState,
 )
 from .frames import EVALUATED_STATUSES, FrameMatch, index_snapshots, match_frames
+from .registry import DUPLICATE_SENSITIVITY_GATES_M, gate_label
 
 _COVERAGE_95 = float(chi2.ppf(0.95, 2))  # 5.991 for two-dimensional position
 _COVERAGE_68 = float(chi2.ppf(0.68, 2))
-
-# Matching gates at which duplicate-track counts are also reported. Fixed before
-# any run (issue #11); the canonical headline gate stays 2.0 m.
-DUPLICATE_SENSITIVITY_GATES_M = (1.0, 2.0, 3.0)
 
 
 @dataclass(frozen=True)
@@ -275,9 +272,9 @@ class TrackingEvaluator:
             )
             for gate in DUPLICATE_SENSITIVITY_GATES_M
         }
-        result.num_duplicate_tracks_gate_1m = duplicate_counts[1.0]
-        result.num_duplicate_tracks_gate_2m = duplicate_counts[2.0]
-        result.num_duplicate_tracks_gate_3m = duplicate_counts[3.0]
+        result.num_duplicate_tracks_by_gate = {
+            gate_label(gate): count for gate, count in duplicate_counts.items()
+        }
 
         result.notes.extend(
             [

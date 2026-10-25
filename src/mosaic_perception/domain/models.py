@@ -419,9 +419,7 @@ class EvaluationResult(BaseModel):
     class_correct_samples: int = 0
     class_accuracy: float | None = None
     # Duplicate-track sensitivity to the matching gate (fixed, preregistered gates)
-    num_duplicate_tracks_gate_1m: int = 0
-    num_duplicate_tracks_gate_2m: int = 0
-    num_duplicate_tracks_gate_3m: int = 0
+    num_duplicate_tracks_by_gate: dict[str, int] = Field(default_factory=dict)
     duplicate_track_samples: int = 0
 
     # Raw data for detailed analysis

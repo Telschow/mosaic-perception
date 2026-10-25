@@ -90,6 +90,15 @@ only orchestrates them.
 - Clears evaluator-only object IDs before processing.
 - Wraps the evaluator and optional git-commit metadata.
 
+### Metric declarations (`evaluation/registry.py`, `reporting/tables.py`)
+
+Every per-run metric is declared once (name and display precision) in
+`registry.py`. The CSV columns, the cross-seed aggregates and the report
+columns are derived from those declarations, and `reporting/tables.py` lists
+the report tables as data. Adding a metric means one declaration, the code that
+computes it, and a row in `docs/metrics.md` (a test fails if a declared metric
+is undocumented).
+
 ### Reporting (`reporting/markdown.py`)
 
 `render_report(payload)` is a pure function from the benchmark payload to

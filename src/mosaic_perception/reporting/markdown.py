@@ -10,10 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-
-def format_number(value: float | None, digits: int = 3) -> str:
-    """Format a metric; undefined values are ``N/A``, never a fabricated zero."""
-    return "N/A" if value is None else f"{value:.{digits}f}"
+from .tables import TABLES, TableSpec, format_number, render_table
 
 
 def _tally(payload: dict[str, Any], metric: str, lower_is_better: bool) -> tuple[int, int, int]:
@@ -34,7 +31,7 @@ def _tally(payload: dict[str, Any], metric: str, lower_is_better: bool) -> tuple
     return better, worse, inconclusive
 
 
-def render_report(payload: dict[str, Any]) -> str:
+def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLES) -> str:
     protocol = payload["protocol"]
     methods = tuple(protocol["methods"])
     paired_comparison = protocol.get("paired_comparison", {})
@@ -66,46 +63,9 @@ def render_report(payload: dict[str, Any]) -> str:
         "ground-truth object samples. Precision denominator: all confirmed/coasting "
         "track samples.",
         "- 95% position coverage threshold: chi-square(2, 0.95) = 5.991.",
-        "",
-        "## Aggregate results",
-        "",
-        "Values are mean ± sample standard deviation across seeds. `N/A` means the",
-        "metric was not defined for any seed (for example, no matched tracks); it is",
-        "never a fabricated zero.",
-        "",
-        "| Scenario | Method | Pos RMSE (m) | Vel RMSE (m/s) | Recall | Precision | Cov95 | Matched/GT (mean) | Unmatched confirmed tracks | Duplicate tracks | Fragmentation |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
-    for scenario_report in payload["scenarios"]:
-        scenario_name = scenario_report["scenario"]["name"]
-        for method in methods:
-            aggregate = scenario_report["aggregate"][method]
-            rmse = aggregate.get("position_rmse")
-            rmse_std = aggregate.get("position_rmse_std")
-            rmse_text = (
-                "N/A"
-                if rmse is None
-                else f"{rmse:.3f} ± {rmse_std:.3f}"
-                if rmse_std is not None
-                else f"{rmse:.3f}"
-            )
-            lines.append(
-                "| {scenario} | {method} | {rmse} | {vel} | {recall} | {precision} | "
-                "{coverage} | {matched}/{gt} | {unmatched} | {duplicates} | {fragmentation} |".format(
-                    scenario=scenario_name,
-                    method=method,
-                    rmse=rmse_text,
-                    vel=format_number(aggregate.get("velocity_rmse")),
-                    recall=format_number(aggregate.get("recall")),
-                    precision=format_number(aggregate.get("precision")),
-                    coverage=format_number(aggregate.get("position_coverage_95")),
-                    matched=format_number(aggregate.get("matched_samples"), 0),
-                    gt=format_number(aggregate.get("ground_truth_samples"), 0),
-                    unmatched=format_number(aggregate.get("num_unmatched_confirmed_tracks"), 1),
-                    duplicates=format_number(aggregate.get("num_duplicate_tracks"), 1),
-                    fragmentation=format_number(aggregate.get("track_fragmentation"), 1),
-                )
-            )
+    for table in (t for t in tables if t.primary):
+        lines.extend(render_table(table, payload, methods))
 
     lines.extend(
         [
@@ -135,132 +95,8 @@ def render_report(payload: dict[str, Any]) -> str:
                 f"{mean} | {interval} |"
             )
 
-    lines.extend(
-        [
-            "",
-            "## Class estimate accuracy",
-            "",
-            "Correct / classified over matched samples where both the track's class estimate",
-            "and the ground-truth class are known. Range-only runs carry no class",
-            "information, so their accuracy is `N/A`, not zero. `Classified` is the mean",
-            "number of such samples per seed, out of the matched samples in the results table.",
-            "`Class accuracy` is an unweighted mean of per-seed accuracies (seeds with no",
-            "classified sample are excluded). `Pooled` is total correct / total classified",
-            "over all seeds, and `Classified fraction` is classified / matched samples, so a",
-            "method that classifies rarely cannot look accurate on its own: read the three",
-            "together.",
-            "",
-            "| Scenario | Method | Class accuracy | Pooled | Classified fraction | Classified (mean) |",
-            "|---|---|---|---|---|---|",
-        ]
-    )
-    for scenario_report in payload["scenarios"]:
-        for method in methods:
-            aggregate = scenario_report["aggregate"][method]
-            lines.append(
-                "| {name} | {method} | {accuracy} | {pooled} | {fraction} | {classified} |".format(
-                    name=scenario_report["scenario"]["name"],
-                    method=method,
-                    accuracy=format_number(aggregate.get("class_accuracy")),
-                    pooled=format_number(aggregate.get("class_accuracy_pooled")),
-                    fraction=format_number(aggregate.get("class_classified_fraction_pooled")),
-                    classified=format_number(aggregate.get("class_classified_samples"), 1),
-                )
-            )
-
-    lines.extend(
-        [
-            "",
-            "## Duplicate-track sensitivity to the matching gate",
-            "",
-            "Mean number of duplicate tracks per seed when the evaluation matching gate is",
-            "1.0, 2.0 or 3.0 m. The three gates were chosen before running (see the project issue",
-            "tracker). The 2.0 m column is the headline gate used everywhere else in this",
-            "report when it is the evaluator gate; the others show how much the",
-            "duplicate count depends on that choice, not which gate is correct.",
-            "",
-            "| Scenario | Method | 1.0 m | 2.0 m | 3.0 m |",
-            "|---|---|---|---|---|",
-        ]
-    )
-    for scenario_report in payload["scenarios"]:
-        for method in methods:
-            aggregate = scenario_report["aggregate"][method]
-            lines.append(
-                "| {name} | {method} | {g1} | {g2} | {g3} |".format(
-                    name=scenario_report["scenario"]["name"],
-                    method=method,
-                    g1=format_number(aggregate.get("num_duplicate_tracks_gate_1m"), 1),
-                    g2=format_number(aggregate.get("num_duplicate_tracks_gate_2m"), 1),
-                    g3=format_number(aggregate.get("num_duplicate_tracks_gate_3m"), 1),
-                )
-            )
-
-    lines.extend(
-        [
-            "",
-            "## Vision observation acceptance (fused method)",
-            "",
-            "Mean per seed. `Generated` = produced by vision sensors; `Delivered` = left the",
-            "pending queue (generated minus those still pending at the end); `Gate-rejected` =",
-            "at least one track was evaluated and none passed the chi-square gate;",
-            "`Lost competition` = passed the gate for some track but lost the one-to-one",
-            "assignment; `Other unassigned` = no evaluable candidate track; `Stale/invalid` =",
-            "rejected outside association; `Applied` = used in a track update.",
-            "",
-            "| Scenario | Generated | Delivered | Gate-rejected | Lost competition | Other unassigned | Stale/invalid | Applied |",
-            "|---|---|---|---|---|---|---|---|",
-        ]
-    )
-    for scenario_report in payload["scenarios"]:
-        aggregate = scenario_report["aggregate"]["fused"]
-        lines.append(
-            "| {name} | {g} | {d} | {r} | {c} | {o} | {i} | {a} |".format(
-                name=scenario_report["scenario"]["name"],
-                g=format_number(aggregate.get("vision_generated"), 1),
-                d=format_number(aggregate.get("vision_delivered"), 1),
-                r=format_number(aggregate.get("vision_gate_rejected"), 1),
-                c=format_number(aggregate.get("vision_lost_competition"), 1),
-                o=format_number(aggregate.get("vision_unassigned_other"), 1),
-                i=format_number(aggregate.get("vision_invalid_or_stale"), 1),
-                a=format_number(aggregate.get("vision_applied"), 1),
-            )
-        )
-
-    lines.extend(
-        [
-            "",
-            "## Delivery statistics",
-            "",
-            "Means across seeds where applicable. `Delivered` counts observations removed",
-            "from the pending queue, including those subsequently rejected. `Rejected`",
-            "includes stale and invalid observations; gate-unmatched detections are not",
-            "counted as rejected because range detections may initiate tracks. Unused",
-            "vision detections are broken down in the vision acceptance table above.",
-            "`AoI n` is the mean number of admitted",
-            "observations behind each mean age of information.",
-            "",
-            "| Scenario | Method | Delivered | Rejected | Out of sequence | Pending at end | Mean AoI (s) | AoI n |",
-            "|---|---|---|---|---|---|---|---|",
-        ]
-    )
-    for scenario_report in payload["scenarios"]:
-        scenario_name = scenario_report["scenario"]["name"]
-        for method in methods:
-            aggregate = scenario_report["aggregate"][method]
-            lines.append(
-                "| {scenario} | {method} | {delivered} | {rejected} | {oos} | "
-                "{pending} | {aoi} | {aoi_n} |".format(
-                    scenario=scenario_name,
-                    method=method,
-                    delivered=format_number(aggregate.get("delivered_observations"), 1),
-                    rejected=format_number(aggregate.get("rejected_observations"), 1),
-                    oos=format_number(aggregate.get("rejected_out_of_sequence"), 1),
-                    pending=format_number(aggregate.get("pending_observations"), 1),
-                    aoi=format_number(aggregate.get("mean_age_of_information"), 3),
-                    aoi_n=format_number(aggregate.get("age_samples"), 1),
-                )
-            )
+    for table in (t for t in tables if not t.primary):
+        lines.extend(render_table(table, payload, methods))
 
     lines.extend(
         [

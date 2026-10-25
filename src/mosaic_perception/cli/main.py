@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -19,6 +20,17 @@ from rich.table import Table
 
 from .. import __version__
 from ..domain.models import EvaluationResult
+from ..evaluation.registry import (
+    DUPLICATE_SENSITIVITY_GATES_M,
+    POOLED_RATIOS,
+    RESULT_METRICS,
+    MetricSpec,
+    PooledRatio,
+    duplicate_gate_metric,
+    gate_label,
+    metric_names,
+    metric_value,
+)
 from ..evaluation.statistics import paired_difference
 from ..experiment import (
     METHODS,
@@ -32,48 +44,6 @@ from ..scenarios import available_scenarios, resolve_scenario
 
 app = typer.Typer(help="Mosaic: multi-sensor perception tracking workbench")
 console = Console()
-
-_RESULT_FIELDS = [
-    "position_rmse",
-    "velocity_rmse",
-    "precision",
-    "recall",
-    "identity_switches",
-    "track_fragmentation",
-    "matched_samples",
-    "ground_truth_samples",
-    "confirmed_track_samples",
-    "unmatched_ground_truth_samples",
-    "unmatched_track_samples",
-    "coverage_samples",
-    "position_coverage_95",
-    "position_coverage_68",
-    "num_tracks",
-    "num_confirmed_tracks",
-    "num_unmatched_confirmed_tracks",
-    "num_duplicate_tracks",
-    "class_classified_samples",
-    "class_correct_samples",
-    "class_accuracy",
-    "num_duplicate_tracks_gate_1m",
-    "num_duplicate_tracks_gate_2m",
-    "num_duplicate_tracks_gate_3m",
-    "duplicate_track_samples",
-    "mean_age_of_information",
-    "rejected_observations",
-    "rejected_out_of_sequence",
-    "rejected_invalid",
-    "delivered_observations",
-    "pending_observations",
-    "age_samples",
-    "vision_generated",
-    "vision_delivered",
-    "vision_gate_rejected",
-    "vision_lost_competition",
-    "vision_unassigned_other",
-    "vision_invalid_or_stale",
-    "vision_applied",
-]
 
 
 def _parse_seeds(value: str) -> list[int]:
@@ -116,6 +86,11 @@ def _scenario_names(value: str) -> list[str]:
 def _result_payload(result: EvaluationResult, include_frames: bool = False) -> dict[str, Any]:
     """Serialise deterministic scalar metrics without volatile environment data."""
     payload = result.model_dump(mode="json")
+    # Flatten the per-gate duplicate counts into the declared metric names.
+    by_gate = payload.pop("num_duplicate_tracks_by_gate", {})
+    for gate in DUPLICATE_SENSITIVITY_GATES_M:
+        label = gate_label(gate)
+        payload[duplicate_gate_metric(gate)] = by_gate.get(label)
     payload.pop("config", None)
     payload.pop("git_commit", None)
     if not include_frames:
@@ -153,25 +128,28 @@ def _print_pair(pair: PairedRun) -> None:
     console.print(table)
 
 
-def _aggregate(results: list[EvaluationResult]) -> dict[str, Any]:
-    """Aggregate deterministic metrics over seeds (mean and sample std)."""
+def _aggregate(
+    results: list[EvaluationResult],
+    metrics: Sequence[MetricSpec] = RESULT_METRICS,
+    pooled: Sequence[PooledRatio] = POOLED_RATIOS,
+) -> dict[str, Any]:
+    """Aggregate the declared metrics over seeds (mean and sample std, plus pooled ratios)."""
     aggregate: dict[str, Any] = {"num_seeds": len(results)}
-    for field in _RESULT_FIELDS:
+    for spec in metrics:
         values = [
-            float(value) for result in results if (value := getattr(result, field)) is not None
+            value for result in results if (value := metric_value(result, spec.name)) is not None
         ]
         if not values:
-            aggregate[field] = None
-            aggregate[f"{field}_std"] = None
+            aggregate[spec.name] = None
+            aggregate[f"{spec.name}_std"] = None
             continue
-        aggregate[field] = float(np.mean(values))
-        aggregate[f"{field}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
-    classified = sum(result.class_classified_samples for result in results)
-    matched = sum(result.matched_samples for result in results)
-    correct = sum(result.class_correct_samples for result in results)
-    # Pooled over seeds so a seed with very few classified samples cannot dominate.
-    aggregate["class_accuracy_pooled"] = correct / classified if classified else None
-    aggregate["class_classified_fraction_pooled"] = classified / matched if matched else None
+        aggregate[spec.name] = float(np.mean(values))
+        aggregate[f"{spec.name}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+    for ratio in pooled:
+        # Pooled over seeds so a seed with very few samples cannot dominate.
+        numerator = sum(metric_value(result, ratio.numerator) or 0.0 for result in results)
+        denominator = sum(metric_value(result, ratio.denominator) or 0.0 for result in results)
+        aggregate[ratio.name] = numerator / denominator if denominator else None
     return aggregate
 
 
@@ -196,8 +174,10 @@ def _paired_differences(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
     return summary
 
 
-def _write_per_seed_csv(path: Path, rows: list[dict[str, Any]]) -> None:
-    columns = ["scenario", "seed", "method", *_RESULT_FIELDS]
+def _write_per_seed_csv(
+    path: Path, rows: list[dict[str, Any]], metrics: Sequence[MetricSpec] = RESULT_METRICS
+) -> None:
+    columns = ["scenario", "seed", "method", *metric_names(metrics)]
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=columns, lineterminator="\n")
         writer.writeheader()

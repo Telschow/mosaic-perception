@@ -310,10 +310,10 @@ def test_duplicate_counts_depend_on_matching_gate():
         make_snapshot(0.0, "track_far_dup", (2.5, 0.0)),  # inside 3 m only
     ]
     result = TrackingEvaluator(match_gate_m=2.0).evaluate(snapshots, [world])
-    assert result.num_duplicate_tracks_gate_1m == 0
-    assert result.num_duplicate_tracks_gate_2m == 1
-    assert result.num_duplicate_tracks_gate_3m == 2
-    assert result.num_duplicate_tracks == result.num_duplicate_tracks_gate_2m
+    assert result.num_duplicate_tracks_by_gate["1m"] == 0
+    assert result.num_duplicate_tracks_by_gate["2m"] == 1
+    assert result.num_duplicate_tracks_by_gate["3m"] == 2
+    assert result.num_duplicate_tracks == result.num_duplicate_tracks_by_gate["2m"]
 
 
 def test_sensitivity_fields_are_independent_of_the_headline_gate():
@@ -325,9 +325,9 @@ def test_sensitivity_fields_are_independent_of_the_headline_gate():
     headline_1m = TrackingEvaluator(match_gate_m=1.0).evaluate(snapshots, [world])
     headline_3m = TrackingEvaluator(match_gate_m=3.0).evaluate(snapshots, [world])
     for result in (headline_1m, headline_3m):
-        assert result.num_duplicate_tracks_gate_1m == 0
-        assert result.num_duplicate_tracks_gate_2m == 1
-        assert result.num_duplicate_tracks_gate_3m == 1
+        assert result.num_duplicate_tracks_by_gate["1m"] == 0
+        assert result.num_duplicate_tracks_by_gate["2m"] == 1
+        assert result.num_duplicate_tracks_by_gate["3m"] == 1
 
 
 def _class_world(true_classes):
