@@ -2,17 +2,36 @@
 Domain models and data contracts for Mosaic.
 
 All data structures follow explicit contracts to prevent mixing ground truth
-with estimator inputs and to clearly distinguish timing, uncertainty, and metadata.
+with estimator inputs and to clearly distinguish timing, uncertainty, and
+metadata.
+
+Coordinate and timing conventions
+--------------------------------
+* Positions are metres in a single right-handed world frame (x east, y north).
+* Headings and bearings are radians, measured counter-clockwise from +x, and are
+  wrapped to ``[-pi, pi]``.
+* Sensor measurements are reported in the **sensor frame**: a bearing is the
+  world-frame line-of-sight angle minus the observer heading at capture time.
+* ``capture_time`` is when the measurement was taken; ``delivery_time`` is when
+  the estimator may use it. Both are simulation seconds since t=0.
 """
 
 from __future__ import annotations
 
-import time
+import math
 from enum import StrEnum
 from typing import Any
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+# Angular values closer than this are treated as identical after wrapping.
+ANGLE_EPS = 1e-9
+
+
+def wrap_angle(angle: float) -> float:
+    """Wrap an angle to the interval [-pi, pi]."""
+    return float(math.atan2(math.sin(angle), math.cos(angle)))
 
 
 class CoordinateFrame(StrEnum):
@@ -43,7 +62,7 @@ class ObjectClass(StrEnum):
 
 
 class Vector2(BaseModel):
-    """2D vector representation."""
+    """2D vector in metres or metres/second (context dependent)."""
 
     x: float = 0.0
     y: float = 0.0
@@ -57,10 +76,16 @@ class Vector2(BaseModel):
 
 
 class Pose2D(BaseModel):
-    """2D pose with position and heading."""
+    """
+    Planar pose of the observer/sensor platform at a simulation time.
+
+    ``velocity`` is the world-frame platform velocity, needed to model radial
+    velocity correctly for a moving observer. It defaults to zero.
+    """
 
     position: Vector2 = Field(default_factory=Vector2)
-    heading: float = 0.0  # radians
+    heading: float = 0.0  # radians, wrapped to [-pi, pi]
+    velocity: Vector2 = Field(default_factory=Vector2)
 
     def to_array(self) -> np.ndarray:
         return np.array([self.position.x, self.position.y, self.heading])
@@ -102,8 +127,8 @@ class SensorConfig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     sensor_id: str
-    sensor_type: str  # "range_bearing", "vision_bearing", etc.
-    frame_rate: float = 10.0  # Hz
+    sensor_type: str  # "range_bearing", "vision_bearing"
+    frame_rate: float = 10.0  # Hz; sensor emits at most this often
     noise_std: dict[str, float] = Field(default_factory=dict)
     detection_probability: float = 1.0
     false_alarm_rate: float = 0.0
@@ -111,6 +136,9 @@ class SensorConfig(BaseModel):
     dropout_prob: float = 0.0
     delivery_delay_mean: float = 0.0
     delivery_delay_std: float = 0.0
+    # Multiplies the covariance *reported to the estimator* without changing the
+    # sampled measurement error. Used by the miscalibration scenario.
+    reported_cov_scale: float = 1.0
     enabled: bool = True
 
     @field_validator("detection_probability")
@@ -120,29 +148,39 @@ class SensorConfig(BaseModel):
             raise ValueError("detection_probability must be in [0,1]")
         return v
 
+    @field_validator("frame_rate")
+    @classmethod
+    def validate_frame_rate(cls, v: float) -> float:
+        if v <= 0.0:
+            raise ValueError("frame_rate must be positive")
+        return v
+
+    @field_validator("reported_cov_scale")
+    @classmethod
+    def validate_cov_scale(cls, v: float) -> float:
+        if v <= 0.0:
+            raise ValueError("reported_cov_scale must be positive")
+        return v
+
 
 class ScenarioConfig(BaseModel):
-    """Configuration for a simulation scenario."""
+    """
+    Fully resolved configuration for one scenario.
+
+    This is the effective configuration recorded with every run. Scenario
+    presets are expanded into these values before simulation starts.
+    """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str
     description: str = ""
+    hypothesis: str = ""
     seed: int = 42
     duration: float = 10.0  # seconds
-    dt: float = 0.1  # time step
+    dt: float = 0.1  # seconds
     num_objects: int = 3
     observer_trajectory: str = "static"
-
-    # Degradation settings
-    vision_dropout_rate: float = 0.0
-    range_dropout_rate: float = 0.0
-    measurement_bias_scale: float = 0.0
-    delivery_delay_scale: float = 1.0
-    false_observation_rate: float = 0.0
-    uncertainty_miscalibration: float = 1.0  # scale factor for reported uncertainty
-
-    # Sensor configurations
     sensors: dict[str, SensorConfig] = Field(default_factory=dict)
 
 
@@ -162,16 +200,16 @@ class SensorObservation(BaseModel):
 
     # Timing
     capture_time: float = Field(description="Time when measurement was captured")
-    delivery_time: float = Field(description="Time when observation was delivered to tracker")
+    delivery_time: float = Field(description="Time when observation is delivered to the tracker")
 
     # Metadata
     coordinate_frame: CoordinateFrame = CoordinateFrame.SENSOR
     measurement_model: str = Field(description="Identifier for measurement model used")
 
-    # Measurements (sensor-specific)
+    # Measurements (sensor-specific, sensor frame)
     measurements: dict[str, float] = Field(default_factory=dict)
 
-    # Uncertainty
+    # Uncertainty reported to the estimator (measurement units)
     measurement_covariance: list[list[float]] | None = None
 
     # Classification (for vision-like sensors)
@@ -181,7 +219,7 @@ class SensorObservation(BaseModel):
     # Association (set by tracker, not by sensor)
     associated_track_id: str | None = None
 
-    # Observer pose context for the estimator
+    # Observer pose at capture time (position, heading, velocity)
     observer_pose: Pose2D | None = Field(
         default=None, description="Observer pose at capture time for estimation"
     )
@@ -192,15 +230,28 @@ class SensorObservation(BaseModel):
     def get_measurement_cov(self) -> np.ndarray | None:
         if self.measurement_covariance is None:
             return None
-        return np.array(self.measurement_covariance)
+        return np.array(self.measurement_covariance, dtype=float)
 
     def age_of_information(self) -> float:
         """Time between capture and delivery."""
         return self.delivery_time - self.capture_time
 
+    def measurement_group(self) -> str:
+        """Group observations by the measurement model they carry."""
+        if "range" in self.measurements:
+            return "range_bearing"
+        if "bearing" in self.measurements:
+            return "vision_bearing"
+        raise ValueError(f"observation {self.observation_id} has no recognised measurement group")
+
 
 class TrackEstimate(BaseModel):
-    """Track estimate from the tracker."""
+    """
+    Current track estimate from the tracker.
+
+    ``hits`` counts epochs in which at least one measurement was accepted.
+    ``misses`` counts consecutive epochs with no accepted measurement.
+    """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -216,9 +267,9 @@ class TrackEstimate(BaseModel):
     covariance: list[list[float]] = Field(description="4x4 state covariance")
 
     # Track management
-    hits: int = 0  # Number of successful updates
-    misses: int = 0  # Number of missed updates/opportunities
-    age: int = 0  # Track age in frames/epochs
+    hits: int = 0  # epochs with at least one accepted measurement
+    misses: int = 0  # consecutive epochs with no accepted measurement
+    age: int = 0  # epochs since initiation
     associated_observations: list[str] = Field(default_factory=list)
 
     # Metadata
@@ -227,10 +278,10 @@ class TrackEstimate(BaseModel):
     class_confidence: float = 0.0
 
     def state_array(self) -> np.ndarray:
-        return np.array(self.state)
+        return np.array(self.state, dtype=float)
 
     def cov_array(self) -> np.ndarray:
-        return np.array(self.covariance)
+        return np.array(self.covariance, dtype=float)
 
     def position(self) -> np.ndarray:
         return self.state_array()[:2]
@@ -239,35 +290,101 @@ class TrackEstimate(BaseModel):
         return self.state_array()[2:]
 
     def position_cov(self) -> np.ndarray:
-        P = self.cov_array()
-        return P[:2, :2]
+        covariance = self.cov_array()
+        return covariance[:2, :2]
+
+
+class TrackSnapshot(BaseModel):
+    """
+    Immutable per-epoch snapshot of a track, recorded during the run.
+
+    Evaluation uses these snapshots rather than the final track dictionary so
+    that estimates are scored at the epoch they actually describe.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    time: float
+    track_id: str
+    status: TrackStatus
+    state: list[float]
+    covariance: list[list[float]]
+    hits: int = 0
+    misses: int = 0
+    age: int = 0
+    updated_this_epoch: bool = False
+
+    def state_array(self) -> np.ndarray:
+        return np.array(self.state, dtype=float)
+
+    def cov_array(self) -> np.ndarray:
+        return np.array(self.covariance, dtype=float)
+
+    def position(self) -> np.ndarray:
+        return self.state_array()[:2]
+
+    def velocity(self) -> np.ndarray:
+        return self.state_array()[2:]
+
+    def position_cov(self) -> np.ndarray:
+        return self.cov_array()[:2, :2]
+
+
+class ObservationStatistics(BaseModel):
+    """Delivery statistics produced by the tracker for evaluation reporting."""
+
+    delivered_observations: int = 0
+    rejected_observations: int = 0
+    rejected_out_of_sequence: int = 0
+    rejected_invalid: int = 0
+    pending_observations: int = 0
+    age_samples: int = 0
+    mean_age_of_information: float | None = None
 
 
 class EvaluationResult(BaseModel):
-    """Evaluation results for a run."""
+    """
+    Evaluation results for one method on one scenario/seed.
+
+    Metric definitions are documented in ``docs/metrics.md``. A metric that is
+    not defined for a run is ``None``; it is never silently reported as zero.
+    """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     scenario_name: str
     seed: int
     method_name: str
-    timestamp: float = Field(default_factory=time.time)
 
-    # Accuracy metrics
+    # Accuracy metrics (matched track/object samples)
     position_rmse: float | None = None
     velocity_rmse: float | None = None
 
-    # Detection/association metrics
-    precision: float | None = None
-    recall: float | None = None
-    identity_switches: int = 0
-    track_fragmentation: float | None = None
+    # Track/object matching metrics (see docs/metrics.md)
+    precision: float | None = None  # matched samples / confirmed track samples
+    recall: float | None = None  # matched samples / ground-truth object samples
+    identity_switches: int | None = None
+    track_fragmentation: float | None = None  # unsupported in v0.1
+    matched_samples: int = 0
+    ground_truth_samples: int = 0
+    confirmed_track_samples: int = 0
+    unmatched_ground_truth_samples: int = 0
+    unmatched_track_samples: int = 0
+    coverage_samples: int = 0
+    evaluated_frames: int = 0
+    matching_gate_m: float = 2.0
 
     # Timing
     mean_age_of_information: float | None = None
+    rejected_observations: int = 0
+    rejected_out_of_sequence: int = 0
+    rejected_invalid: int = 0
+    delivered_observations: int = 0
+    pending_observations: int = 0
+    age_samples: int = 0
 
     # Uncertainty calibration
-    position_coverage_95: float | None = None  # empirical coverage
+    position_coverage_95: float | None = None
     position_coverage_68: float | None = None
 
     # Track statistics

@@ -1,144 +1,140 @@
 """
 Mosaic Streamlit workbench.
+
+Uses the shared experiment runner so the UI and CLI execute the same pipeline.
 """
 
-import streamlit as st
-import plotly.graph_objects as go
-import numpy as np
-import pandas as pd
+from __future__ import annotations
 
-from mosaic_perception.simulation.world import SyntheticWorld
-from mosaic_perception.sensors import RangeBearingSensor, VisionBearingSensor
-from mosaic_perception.domain.models import SensorConfig
-from mosaic_perception.tracking import MultiSensorTracker
-from mosaic_perception.evaluation.metrics import TrackingEvaluator
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+
+from mosaic_perception.domain.models import TrackStatus
+from mosaic_perception.experiment import run_pair
+from mosaic_perception.scenarios import available_scenarios, resolve_scenario
 
 st.set_page_config(page_title="Mosaic Perception Workbench", layout="wide")
 
-st.title("🔍 Mosaic: Multi-Sensor Perception Workbench")
-st.markdown("*A reproducible workbench for investigating when sensor fusion helps or hurts.*")
+st.title("Mosaic: Multi-Sensor Perception Workbench")
+st.markdown(
+    "*A reproducible workbench for investigating when sensor fusion helps or hurts.*"
+)
 
-# Sidebar
 st.sidebar.header("Configuration")
+scenario_name = st.sidebar.selectbox("Scenario", available_scenarios())
+seed = st.sidebar.slider("Random seed", 0, 100, 42)
+duration = st.sidebar.slider("Duration (s)", 2.0, 20.0, 5.0)
+num_objects = st.sidebar.slider("Number of objects", 1, 5, 3)
+show_fused = st.sidebar.checkbox("Show fused method", value=True)
+run_button = st.sidebar.button("Run simulation")
 
-scenario = st.sidebar.selectbox("Scenario", ["nominal", "vision_dropout", "range_dropout", "false_observations"])
-seed = st.sidebar.slider("Random Seed", 0, 100, 42)
-duration = st.sidebar.slider("Duration (s)", 5.0, 20.0, 10.0)
-num_objects = st.sidebar.slider("Number of Objects", 1, 5, 3)
-use_vision = st.sidebar.checkbox("Enable Vision Fusion", value=True)
 
-if st.sidebar.button("Run Simulation"):
+def format_metric(value: float | None, digits: int = 3) -> str:
+    return "N/A" if value is None else f"{value:.{digits}f}"
+
+
+if run_button:
     with st.spinner("Running simulation..."):
-        # Create world
-        world = SyntheticWorld(seed=seed, duration=duration, dt=0.1, num_objects=num_objects)
-        
-        # Configure sensors
-        rng_sensor = np.random.RandomState(seed + 1000)
-        range_config = SensorConfig(
-            sensor_id="range1", sensor_type="range_bearing", frame_rate=10.0,
-            noise_std={"range": 0.5, "bearing": 0.01, "range_rate": 0.1},
-            detection_probability=0.95 if scenario != "range_dropout" else 0.6,
-            false_alarm_rate=0.01 if scenario != "false_observations" else 0.1,
+        scenario = resolve_scenario(
+            scenario_name,
+            seed=seed,
+            duration=duration,
+            num_objects=num_objects,
         )
-        range_sensor = RangeBearingSensor(range_config, rng_sensor)
-        
-        vision_config = SensorConfig(
-            sensor_id="vision1", sensor_type="vision_bearing", frame_rate=10.0,
-            noise_std={"bearing": 0.005},
-            detection_probability=0.9 if scenario != "vision_dropout" else 0.4,
-            false_alarm_rate=0.02 if scenario != "false_observations" else 0.15,
-        )
-        vision_sensor = VisionBearingSensor(vision_config, np.random.RandomState(seed + 2000))
-        
-        states = world.get_all_states()
-        
-        # Run range-only
-        tracker_range = MultiSensorTracker(dt=0.1, use_vision=False)
-        for world_state in states:
-            obs = range_sensor.generate_observations(world_state, world_state.time)
-            for o in obs: o._true_object_id = None
-            tracker_range.process_observations(obs, world_state.time)
-        
-        # Run fused
-        tracker_fused = MultiSensorTracker(dt=0.1, use_vision=use_vision)
-        for world_state in states:
-            obs_range = range_sensor.generate_observations(world_state, world_state.time)
-            obs_vision = vision_sensor.generate_observations(world_state, world_state.time)
-            obs = obs_range + obs_vision
-            for o in obs: o._true_object_id = None
-            tracker_fused.process_observations(obs, world_state.time)
-        
-        # Evaluate
-        evaluator = TrackingEvaluator()
-        result_range = evaluator.evaluate(tracker_range.tracks, states, scenario, seed, "range_only")
-        result_fused = evaluator.evaluate(tracker_fused.tracks, states, scenario, seed, "fused")
-        
-        st.session_state['results'] = {
-            'world': world,
-            'states': states,
-            'tracker_range': tracker_range,
-            'tracker_fused': tracker_fused,
-            'result_range': result_range,
-            'result_fused': result_fused,
-            'scenario': scenario
-        }
+        pair = run_pair(scenario)
+        st.session_state["results"] = pair
+        st.session_state["scenario_name"] = scenario_name
+        st.session_state["seed"] = seed
+        st.session_state["num_objects"] = num_objects
 
-# Display results
-if 'results' in st.session_state:
-    res = st.session_state['results']
-    
-    # Metrics table
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("Range-Only Tracking")
-        st.metric("Position RMSE", f"{res['result_range'].position_rmse:.3f} m" if res['result_range'].position_rmse else "N/A")
-        st.metric("Confirmed Tracks", res['result_range'].num_confirmed_tracks)
-        st.metric("Total Tracks", res['result_range'].num_tracks)
-    
-    with col2:
-        st.subheader("Fused Tracking")
-        st.metric("Position RMSE", f"{res['result_fused'].position_rmse:.3f} m" if res['result_fused'].position_rmse else "N/A")
-        st.metric("Confirmed Tracks", res['result_fused'].num_confirmed_tracks)
-        st.metric("Total Tracks", res['result_fused'].num_tracks)
-    
-    # Scene visualization
-    st.subheader("2D Scene Visualization")
-    
-    fig = go.Figure()
-    
-    # Plot ground truth
-    states = res['states']
-    for i, obj_id in enumerate(states[0].objects.keys()):
-        xs = [s.objects[obj_id].position.x for s in states]
-        ys = [s.objects[obj_id].position.y for s in states]
-        fig.add_trace(go.Scatter(x=xs, y=ys, mode='lines', name=f'GT {obj_id}', 
-                                line=dict(dash='dash', width=2)))
-    
-    # Plot range-only tracks
-    for track_id, track in res['tracker_range'].tracks.items():
-        if track.status.value == 'confirmed':
-            fig.add_trace(go.Scatter(x=[track.position()[0]], y=[track.position()[1]], 
-                                    mode='markers', name=f'Range Track {track_id[:8]}',
-                                    marker=dict(size=10, symbol='square')))
-    
-    # Plot fused tracks
-    for track_id, track in res['tracker_fused'].tracks.items():
-        if track.status.value == 'confirmed':
-            fig.add_trace(go.Scatter(x=[track.position()[0]], y=[track.position()[1]], 
-                                    mode='markers', name=f'Fused Track {track_id[:8]}',
-                                    marker=dict(size=10, symbol='triangle-up')))
-    
-    fig.update_layout(
-        title="Ground Truth (dashed) vs Tracks (markers)",
+if "results" in st.session_state:
+    pair = st.session_state["results"]
+    methods = [("range_only", pair.range_only)]
+    if show_fused:
+        methods.append(("fused", pair.fused))
+
+    st.subheader("Metrics")
+    rows = []
+    for method_name, record in methods:
+        result = record.result
+        rows.append(
+            {
+                "method": method_name,
+                "position_rmse_m": result.position_rmse,
+                "velocity_rmse_mps": result.velocity_rmse,
+                "recall": result.recall,
+                "precision": result.precision,
+                "coverage_95": result.position_coverage_95,
+                "matched_samples": result.matched_samples,
+                "ground_truth_samples": result.ground_truth_samples,
+                "confirmed_track_samples": result.confirmed_track_samples,
+                "confirmed_tracks": result.num_confirmed_tracks,
+                "false_tracks": result.num_false_tracks,
+                "mean_aoi_s": result.mean_age_of_information,
+                "rejected_out_of_sequence": result.rejected_out_of_sequence,
+                "pending_observations": result.pending_observations,
+            }
+        )
+    st.dataframe(pd.DataFrame(rows), use_container_width=True)
+    st.caption(
+        "Accuracy metrics use one-to-one gated matching at each timestamp. "
+        "Recall is relative to all ground-truth object samples; precision is "
+        "relative to all confirmed/coasting track samples. `track_fragmentation` "
+        "is not implemented and is omitted rather than reported as zero."
+    )
+
+    st.subheader("Scene")
+    figure = go.Figure()
+    states = pair.states
+    for object_id in states[0].objects:
+        figure.add_trace(
+            go.Scatter(
+                x=[state.objects[object_id].position.x for state in states],
+                y=[state.objects[object_id].position.y for state in states],
+                mode="lines",
+                name=f"GT {object_id}",
+                line={"dash": "dash", "width": 2},
+            )
+        )
+
+    symbols = {"range_only": "square", "fused": "triangle-up"}
+    for method_name, record in methods:
+        for track in record.tracker.tracks.values():
+            if track.status not in {TrackStatus.CONFIRMED, TrackStatus.COASTING}:
+                continue
+            figure.add_trace(
+                go.Scatter(
+                    x=[track.position()[0]],
+                    y=[track.position()[1]],
+                    mode="markers",
+                    name=f"{method_name} {track.track_id}",
+                    marker={"size": 10, "symbol": symbols[method_name]},
+                )
+            )
+    figure.update_layout(
+        title="Ground truth (dashed) and final confirmed/coasting tracks",
         xaxis_title="X (m)",
         yaxis_title="Y (m)",
         height=600,
     )
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Scenario info
-    st.subheader("Scenario Information")
-    st.info(f"**Scenario:** {res['scenario']} | **Seed:** {seed} | **Objects:** {num_objects} | "
-            f"This is synthetic data - not representative of real-world performance.")
+    st.plotly_chart(figure, use_container_width=True)
+
+    st.subheader("Scenario")
+    st.info(
+        f"**Scenario:** {st.session_state['scenario_name']} | "
+        f"**Seed:** {st.session_state['seed']} | "
+        f"**Objects:** {st.session_state['num_objects']} | "
+        f"**Observer trajectory:** {pair.scenario.observer_trajectory}"
+    )
+    with st.expander("Known limitations"):
+        st.markdown(
+            "- Synthetic 2-D world; simplified sensor models.\n"
+            "- Vision-only track initiation is unsupported.\n"
+            "- Observations older than one tracker epoch are rejected and counted, "
+            "not replayed.\n"
+            "- `track_fragmentation` is not implemented.\n"
+            "- Results are not evidence of real-world or hardware performance."
+        )
 else:
-    st.info("Configure parameters in the sidebar and click 'Run Simulation' to start.")
+    st.info("Configure parameters in the sidebar and click 'Run simulation'.")
