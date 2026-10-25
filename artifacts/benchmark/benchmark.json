@@ -1,6 +1,6 @@
 {
   "code": {
-    "git_commit": "9feac5eca754e67ffb5db0b95e0f48aa7984ab8a",
+    "git_commit": "e4af2cab6e7e055479378eac0a3de2562c414684",
     "package_version": "0.1.0"
   },
   "command": "benchmark",
@@ -15,6 +15,10 @@
     "metrics_document": "docs/metrics.md",
     "num_objects": 3,
     "paired": "same world states and range-sensor random stream per seed",
+    "paired_comparison": {
+      "baseline": "range_only",
+      "treatment": "fused"
+    },
     "paired_difference_interval": "two-sided 95% t interval over seeds of (fused - range_only); descriptive seed-to-seed variation, not a generalisation claim",
     "position_coverage_95_threshold": 5.991,
     "seed_group": "development",
@@ -9360,7 +9364,7 @@
         }
       ],
       "scenario": {
-        "description": "Heavy Poisson false alarms per frame: 4.0 on the range-bearing sensor and 8.0 on the vision sensor (4x false_observations).",
+        "description": "Heavy Poisson false alarms per frame: 4.0 on the range-bearing sensor (4x false_observations) and 8.0 on the vision sensor (about 2.7x false_observations).",
         "dt": 0.1,
         "duration": 10.0,
         "hypothesis": "Dense clutter creates many spurious candidates inside the gates; precision, unmatched confirmed tracks and lost-competition counts should worsen, and gate rejection is not a defence against clutter that falls inside the gate.",

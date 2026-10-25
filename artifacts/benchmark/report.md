@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `9feac5eca754e67ffb5db0b95e0f48aa7984ab8a`
+- Git commit: `e4af2cab6e7e055479378eac0a3de2562c414684`
 - Seeds: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -666,12 +666,8 @@ observations behind each mean age of information.
 
 ## Findings
 
-- On the aggregate position RMSE, fused was better in 8 scenario(s),
-  worse in 3 scenario(s), and within 0.01 m in 3 scenario(s).
-- Fused precision was higher in 0 scenario(s) and lower
-  in 14. Fused 95% coverage was higher in 2
-  scenario(s) and lower in 12. Accuracy alone does not
-  establish that fusion improved association or calibration.
+- Position RMSE: the paired interval excludes zero in favour of fusion in 7 scenario(s) and against fusion in 3 scenario(s); it includes zero (or has fewer than two seeds) in 4 scenario(s).
+- Fused precision is lower (interval excludes zero) in 13 scenario(s) and higher in 0; fused 95% coverage is lower in 9 and higher in 2. Accuracy alone does not establish that fusion improved association or calibration.
 - Fusion is not guaranteed to improve accuracy. Systematic sensor bias,
   miscalibrated uncertainty, missed detections, false observations and
   association errors can all reverse the comparison.
@@ -689,7 +685,7 @@ observations behind each mean age of information.
   enough to pass the gate often, so it measures what happens when biased
   vision data is actually fused. Neither scenario establishes real-world
   sensor-fusion performance; both are descriptive synthetic results on
-  development seeds, not statistical or held-out claims.
+  results; intervals reflect seed-to-seed variation only.
 - `track_fragmentation` counts interruptions in an object's matched frames, summed
   over objects; it is independent of identity switches.
 - `identity_switches` counts changes of matched track ID for the same
@@ -699,8 +695,7 @@ observations behind each mean age of information.
 - Scenarios with no matched samples (for example `out_of_sequence`)
   report `N/A` accuracy because their observations are rejected as stale;
   that is an explicit non-result, not a zero-error result.
-- This report uses the seeds shown above. The reserved held-out range
-  (25-49) is not included here and no held-out claim is made.
+- This report uses 25 development seed(s). The reserved held-out range (25-49) is not included here and no held-out claim is made.
 
 ## Limitations
 
@@ -710,6 +705,4 @@ observations behind each mean age of information.
 - Out-of-sequence observations older than one tracker epoch are explicitly
   rejected and counted, not silently dropped. Their accuracy impact is
   therefore not represented as a successful fusion result.
-- Development seeds are used for debugging. The documented held-out seed
-  range (25-49) is only a held-out evaluation when those seeds are actually
-  present in the `Seeds` line above.
+- Results on development seeds include choices made while building the workbench and are not confirmatory. A held-out evaluation exists only when the reserved seeds (25-49) appear in the `Seeds` line above.
