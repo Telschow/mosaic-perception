@@ -1,0 +1,49 @@
+{
+  "clear_threshold": 0.5,
+  "commit": "12c8791b303e0a0b50f753af204249e622d0281a",
+  "installed_version": "1.0.dev1",
+  "repository": "https://github.com/JonathonLuiten/TrackEval",
+  "sequences": {
+    "clean_two_objects": {
+      "clr_fn": 0,
+      "clr_fp": 0,
+      "clr_tp": 12,
+      "idf1": 1.0,
+      "idp": 1.0,
+      "idr": 1.0,
+      "idsw": 0,
+      "mota": 1.0
+    },
+    "duplicate_track": {
+      "clr_fn": 0,
+      "clr_fp": 6,
+      "clr_tp": 6,
+      "idf1": 0.6666666666666666,
+      "idp": 0.5,
+      "idr": 1.0,
+      "idsw": 0,
+      "mota": 0.0
+    },
+    "identity_switch": {
+      "clr_fn": 3,
+      "clr_fp": 0,
+      "clr_tp": 9,
+      "idf1": 0.5714285714285714,
+      "idp": 0.6666666666666666,
+      "idr": 0.5,
+      "idsw": 1,
+      "mota": 0.6666666666666666
+    },
+    "miss_and_spurious": {
+      "clr_fn": 2,
+      "clr_fp": 6,
+      "clr_tp": 4,
+      "idf1": 0.5,
+      "idp": 0.4,
+      "idr": 0.6666666666666666,
+      "idsw": 0,
+      "mota": -0.3333333333333333
+    }
+  },
+  "tool": "TrackEval"
+}

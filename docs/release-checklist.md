@@ -2,6 +2,8 @@
 
 > **Status: historical and superseded.**
 >
+> For current state see [implementation-status.md](implementation-status.md).
+>
 > This checklist describes the published v0.1.0 release at `ae518f7`. It is
 > retained for context only and is **not** a current release checklist. The
 > v0.1.0 implementation contained the core defects documented in

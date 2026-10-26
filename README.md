@@ -6,6 +6,27 @@ Mosaic is a deterministic synthetic workbench for investigating a narrow but imp
 
 It compares a **range-bearing-sensor-only baseline** (method identifier `range_only`, no vision at all) with a **fused** method that adds vision-like bearing observations, and a third method, **fused_bias_estimated**, that also estimates a constant vision bearing bias and removes it before gating and updating. All methods run on the same worlds and the same sensor random streams, so the comparisons are paired rather than comparisons of unrelated runs.
 
+**All results in this repository are synthetic and use development seeds (0–24) only.** The reserved held-out range 25–49 has not been run, and no held-out claim is made.
+
+### Status
+
+This README is the summary; [docs/implementation-status.md](docs/implementation-status.md) is the authoritative inventory of what is implemented per subsystem with the test or artifact behind each claim, what is only planned, and what is out of scope. Every result statement in this README is read from the generated report or artifacts linked below.
+
+### Reproduce in three commands
+
+```bash
+git clone https://github.com/Telschow/mosaic-perception.git && cd mosaic-perception
+uv sync --locked --all-extras && uv run pytest
+uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
+```
+
+CI runs the locked sync and test suite on every push, checks benchmark determinism by regenerating a small fixed benchmark and comparing it byte-for-byte with the committed golden files, and verifies the committed artifacts with `make provenance-check benchmark-golden-check`. The third command is the same benchmark code path as the golden check, at the published configuration.
+
+### What the evidence shows, and what it does not
+
+- **Shows, on these synthetic worlds only:** in the paired 25-seed comparison, fusion improves position RMSE under the headline matcher in 1 of the 15 scenarios with defined accuracy and worsens it in 6; fused precision is worse in 14 of 15 and MOTA and GOSPA in 14 of 16; position NEES is above its 95% interval in all 15 scenarios for both methods (overconfident). The bias-estimated method recovers part of fusion's loss in the within-gate bias scenarios but stays below range-only on precision and MOTA. Every figure is in [artifacts/benchmark/report.md](artifacts/benchmark/report.md), including all headline observations quoted below.
+- **Does not show:** real-world or hardware performance or held-out-seed results.
+
 ## What is implemented
 
 - Deterministic 2-D synthetic worlds with known ground truth and optional moving observer.
@@ -18,6 +39,9 @@ It compares a **range-bearing-sensor-only baseline** (method identifier `range_o
 - Deterministic IDs, explicit delivery/rejection statistics, and no ground-truth identities in the tracker.
 - Hand-constructed evaluator tests with exact expected values, plus end-to-end regression tests.
 - Reproducible benchmark artifacts generated from code: JSON, CSV and Markdown.
+- CI on every push: locked install, Ruff lint and format check, mypy, the full
+  test suite, CLI smoke tests, a pinned secret scan over full git history, and
+  byte-level artifact provenance and golden-benchmark checks.
 
 ## Quickstart
 
@@ -145,7 +169,10 @@ Headline observations from the current development benchmark:
   but in `dense_clutter` only 8.6 of 73.4.
 - Identity switches also depend on the matcher: the continuity preference cuts
   the summed per-seed mean from 388.5 to 241.8 (about 38%) over the 16
-  scenarios and both methods, and changes the fused-versus-range ordering in
+  scenarios and both methods (summed from the `identity_switches` and
+  `identity_switches_distance_only` columns of
+  [artifacts/benchmark/per_seed.csv](artifacts/benchmark/per_seed.csv)), and
+  changes the fused-versus-range ordering in
   some scenarios (for example `nominal`: 6.1 for range-only and 4.7 for fused
   with continuity, 8.9 and 10.6 distance-only).
 - **Consistency.** Position NEES per degree of freedom is above its 95% interval
@@ -231,11 +258,12 @@ been superseded; they are not preserved as a baseline for comparison.**
   occlusion, clutter maps or hardware validation.
 - Constant-velocity motion model; turning objects are approximated.
 - Vision-only track initiation is unsupported by design.
-- Observations older than one tracker epoch are rejected, not replayed; the
-  stale-data fusion case is not evaluated. Admitted delayed observations are
-  applied to the delivery-time state (not rewound to capture time), an
-  approximation whose displacement scale is ~speed x age under constant
-  velocity, not a strict bound.
+- Observations older than one tracker epoch are rejected and counted, not
+  replayed, in the default mode; fusion of observations older than one epoch
+  is therefore not measured. Within one epoch the tracker applies
+  observations to the delivery-time state (an approximation of scale
+  ~speed × age), with an opt-in one-step-lag retrodiction mode; see
+  [docs/limitations.md](docs/limitations.md).
 - Association is gated Hungarian within each measurement group, not MHT/JPDA.
 - Only development seeds have been run; no held-out evaluation is claimed.
 - Reported covariance and empirical coverage can disagree; calibration is
@@ -245,6 +273,7 @@ See [docs/limitations.md](docs/limitations.md) for the full list.
 
 ## Documentation
 
+- [Implementation status](docs/implementation-status.md) — what exists today, with evidence
 - [Architecture](docs/architecture.md)
 - [Measurement models](docs/measurement-models.md)
 - [Metrics](docs/metrics.md)

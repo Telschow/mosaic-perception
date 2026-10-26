@@ -2,6 +2,8 @@
 
 > **Status: historical and superseded.**
 >
+> For current state see [implementation-status.md](implementation-status.md).
+>
 > This report describes the initial v0.1.0 implementation at commit `6782de4`.
 > It is retained for context only. It is **not** a description of the current
 > branch and must not be used as a current status report. Several findings were

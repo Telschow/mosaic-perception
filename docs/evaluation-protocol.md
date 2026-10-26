@@ -86,6 +86,37 @@ Definitions and denominators are in [metrics.md](metrics.md).
 - The report states whether the seeds are development or held-out and whether
   the held-out range was run.
 
+## Reproducibility checks in CI
+
+Two checks run on every push and pull request alongside the test suite.
+
+**Golden benchmark** (`scripts/check_benchmark_golden.py`, `make
+benchmark-golden-check`). Regenerates a small fixed benchmark — scenarios
+`nominal` and `sensor_disagreement_within_gate`, seeds 0 and 1, 2.0 s duration,
+2 objects — into a temporary directory and compares all three outputs
+(`benchmark.json`, `per_seed.csv`, `report.md`) byte for byte against the
+committed copies in `artifacts/benchmark-golden/`. Any nondeterminism or silent
+behaviour change fails the build. The recorded source commit differs on every
+commit by design, so both sides have 40-hex commit hashes replaced by a
+placeholder before comparison; commit correctness is the provenance check's
+job. When an output change is intended, refresh the goldens with the
+one-command step `make benchmark-golden` and commit the result.
+
+**Artifact provenance** (`scripts/check_artifact_provenance.py`, `make
+provenance-check`). Reads `artifacts/benchmark/benchmark.json` and verifies
+that the recorded source commit exists and is an ancestor of `HEAD`, that no
+artifact-producing source has changed since that commit, and that the recorded
+package version still matches `pyproject.toml`. The artifact-producing source
+set is `src/` — the package that generates the numbers. Tests, documentation,
+workflows and dependency manifests are excluded because they cannot change
+generated values; a dependency change that does change values is caught by the
+golden benchmark check.
+
+Either check failing means the committed benchmark artifact no longer
+describes this tree: regenerate with `make benchmark` and commit the refreshed
+artifacts (and, for the golden check, `make benchmark-golden` if the change is
+intended).
+
 ## What this protocol does not establish
 
 - Real-sensor, hardware or field performance.
