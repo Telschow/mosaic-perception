@@ -158,7 +158,7 @@ suite, CLI smoke tests, a pinned secret scan over full history, artifact
 provenance and golden-benchmark checks. Least-privilege permissions, all
 actions pinned to commit SHAs.
 
-- Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6) — jobs `test`, `secret-scan`,
+- Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6): jobs `test`, `secret-scan`,
   `artifact-checks`. CI invokes the tools directly rather than through `make`,
   on the same paths as the Make targets: `ruff check src tests scripts app`
   (`make lint`), `ruff format --check src tests scripts app`
