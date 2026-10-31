@@ -1,5 +1,9 @@
 # Roadmap
 
+> For current state see [implementation-status.md](implementation-status.md)
+> and the [comprehensive audit](audits/mosaic-perception-comprehensive-audit.md).
+> Sections below that describe an earlier state are superseded.
+
 ## v0.1.0 (published, superseded)
 
 - [x] Synthetic world generation

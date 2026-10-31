@@ -2,7 +2,7 @@
 
 <issues-json>
 
-!`gh issue list --state open --label Sandcastle --limit 20 --json number,title,body,labels --jq '[.[] | {number, title, body, labels: [.labels[].name]}]'`
+!`gh issue list --state open --label Sandcastle --label ready-for-agent --limit 20 --json number,title,body,labels --jq '[.[] | {number, title, body, labels: [.labels[].name]}]'`
 
 </issues-json>
 

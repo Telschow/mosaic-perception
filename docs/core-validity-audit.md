@@ -2,7 +2,10 @@
 
 > **Status: historical.** This is a pre-fix record, not a description of the
 > current code. For current state see
-> [implementation-status.md](implementation-status.md).
+> [implementation-status.md](implementation-status.md). Statements below that
+> are now out of date (for example the V10 row on `track_fragmentation`, which is
+> implemented) are catalogued in the
+> [comprehensive audit](audits/mosaic-perception-comprehensive-audit.md).
 
 **Branch:** `fix/core-validity` (from published `main` @ `ae518f7`)
 **Date:** 2026-10-25

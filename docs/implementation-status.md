@@ -4,7 +4,11 @@ The single source of truth for what this repository actually contains today,
 per subsystem, with the evidence behind each claim. Origin: an external audit
 could not inspect the code and asked for one place that answers "what is
 implemented, and how do you know". Historical audit documents are superseded
-by this one and point here.
+by this one and point here. The current verification of these claims against
+the code, tests and artifacts is the
+[comprehensive audit](audits/mosaic-perception-comprehensive-audit.md), pinned
+to a commit; where the audit finds a claim here wrong, the audit's finding
+stands until the claim is corrected.
 
 ## How to read this document
 
@@ -182,7 +186,9 @@ military/tactical applications, ego-navigation, C2/operator systems, optional
 ## Superseded documents
 
 The following describe older states of this repository and must not be read as
-current: [audit-report.md](audit-report.md),
+current (the current audit is
+[audits/mosaic-perception-comprehensive-audit.md](audits/mosaic-perception-comprehensive-audit.md)):
+[audit-report.md](audit-report.md),
 [core-validity-audit.md](core-validity-audit.md),
 [release-checklist.md](release-checklist.md) and the superseded sections of
 [roadmap.md](roadmap.md). For current state, use this document.
