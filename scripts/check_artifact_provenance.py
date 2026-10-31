@@ -12,7 +12,10 @@ Reads ``artifacts/benchmark/benchmark.json`` and verifies:
    the set: they cannot change generated values, and a dependency change that
    does change values is caught by ``scripts/check_benchmark_golden.py``,
 4. the recorded package version still equals the version in ``pyproject.toml``
-   (a version bump without regenerating artifacts is stale provenance).
+   (a version bump without regenerating artifacts is stale provenance),
+5. ``report.md`` records the same commit as ``benchmark.json`` and equals
+   ``render_report(benchmark.json)`` (the render is a pure function, so a stale
+   report is detectable). ``per_seed.csv`` records no commit and is not checked.
 
 Exit code 0 when everything holds, 1 otherwise. Runs in CI on every push and
 pull request; see docs/evaluation-protocol.md.
@@ -26,13 +29,35 @@ import subprocess
 import sys
 import tomllib
 from pathlib import Path
+from typing import Any
 
 ARTIFACT = Path("artifacts/benchmark/benchmark.json")
+REPORT = ARTIFACT.with_name("report.md")
 SOURCE_PATHS = ("src/",)
 
 
 def _git(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(["git", *args], capture_output=True, text=True)
+
+
+def check_report_commit(report: str, commit: str) -> list[str]:
+    match = re.search(r"^- Git commit: `([^`]*)`", report, re.MULTILINE)
+    if match is None:
+        return ["report.md records no git commit"]
+    if match.group(1) != commit:
+        return [
+            f"report.md records commit {match.group(1)[:12]} but benchmark.json records "
+            f"{commit[:12]} — regenerate the benchmark (make benchmark)"
+        ]
+    return []
+
+
+def check_report_render(report: str, payload: dict[str, Any]) -> list[str]:
+    from mosaic_perception.reporting import render_report
+
+    if report != render_report(payload):
+        return ["report.md differs from render_report(benchmark.json) — regenerate the report"]
+    return []
 
 
 def main() -> int:
@@ -71,6 +96,13 @@ def main() -> int:
         failures.append(
             f"artifact records package version {version!r} but pyproject.toml declares {declared!r}"
         )
+
+    if not REPORT.exists():
+        failures.append(f"missing {REPORT}")
+    else:
+        report = REPORT.read_text()
+        failures += check_report_commit(report, commit)
+        failures += check_report_render(report, artifact)
 
     if failures:
         for line in failures:
