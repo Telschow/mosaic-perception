@@ -47,7 +47,7 @@ def check_report_commit(report: str, commit: str) -> list[str]:
     if match.group(1) != commit:
         return [
             f"report.md records commit {match.group(1)[:12]} but benchmark.json records "
-            f"{commit[:12]} — regenerate the benchmark (make benchmark)"
+            f"{commit[:12]}; regenerate the benchmark (make benchmark)"
         ]
     return []
 
@@ -56,7 +56,7 @@ def check_report_render(report: str, payload: dict[str, Any]) -> list[str]:
     from mosaic_perception.reporting import render_report
 
     if report != render_report(payload):
-        return ["report.md differs from render_report(benchmark.json) — regenerate the report"]
+        return ["report.md differs from render_report(benchmark.json); regenerate the report"]
     return []
 
 
@@ -87,7 +87,7 @@ def main() -> int:
                 "artifact-producing source changed since the recorded commit: "
                 + ", ".join(changed[:10])
                 + (" ..." if len(changed) > 10 else "")
-                + " — regenerate the benchmark (make benchmark)"
+                + "; regenerate the benchmark (make benchmark)"
             )
 
     pyproject = tomllib.loads(Path("pyproject.toml").read_text())
