@@ -199,15 +199,15 @@ Headline observations from the current development benchmark:
   fused). The estimator is a global scalar Kalman filter on the difference
   between a vision bearing and the contemporaneous range-bearing bearing of the
   same confirmed track. In the three within-gate scenarios its final estimate
-  is close to the configured bias (0.0100, 0.0149 and 0.0198 rad against 0.010,
-  0.015 and 0.020) and, against plain fused, it improves position RMSE by 0.075,
-  0.117 and 0.198 m, precision by 0.056, 0.122 and 0.139 and MOTA by 0.134,
-  0.320 and 0.378 (intervals exclude zero). It removes much but not all of the
-  harm: precision (0.673, 0.683, 0.674) and MOTA (0.467, 0.489, 0.470) stay below
-  range-only (0.826 and 0.746), while distance-only RMSE (0.200, 0.202, 0.207)
-  is slightly lower than range-only's 0.213. In the 12 other scenarios with
+  is close to the configured bias (0.0101, 0.0149 and 0.0199 rad against 0.010,
+  0.015 and 0.020) and, against plain fused, it improves position RMSE by 0.073,
+  0.113 and 0.192 m, precision by 0.064, 0.110 and 0.131 and MOTA by 0.155,
+  0.297 and 0.359 (intervals exclude zero). It removes much but not all of the
+  harm: precision (0.681, 0.671, 0.666) and MOTA (0.487, 0.466, 0.450) stay below
+  range-only (0.826 and 0.746), while distance-only RMSE (0.202, 0.206, 0.215)
+  is close to range-only's 0.213 (lower in two scenarios, higher in the third). In the 12 other scenarios with
   defined accuracy the RMSE difference includes zero. For the 0.12 rad bias the
-  gate leaves about 1.4 updates per seed, so nothing is learned. The estimator
+  gate leaves about 1.3 updates per seed, so nothing is learned. The estimator
   assumes a constant bias and an unbiased range-bearing sensor.
 - **One-step-lag retrodiction** (`delivery_delay_retrodiction`, same delays as
   `delivery_delay`): it improves position accuracy and consistency (RMSE 0.308
