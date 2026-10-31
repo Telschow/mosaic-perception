@@ -81,11 +81,11 @@ Each observation has:
 
 The tracker holds observations in a pending queue until delivery. At each
 epoch it processes due observations sorted by `(delivery_time, capture_time,
-observation_id)`. An observation whose delivery latency (`delivery_time - capture_time`) is more
-than one tracker epoch (`dt + 1e-6`) is rejected with a logged stale reason and
-counted in `rejected_out_of_sequence`. It is not replayed. In-flight
-observations at the end of the simulation are reported as
-`pending_observations`.
+observation_id)`. An observation whose delivery latency
+(`delivery_time - capture_time`) is more than one tracker epoch (`dt + 1e-6`)
+is rejected with a logged stale reason and counted in
+`rejected_out_of_sequence`. It is not replayed. In-flight observations at the
+end of the simulation are reported as `pending_observations`.
 
 **Delayed-observation state alignment (bounded-staleness approximation):**
 When an observation is processed, the tracker has already predicted all tracks
