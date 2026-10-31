@@ -317,8 +317,10 @@ def _run_experiment(
         output.mkdir(parents=True, exist_ok=True)
         with (output / "benchmark.json").open("w") as handle:
             json.dump(payload, handle, indent=2, sort_keys=True)
+        # Render from the serialised form so report.md matches render_report(benchmark.json).
+        payload_on_disk = json.loads((output / "benchmark.json").read_text())
         _write_per_seed_csv(output / "per_seed.csv", csv_rows)
-        (output / "report.md").write_text(render_report(payload))
+        (output / "report.md").write_text(render_report(payload_on_disk))
         console.print(f"[green]Canonical artifacts written to {output}[/green]")
     return payload
 
