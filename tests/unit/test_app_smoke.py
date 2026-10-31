@@ -20,6 +20,10 @@ def test_app_renders_and_runs_a_short_simulation() -> None:
     assert not app.exception, app.exception
     assert app.title[0].value == "Mosaic: Multi-Sensor Perception Workbench"
 
+    seed_slider = app.sidebar.slider[0]
+    assert seed_slider.value == 1
+    assert seed_slider.max == 24
+
     app.sidebar.selectbox[0].select("nominal")
     app.sidebar.slider[1].set_value(2.0)
     app.sidebar.slider[2].set_value(1)

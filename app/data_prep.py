@@ -14,6 +14,9 @@ import plotly.graph_objects as go
 from mosaic_perception.domain.models import TrackStatus
 from mosaic_perception.experiment import METHODS, PairedRun, RunRecord
 
+DEFAULT_SEED = 1
+MAX_DEV_SEED = 24  # seeds 25-49 are reserved held-out; the app never offers them
+
 SIMULATED_LABEL = "Simulated data — synthetic worlds, development seeds only."
 LIMITATIONS_NOTE = (
     "Known limitations: see `docs/limitations.md`. Results are not evidence of "

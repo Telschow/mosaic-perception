@@ -17,8 +17,10 @@ import streamlit as st
 # this directory is not importable until it is added to sys.path.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from data_prep import (  # noqa: E402
+    DEFAULT_SEED,
     LIMITATIONS_LINES,
     LIMITATIONS_NOTE,
+    MAX_DEV_SEED,
     SIMULATED_LABEL,
     build_scene_figure,
     metrics_frame,
@@ -37,7 +39,7 @@ st.caption(SIMULATED_LABEL)
 
 st.sidebar.header("Configuration")
 scenario_name = st.sidebar.selectbox("Scenario", available_scenarios())
-seed = st.sidebar.slider("Random seed", 0, 100, 42)
+seed = st.sidebar.slider("Development seed", 0, MAX_DEV_SEED, DEFAULT_SEED)
 duration = st.sidebar.slider("Duration (s)", 2.0, 20.0, 5.0)
 num_objects = st.sidebar.slider("Number of objects", 1, 5, 3)
 run_button = st.sidebar.button("Run simulation")

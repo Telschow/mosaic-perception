@@ -41,7 +41,7 @@ they are not part of the preset identity.
 ## Usage
 
 ```bash
-uv run mosaic run --scenario nominal --seed 42
+uv run mosaic run --scenario nominal --seed 1
 uv run mosaic compare --scenario nominal --seeds 1,2,3
 uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```

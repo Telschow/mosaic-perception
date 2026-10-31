@@ -24,7 +24,7 @@ clean:
 	find . -type f -name "*.pyc" -delete
 
 run:
-	uv run mosaic run --scenario nominal --seed 42
+	uv run mosaic run --scenario nominal --seed 1
 
 compare:
 	uv run mosaic compare --scenario nominal --seeds 1,2,3
