@@ -193,3 +193,29 @@ def test_configured_vision_bias_is_only_recorded_for_vision_methods():
     assert pair.range_only.result.vision_bias_configured is None
     assert pair.fused.result.vision_bias_configured == 0.015
     assert pair.record("fused_bias_estimated").result.vision_bias_configured == 0.015
+
+
+def test_benchmark_metadata_records_numpy_and_scipy_versions(tmp_path: Path):
+    import numpy
+    import scipy
+
+    result = CliRunner().invoke(
+        app,
+        [
+            "evaluate",
+            "--scenario",
+            "nominal",
+            "--seeds",
+            "1",
+            "--duration",
+            "0.5",
+            "--num-objects",
+            "1",
+            "--output",
+            str(tmp_path),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    code = json.loads((tmp_path / "benchmark.json").read_text())["code"]
+    assert code["numpy_version"] == numpy.__version__
+    assert code["scipy_version"] == scipy.__version__
