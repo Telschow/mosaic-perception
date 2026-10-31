@@ -57,6 +57,7 @@ class Coverage:
     samples: int
     hits_95: int
     hits_68: int
+    skipped: int = 0  # matched samples with a non-PSD, singular or non-finite covariance
 
 
 @dataclass(frozen=True)
@@ -87,20 +88,33 @@ def matched_errors(frames: list[FrameMatch]) -> Errors:
     return Errors(position_squared, velocity_squared)
 
 
+def _block_nees(error: np.ndarray, block: np.ndarray) -> float | None:
+    """``e' P^-1 e`` for a positive-definite block, else ``None`` (not PSD, singular, non-finite)."""
+    block = np.asarray(block, dtype=float)
+    if not (np.all(np.isfinite(block)) and np.all(np.isfinite(error))):
+        return None
+    if not np.allclose(block, block.T, rtol=1e-9, atol=1e-12):
+        return None
+    eigenvalues = np.linalg.eigvalsh((block + block.T) / 2.0)
+    if eigenvalues[0] <= 1e-12 * max(float(eigenvalues[-1]), 1e-300):
+        return None
+    value = float(error @ np.linalg.solve(block, error))
+    return value if np.isfinite(value) and value >= 0.0 else None
+
+
 def coverage_counts(frames: list[FrameMatch]) -> Coverage:
-    samples = hits_95 = hits_68 = 0
+    samples = hits_95 = hits_68 = skipped = 0
     for frame in frames:
         for snapshot, truth in frame.matched_pairs:
             error = snapshot.position() - truth.position.to_array()
-            try:
-                mahalanobis_sq = float(error @ np.linalg.solve(snapshot.position_cov(), error))
-            except np.linalg.LinAlgError:
+            mahalanobis_sq = _block_nees(error, snapshot.position_cov())
+            if mahalanobis_sq is None:
+                skipped += 1
                 continue
-            if np.isfinite(mahalanobis_sq) and mahalanobis_sq >= 0.0:
-                samples += 1
-                hits_95 += int(mahalanobis_sq <= _COVERAGE_95)
-                hits_68 += int(mahalanobis_sq <= _COVERAGE_68)
-    return Coverage(samples, hits_95, hits_68)
+            samples += 1
+            hits_95 += int(mahalanobis_sq <= _COVERAGE_95)
+            hits_68 += int(mahalanobis_sq <= _COVERAGE_68)
+    return Coverage(samples, hits_95, hits_68, skipped)
 
 
 def class_counts(frames: list[FrameMatch]) -> ClassCounts:
@@ -269,42 +283,40 @@ def gospa(frames: list[FrameMatch], cutoff_m: float, p: int, alpha: int = 2) -> 
 class NeesSums:
     """Sums of normalised estimation error squared over matched samples."""
 
-    samples: int
+    position_samples: int
+    velocity_samples: int
     position: float  # sum of 2-DOF position NEES
     velocity: float  # sum of 2-DOF velocity NEES
+    skipped: int = 0  # matched samples missing at least one valid block
 
 
 def nees_sums(frames: list[FrameMatch]) -> NeesSums:
     """NEES of matched samples, position and velocity from their own covariance blocks.
 
     Only matched samples contribute (those inside the matching gate), so the
-    statistic is conditioned on that gate; samples with a singular or non-finite
-    covariance are skipped. Samples within one track are correlated.
+    statistic is conditioned on that gate. Each block is used only if it is
+    symmetric positive definite and finite; an invalid block drops that block's
+    sample alone (a singular velocity block keeps the position sample) and the
+    matched sample is counted in ``skipped``. Samples within one track are correlated.
     """
-    samples = 0
+    position_samples = velocity_samples = skipped = 0
     position_sum = velocity_sum = 0.0
     for frame in frames:
         for snapshot, truth in frame.matched_pairs:
             error = snapshot.position() - truth.position.to_array()
             velocity_error = snapshot.velocity() - truth.velocity.to_array()
             covariance = np.asarray(snapshot.covariance, dtype=float)
-            try:
-                position_nees = float(error @ np.linalg.solve(covariance[:2, :2], error))
-                velocity_nees = float(
-                    velocity_error @ np.linalg.solve(covariance[2:4, 2:4], velocity_error)
-                )
-            except np.linalg.LinAlgError:
-                continue
-            if (
-                np.isfinite(position_nees)
-                and np.isfinite(velocity_nees)
-                and position_nees >= 0.0
-                and velocity_nees >= 0.0
-            ):
-                samples += 1
+            position_nees = _block_nees(error, covariance[:2, :2])
+            velocity_nees = _block_nees(velocity_error, covariance[2:4, 2:4])
+            if position_nees is None or velocity_nees is None:
+                skipped += 1
+            if position_nees is not None:
+                position_samples += 1
                 position_sum += position_nees
+            if velocity_nees is not None:
+                velocity_samples += 1
                 velocity_sum += velocity_nees
-    return NeesSums(samples, position_sum, velocity_sum)
+    return NeesSums(position_samples, velocity_samples, position_sum, velocity_sum, skipped)
 
 
 def per_frame_metrics(frames: list[FrameMatch]) -> list[dict]:
@@ -394,6 +406,7 @@ class TrackingEvaluator:
 
         coverage = coverage_counts(frames)
         result.coverage_samples = coverage.samples
+        result.coverage_skipped_samples = coverage.skipped
         if coverage.samples:
             result.position_coverage_95 = coverage.hits_95 / coverage.samples
             result.position_coverage_68 = coverage.hits_68 / coverage.samples
@@ -405,12 +418,15 @@ class TrackingEvaluator:
             result.class_accuracy = classes.correct / classes.classified
 
         nees = nees_sums(frames)
-        result.nees_samples = nees.samples
+        result.nees_samples = nees.position_samples
+        result.nees_velocity_samples = nees.velocity_samples
+        result.nees_skipped_samples = nees.skipped
         result.nees_position_sum = nees.position
         result.nees_velocity_sum = nees.velocity
-        if nees.samples:
-            result.anees_position = nees.position / nees.samples
-            result.anees_velocity = nees.velocity / nees.samples
+        if nees.position_samples:
+            result.anees_position = nees.position / nees.position_samples
+        if nees.velocity_samples:
+            result.anees_velocity = nees.velocity / nees.velocity_samples
         result.identity_switches = identity_switches(frames)
         if self.continuity:
             distance_only = match_frames(
