@@ -14,7 +14,7 @@ uv sync --all-extras
 ## Step 1: Quick CLI test (30 seconds)
 
 ```bash
-uv run mosaic run --scenario nominal --seed 42 --duration 10.0
+uv run mosaic run --scenario nominal --seed 1 --duration 10.0
 ```
 
 You will see both methods on the same world and range stream, with position and
