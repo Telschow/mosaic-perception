@@ -73,6 +73,22 @@ The explicit count fields `matched_samples`, `ground_truth_samples`,
 denominators can be audited. `evaluated_frames` and `matching_gate_m` are also
 recorded.
 
+### Skipped samples and invalid input
+
+Coverage and NEES use a covariance block only if it is finite, symmetric and
+positive definite. A non-PSD (for example `diag(1, -1, 1, 1)`), singular or
+non-finite block is skipped, not inverted. Each matched sample with a rejected
+block is counted: `coverage_skipped_samples` for the position coverage block,
+`nees_skipped_samples` for a sample missing a valid position or velocity block.
+The position and velocity blocks are judged separately, so a singular velocity
+block keeps the position sample: `nees_samples` counts valid position blocks,
+`nees_velocity_samples` valid velocity blocks, and `anees_position` and
+`anees_velocity` divide by their own counts.
+
+The evaluator raises `ValueError` rather than skipping when a track snapshot time
+matches no world-state time (within 1e-9 s), or when two snapshots share a
+`(track_id, time)`.
+
 ## Cross-check against TrackEval
 
 `mota`, `idf1`, `idp`, `idr`, the CLEAR counts (`matched_samples`,

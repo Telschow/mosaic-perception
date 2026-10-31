@@ -40,7 +40,10 @@ def index_snapshots(snapshots: list[TrackSnapshot]) -> dict[float, dict[str, Tra
     by_time: dict[float, dict[str, TrackSnapshot]] = {}
     for snapshot in snapshots:
         key = round(float(snapshot.time), 9)
-        by_time.setdefault(key, {})[snapshot.track_id] = snapshot
+        frame = by_time.setdefault(key, {})
+        if snapshot.track_id in frame:
+            raise ValueError(f"duplicate snapshot for track {snapshot.track_id!r} at time {key}")
+        frame[snapshot.track_id] = snapshot
     return by_time
 
 
@@ -63,6 +66,10 @@ def match_frames(
     match (continuity outranks match count); an object that was unmatched in the
     preceding frame has no preference. Otherwise matching is distance-only.
     """
+    world_times = {round(float(world_state.time), 9) for world_state in world_states}
+    stray = sorted(set(snapshots_by_time) - world_times)
+    if stray:
+        raise ValueError(f"snapshots at {stray[:3]} match no world-state time (within 1e-9 s)")
     frames: list[FrameMatch] = []
     previous: dict[str, str] = {}
     for index, world_state in enumerate(world_states):

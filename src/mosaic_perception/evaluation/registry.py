@@ -88,6 +88,7 @@ RESULT_METRICS: tuple[MetricSpec, ...] = (
     MetricSpec("unmatched_ground_truth_samples", 0),
     MetricSpec("unmatched_track_samples", 0),
     MetricSpec("coverage_samples", 0),
+    MetricSpec("coverage_skipped_samples", 0),
     MetricSpec("position_coverage_95"),
     MetricSpec("position_coverage_68"),
     MetricSpec("num_tracks", 1),
@@ -103,6 +104,8 @@ RESULT_METRICS: tuple[MetricSpec, ...] = (
     MetricSpec("vision_bias_updates", 1),
     MetricSpec("vision_bias_configured", 4),
     MetricSpec("nees_samples", 0),
+    MetricSpec("nees_velocity_samples", 0),
+    MetricSpec("nees_skipped_samples", 0),
     MetricSpec("nees_position_sum", 1),
     MetricSpec("nees_velocity_sum", 1),
     MetricSpec("anees_position"),
@@ -134,7 +137,9 @@ POOLED_RATIOS: tuple[PooledRatio, ...] = (
 
 POOLED_CHI_SQUARES: tuple[PooledChiSquare, ...] = (
     PooledChiSquare("anees_position_per_dof_pooled", "nees_position_sum", "nees_samples", 2),
-    PooledChiSquare("anees_velocity_per_dof_pooled", "nees_velocity_sum", "nees_samples", 2),
+    PooledChiSquare(
+        "anees_velocity_per_dof_pooled", "nees_velocity_sum", "nees_velocity_samples", 2
+    ),
     PooledChiSquare("anis_pooled", "nis_sum", dof_metric="nis_dof_sum"),
 )
 
