@@ -190,14 +190,14 @@ setup and is not a claim about other worlds.
 | sensor_disagreement_within_gate_low | position_rmse_distance_only | 25 | +0.023 | [+0.005, +0.041] |
 | sensor_disagreement_within_gate_low | precision | 25 | -0.216 | [-0.243, -0.189] |
 | sensor_disagreement_within_gate_low | recall | 25 | +0.001 | [-0.000, +0.001] |
-| stale_rejection | gospa_p1 | 25 | +0.000 | [+0.000, +0.000] |
-| stale_rejection | idf1 | 25 | +0.000 | [+0.000, +0.000] |
-| stale_rejection | mota | 25 | +0.000 | [+0.000, +0.000] |
+| stale_rejection | gospa_p1 | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
+| stale_rejection | idf1 | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
+| stale_rejection | mota | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | stale_rejection | position_coverage_95 | 0 | N/A | N/A |
 | stale_rejection | position_rmse | 0 | N/A | N/A |
 | stale_rejection | position_rmse_distance_only | 0 | N/A | N/A |
 | stale_rejection | precision | 0 | N/A | N/A |
-| stale_rejection | recall | 25 | +0.000 | [+0.000, +0.000] |
+| stale_rejection | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | uncertainty_miscalibration | gospa_p1 | 25 | +2.422 | [+2.237, +2.607] |
 | uncertainty_miscalibration | idf1 | 25 | +0.037 | [+0.019, +0.054] |
 | uncertainty_miscalibration | mota | 25 | -0.731 | [-0.795, -0.667] |
@@ -252,7 +252,7 @@ Same conventions as the first comparison.
 | dense_clutter | position_rmse | 25 | +0.005 | [-0.016, +0.026] |
 | dense_clutter | position_rmse_distance_only | 25 | +0.007 | [-0.003, +0.017] |
 | dense_clutter | precision | 25 | -0.004 | [-0.010, +0.002] |
-| dense_clutter | recall | 25 | +0.000 | [+0.000, +0.000] |
+| dense_clutter | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | false_observations | gospa_p1 | 25 | +0.149 | [-0.025, +0.324] |
 | false_observations | idf1 | 25 | -0.030 | [-0.055, -0.005] |
 | false_observations | mota | 25 | -0.040 | [-0.090, +0.009] |
@@ -276,7 +276,7 @@ Same conventions as the first comparison.
 | moving_observer | position_rmse | 25 | +0.015 | [-0.009, +0.039] |
 | moving_observer | position_rmse_distance_only | 25 | +0.015 | [+0.000, +0.029] |
 | moving_observer | precision | 25 | -0.007 | [-0.035, +0.020] |
-| moving_observer | recall | 25 | +0.000 | [+0.000, +0.000] |
+| moving_observer | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | nominal | gospa_p1 | 25 | +0.026 | [-0.163, +0.216] |
 | nominal | idf1 | 25 | -0.004 | [-0.020, +0.012] |
 | nominal | mota | 25 | -0.000 | [-0.056, +0.055] |
@@ -284,7 +284,7 @@ Same conventions as the first comparison.
 | nominal | position_rmse | 25 | +0.005 | [-0.020, +0.030] |
 | nominal | position_rmse_distance_only | 25 | +0.009 | [-0.000, +0.019] |
 | nominal | precision | 25 | +0.001 | [-0.024, +0.026] |
-| nominal | recall | 25 | +0.000 | [+0.000, +0.000] |
+| nominal | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | range_dropout | gospa_p1 | 25 | +0.069 | [-0.055, +0.193] |
 | range_dropout | idf1 | 25 | -0.012 | [-0.031, +0.007] |
 | range_dropout | mota | 25 | -0.014 | [-0.050, +0.023] |
@@ -300,7 +300,7 @@ Same conventions as the first comparison.
 | sensor_disagreement_large_bias | position_rmse | 25 | -0.004 | [-0.013, +0.006] |
 | sensor_disagreement_large_bias | position_rmse_distance_only | 25 | -0.000 | [-0.003, +0.003] |
 | sensor_disagreement_large_bias | precision | 25 | +0.001 | [-0.005, +0.006] |
-| sensor_disagreement_large_bias | recall | 25 | +0.000 | [+0.000, +0.000] |
+| sensor_disagreement_large_bias | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | sensor_disagreement_within_gate | gospa_p1 | 25 | -1.071 | [-1.320, -0.822] |
 | sensor_disagreement_within_gate | idf1 | 25 | +0.132 | [+0.092, +0.172] |
 | sensor_disagreement_within_gate | mota | 25 | +0.296 | [+0.221, +0.371] |
@@ -308,7 +308,7 @@ Same conventions as the first comparison.
 | sensor_disagreement_within_gate | position_rmse | 25 | -0.140 | [-0.172, -0.109] |
 | sensor_disagreement_within_gate | position_rmse_distance_only | 25 | -0.068 | [-0.090, -0.047] |
 | sensor_disagreement_within_gate | precision | 25 | +0.114 | [+0.084, +0.145] |
-| sensor_disagreement_within_gate | recall | 25 | +0.000 | [+0.000, +0.000] |
+| sensor_disagreement_within_gate | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | sensor_disagreement_within_gate_high | gospa_p1 | 25 | -1.588 | [-1.753, -1.423] |
 | sensor_disagreement_within_gate_high | idf1 | 25 | +0.139 | [+0.106, +0.172] |
 | sensor_disagreement_within_gate_high | mota | 25 | +0.465 | [+0.416, +0.513] |
@@ -324,15 +324,15 @@ Same conventions as the first comparison.
 | sensor_disagreement_within_gate_low | position_rmse | 25 | -0.070 | [-0.103, -0.038] |
 | sensor_disagreement_within_gate_low | position_rmse_distance_only | 25 | -0.041 | [-0.058, -0.024] |
 | sensor_disagreement_within_gate_low | precision | 25 | +0.060 | [+0.034, +0.086] |
-| sensor_disagreement_within_gate_low | recall | 25 | +0.000 | [+0.000, +0.000] |
-| stale_rejection | gospa_p1 | 25 | +0.000 | [+0.000, +0.000] |
-| stale_rejection | idf1 | 25 | +0.000 | [+0.000, +0.000] |
-| stale_rejection | mota | 25 | +0.000 | [+0.000, +0.000] |
+| sensor_disagreement_within_gate_low | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
+| stale_rejection | gospa_p1 | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
+| stale_rejection | idf1 | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
+| stale_rejection | mota | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | stale_rejection | position_coverage_95 | 0 | N/A | N/A |
 | stale_rejection | position_rmse | 0 | N/A | N/A |
 | stale_rejection | position_rmse_distance_only | 0 | N/A | N/A |
 | stale_rejection | precision | 0 | N/A | N/A |
-| stale_rejection | recall | 25 | +0.000 | [+0.000, +0.000] |
+| stale_rejection | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 | uncertainty_miscalibration | gospa_p1 | 25 | +0.026 | [-0.136, +0.188] |
 | uncertainty_miscalibration | idf1 | 25 | -0.005 | [-0.021, +0.012] |
 | uncertainty_miscalibration | mota | 25 | -0.007 | [-0.062, +0.048] |
@@ -348,7 +348,7 @@ Same conventions as the first comparison.
 | vision_dropout | position_rmse | 25 | +0.004 | [-0.005, +0.014] |
 | vision_dropout | position_rmse_distance_only | 25 | +0.002 | [-0.006, +0.010] |
 | vision_dropout | precision | 25 | -0.013 | [-0.036, +0.011] |
-| vision_dropout | recall | 25 | +0.000 | [+0.000, +0.000] |
+| vision_dropout | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
 
 ## Class estimate accuracy
 
@@ -1096,6 +1096,7 @@ observations behind each mean age of information.
   at least one frame, was left unmatched while a ground-truth object lay
   within the matching gate (the object had been claimed by another track).
   The rest were never near an unclaimed object under that gate.
+- Fixed text (not derived from the numbers) in the next two bullets:
 - `sensor_disagreement_large_bias` (0.12 rad) is a gate-rejection
   experiment: see the vision acceptance table for how many biased
   observations the gate rejected versus applied. It does not measure the
@@ -1103,8 +1104,8 @@ observations behind each mean age of information.
 - `sensor_disagreement_within_gate` (0.015 rad) applies a bias small
   enough to pass the gate often, so it measures what happens when biased
   vision data is actually fused. Neither scenario establishes real-world
-  sensor-fusion performance; both are descriptive synthetic results on
-  results; intervals reflect seed-to-seed variation only.
+  sensor-fusion performance; both are descriptive synthetic results;
+  intervals reflect seed-to-seed variation only.
 - `track_fragmentation` counts interruptions in an object's matched frames, summed
   over objects; it is independent of identity switches.
 - `identity_switches` counts changes of matched track ID for the same
@@ -1115,6 +1116,15 @@ observations behind each mean age of information.
   report `N/A` accuracy because their observations are rejected as stale;
   that is an explicit non-result, not a zero-error result.
 - This run includes seeds outside the development range (custom_or_held_out); do not read it as the development benchmark. A held-out evaluation requires a single run on frozen code, reported separately.
+
+## Counting rules
+
+- Fixed text: tallies count scenarios, not independent trials. A scenario with
+  `n == 0` for a metric is skipped in that metric's tally, so better, worse and
+  inconclusive counts can sum to fewer than the number of scenarios. Scored in 15 of 16 scenario(s) for position RMSE.
+- No multiplicity correction is applied across scenarios, metrics or comparisons;
+  with this many 95% intervals some will exclude zero by chance.
+- 4 zero-width interval(s) are not counted as findings: identical paired differences give no spread estimate, so they are tallied as inconclusive and marked `(degenerate)` in the paired table.
 
 ## Limitations
 

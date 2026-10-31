@@ -18,6 +18,31 @@ _DEFAULT_COMPARISONS = [
 ]
 
 
+def _is_degenerate(row: dict[str, Any]) -> bool:
+    """A zero-width interval (identical paired differences) carries no spread information."""
+    return row["ci95_low"] is not None and row["ci95_low"] == row["ci95_high"]
+
+
+def _scored(payload: dict[str, Any], metric: str, comparison: str) -> int:
+    """Scenarios that enter the tally for a metric (those with ``n > 0``)."""
+    count = 0
+    for scenario_report in payload["scenarios"]:
+        row = scenario_report.get("paired_differences", {}).get(comparison, {}).get(metric)
+        count += bool(row and row["n"] > 0)
+    return count
+
+
+def _shared_baselines(payload: dict[str, Any]) -> list[str]:
+    """Names of scenarios whose ``range_only`` runs are identical to another scenario's."""
+    groups: dict[str, list[str]] = {}
+    for scenario_report in payload["scenarios"]:
+        runs = scenario_report.get("runs") or []
+        if runs:
+            key = repr([(run["seed"], run["range_only"]) for run in runs])
+            groups.setdefault(key, []).append(scenario_report["scenario"]["name"])
+    return [name for names in groups.values() if len(names) > 1 for name in names]
+
+
 def _tally(
     payload: dict[str, Any],
     metric: str,
@@ -30,7 +55,7 @@ def _tally(
         row = scenario_report.get("paired_differences", {}).get(comparison, {}).get(metric)
         if not row or row["n"] == 0:
             continue
-        if row["ci95_low"] is None:
+        if row["ci95_low"] is None or _is_degenerate(row):
             inconclusive += 1
         elif row["ci95_high"] < 0:
             better, worse = (better + 1, worse) if lower_is_better else (better, worse + 1)
@@ -122,6 +147,7 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
                     "N/A"
                     if row["ci95_low"] is None
                     else f"[{row['ci95_low']:+.3f}, {row['ci95_high']:+.3f}]"
+                    + (" (degenerate)" if _is_degenerate(row) else "")
                 )
                 mean = "N/A" if row["mean"] is None else f"{row['mean']:+.3f}"
                 lines.append(
@@ -210,6 +236,36 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             "- This run uses seeds outside the development range; whether it is a "
             "held-out evaluation depends on how the code was frozen before it."
         )
+    primary = comparisons[0]["name"]
+    total = len(payload["scenarios"])
+    degenerate = sum(
+        _is_degenerate(row)
+        for scenario_report in payload["scenarios"]
+        for row in scenario_report.get("paired_differences", {}).get(primary, {}).values()
+    )
+    shared = _shared_baselines(payload)
+    counting_rules = [
+        "## Counting rules",
+        "",
+        "- Fixed text: tallies count scenarios, not independent trials. A scenario with",
+        "  `n == 0` for a metric is skipped in that metric's tally, so better, worse and",
+        "  inconclusive counts can sum to fewer than the number of scenarios. Scored in "
+        f"{_scored(payload, 'position_rmse', primary)} of {total} scenario(s) for position RMSE.",
+        "- No multiplicity correction is applied across scenarios, metrics or comparisons;",
+        "  with this many 95% intervals some will exclude zero by chance.",
+    ]
+    if shared:
+        counting_rules.append(
+            f"- {len(shared)} scenarios share a bit-identical `range_only` baseline: "
+            + ", ".join(shared)
+            + ". Their paired tallies reuse that baseline and are not independent."
+        )
+    if degenerate:
+        counting_rules.append(
+            f"- {degenerate} zero-width interval(s) are not counted as findings: identical "
+            "paired differences give no spread estimate, so they are tallied as inconclusive "
+            "and marked `(degenerate)` in the paired table."
+        )
     if len(protocol["seeds"]) < 2:
         seed_note += " Intervals need at least two seeds, so they are `N/A` here."
 
@@ -232,6 +288,7 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             "  at least one frame, was left unmatched while a ground-truth object lay",
             "  within the matching gate (the object had been claimed by another track).",
             "  The rest were never near an unclaimed object under that gate.",
+            "- Fixed text (not derived from the numbers) in the next two bullets:",
             "- `sensor_disagreement_large_bias` (0.12 rad) is a gate-rejection",
             "  experiment: see the vision acceptance table for how many biased",
             "  observations the gate rejected versus applied. It does not measure the",
@@ -239,8 +296,8 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             "- `sensor_disagreement_within_gate` (0.015 rad) applies a bias small",
             "  enough to pass the gate often, so it measures what happens when biased",
             "  vision data is actually fused. Neither scenario establishes real-world",
-            "  sensor-fusion performance; both are descriptive synthetic results on",
-            "  results; intervals reflect seed-to-seed variation only.",
+            "  sensor-fusion performance; both are descriptive synthetic results;",
+            "  intervals reflect seed-to-seed variation only.",
             "- `track_fragmentation` counts interruptions in an object's matched frames, summed",
             "  over objects; it is independent of identity switches.",
             "- `identity_switches` counts changes of matched track ID for the same",
@@ -251,6 +308,8 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             "  report `N/A` accuracy because their observations are rejected as stale;",
             "  that is an explicit non-result, not a zero-error result.",
             seed_note,
+            "",
+            *counting_rules,
             "",
             "## Limitations",
             "",

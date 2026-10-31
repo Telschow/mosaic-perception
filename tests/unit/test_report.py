@@ -220,3 +220,39 @@ def test_an_older_flat_paired_differences_payload_is_rejected_loudly():
     }
     with pytest.raises(ValueError, match="older flat paired_differences schema"):
         render_report(payload)
+
+
+def test_within_gate_bullet_is_not_garbled_and_fixed_text_is_marked():
+    text = render_report(_payload())
+    assert "descriptive synthetic results on\n  results" not in text
+    assert "both are descriptive synthetic results;" in text
+    assert "Fixed text (not derived from the numbers)" in text
+
+
+def test_report_states_the_counting_rules():
+    payload = _with_paired(_interval(-0.05, -0.08, -0.02))
+    skipped = {"scenario": {"name": "empty"}, "runs": [], "aggregate": {}}
+    skipped["paired_differences"] = {
+        "fused_vs_range_only": {"position_rmse": _interval(None, None, None, n=0)}
+    }
+    payload["scenarios"].append(skipped)
+    text = render_report(payload)
+    assert "## Counting rules" in text
+    assert "Scored in 1 of 2 scenario(s) for position RMSE" in text
+    assert "`n == 0`" in text
+    assert "No multiplicity correction" in text
+
+
+def test_report_names_scenarios_sharing_a_range_only_baseline():
+    payload = _with_paired(_interval(-0.05, -0.08, -0.02))
+    twin = {**payload["scenarios"][0], "scenario": {"name": "twin"}}
+    payload["scenarios"].append(twin)
+    text = render_report(payload)
+    assert "share a bit-identical `range_only` baseline: toy, twin" in text
+
+
+def test_degenerate_interval_is_flagged_and_not_counted_as_a_finding():
+    text = render_report(_with_paired(_interval(-0.05, -0.05, -0.05)))
+    assert "in favour of fusion in 0 scenario(s)" in text
+    assert "| toy | position_rmse | 25 | -0.050 | [-0.050, -0.050] (degenerate) |" in text
+    assert "1 zero-width interval(s) are not counted as findings" in text

@@ -74,7 +74,7 @@ Same conventions as the first comparison.
 | nominal | position_rmse | 2 | +0.027 | [-0.293, +0.347] |
 | nominal | position_rmse_distance_only | 2 | +0.009 | [-0.536, +0.554] |
 | nominal | precision | 2 | -0.018 | [-0.083, +0.046] |
-| nominal | recall | 2 | +0.000 | [+0.000, +0.000] |
+| nominal | recall | 2 | +0.000 | [+0.000, +0.000] (degenerate) |
 | sensor_disagreement_within_gate | gospa_p1 | 2 | -0.188 | [-1.669, +1.294] |
 | sensor_disagreement_within_gate | idf1 | 2 | +0.090 | [+0.034, +0.146] |
 | sensor_disagreement_within_gate | mota | 2 | +0.060 | [-0.999, +1.118] |
@@ -82,7 +82,7 @@ Same conventions as the first comparison.
 | sensor_disagreement_within_gate | position_rmse | 2 | -0.031 | [-0.089, +0.026] |
 | sensor_disagreement_within_gate | position_rmse_distance_only | 2 | -0.055 | [-0.493, +0.383] |
 | sensor_disagreement_within_gate | precision | 2 | +0.016 | [-0.470, +0.501] |
-| sensor_disagreement_within_gate | recall | 2 | +0.000 | [+0.000, +0.000] |
+| sensor_disagreement_within_gate | recall | 2 | +0.000 | [+0.000, +0.000] (degenerate) |
 
 ## Class estimate accuracy
 
@@ -224,6 +224,7 @@ observations behind each mean age of information.
   at least one frame, was left unmatched while a ground-truth object lay
   within the matching gate (the object had been claimed by another track).
   The rest were never near an unclaimed object under that gate.
+- Fixed text (not derived from the numbers) in the next two bullets:
 - `sensor_disagreement_large_bias` (0.12 rad) is a gate-rejection
   experiment: see the vision acceptance table for how many biased
   observations the gate rejected versus applied. It does not measure the
@@ -231,8 +232,8 @@ observations behind each mean age of information.
 - `sensor_disagreement_within_gate` (0.015 rad) applies a bias small
   enough to pass the gate often, so it measures what happens when biased
   vision data is actually fused. Neither scenario establishes real-world
-  sensor-fusion performance; both are descriptive synthetic results on
-  results; intervals reflect seed-to-seed variation only.
+  sensor-fusion performance; both are descriptive synthetic results;
+  intervals reflect seed-to-seed variation only.
 - `track_fragmentation` counts interruptions in an object's matched frames, summed
   over objects; it is independent of identity switches.
 - `identity_switches` counts changes of matched track ID for the same
@@ -243,6 +244,14 @@ observations behind each mean age of information.
   report `N/A` accuracy because their observations are rejected as stale;
   that is an explicit non-result, not a zero-error result.
 - This report uses 2 development seed(s). The reserved held-out range (25-49) is not included here and no held-out claim is made.
+
+## Counting rules
+
+- Fixed text: tallies count scenarios, not independent trials. A scenario with
+  `n == 0` for a metric is skipped in that metric's tally, so better, worse and
+  inconclusive counts can sum to fewer than the number of scenarios. Scored in 2 of 2 scenario(s) for position RMSE.
+- No multiplicity correction is applied across scenarios, metrics or comparisons;
+  with this many 95% intervals some will exclude zero by chance.
 
 ## Limitations
 
