@@ -157,6 +157,10 @@ class MultiSensorTracker:
         now = float(current_time)
         if not np.isfinite(now):
             raise ValueError("current_time must be finite")
+        if self._last_time is not None and now < self._last_time - 1e-9:
+            raise ValueError(f"non-monotonic tracker time: {now} < {self._last_time}")
+        # Validate the whole batch before any state changes, so a rejected batch is a no-op.
+        self._validate_batch(observations)
         self._now = now
         if self._last_time is None or now > self._last_time + 1e-9:
             # A repeated time stays in the same epoch: its earlier updates must be replayed.
@@ -182,7 +186,7 @@ class MultiSensorTracker:
             if observation.capture_time > now + 1e-9:
                 self._reject_invalid(observation, "capture time is in the future")
                 continue
-            age = now - observation.capture_time
+            age = observation.delivery_time - observation.capture_time
             if age > self.max_staleness + 1e-9:
                 self.rejected_out_of_sequence += 1
                 self.rejected_observations += 1
@@ -422,10 +426,18 @@ class MultiSensorTracker:
                 track.covariance = covariance.tolist()
                 track.time = now
 
-    def _enqueue(self, observations: list[SensorObservation]) -> None:
+    @staticmethod
+    def _validate_batch(observations: list[SensorObservation]) -> None:
         for observation in observations:
             if not isinstance(observation, SensorObservation):
                 raise TypeError("observations must be SensorObservation instances")
+            if not np.isfinite(observation.capture_time) or not np.isfinite(
+                observation.delivery_time
+            ):
+                raise ValueError("observation times must be finite")
+
+    def _enqueue(self, observations: list[SensorObservation]) -> None:
+        for observation in observations:
             is_vision_like = (
                 "range" not in observation.measurements and "bearing" in observation.measurements
             )
@@ -440,10 +452,6 @@ class MultiSensorTracker:
                     observation, f"duplicate observation id {observation.observation_id!r}"
                 )
                 continue
-            if not np.isfinite(observation.capture_time) or not np.isfinite(
-                observation.delivery_time
-            ):
-                raise ValueError("observation times must be finite")
             self._seen_observation_ids.add(observation.observation_id)
             self._pending.append(observation)
 

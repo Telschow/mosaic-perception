@@ -236,7 +236,7 @@ def test_delayed_observation_is_applied_to_delivery_time_state_not_rewound():
     assert (track.hits, track.misses) == (1, 0)
     stats = tracker.statistics()
     assert stats.age_samples == 1
-    assert stats.mean_age_of_information == pytest.approx(0.1)
+    assert stats.mean_age_of_information == pytest.approx(0.05)  # delivery - capture
 
     final = track.state_array()
     # Policy: update the delivery-time (t=0.1) prediction with the capture-time measurement.
@@ -256,7 +256,7 @@ def test_delayed_observation_with_moving_observer_uses_capture_time_pose():
     tracker, obs, track, current, rewind, wrong_pose = _delay_scenario((0.0, 2.0), (0.0, 3.0))
 
     assert obs.associated_track_id == track.track_id
-    assert tracker.statistics().mean_age_of_information == pytest.approx(0.1)
+    assert tracker.statistics().mean_age_of_information == pytest.approx(0.05)  # delivery - capture
 
     final = track.state_array()
     # Documented approximation: capture-time observer pose + delivery-time target state.
@@ -304,7 +304,7 @@ def test_delayed_observation_of_accelerating_target_state_error(acceleration):
     tracker.process_observations([], 0.1)
 
     assert obs.associated_track_id == track.track_id
-    assert tracker.statistics().mean_age_of_information == pytest.approx(tau)
+    assert tracker.statistics().mean_age_of_information == pytest.approx(0.05)  # delivery - capture
     truth = np.array([10.0 + 5.0 * tau, 0.5 * acceleration * tau**2, 5.0, acceleration * tau])
     error = track.state_array() - truth
 
@@ -372,7 +372,7 @@ def test_retrodiction_equals_the_time_ordered_replay_of_the_delayed_observation(
     # The measurement agrees with the t=0 state, so nothing is pulled back: x = 10.5.
     assert track.state_array()[0] == pytest.approx(10.5, abs=1e-9)
     assert obs.associated_track_id == track.track_id
-    assert tracker.statistics().mean_age_of_information == pytest.approx(0.1)
+    assert tracker.statistics().mean_age_of_information == pytest.approx(0.05)  # delivery - capture
 
 
 def test_delivery_time_update_remains_the_default_and_pulls_the_state_back():
