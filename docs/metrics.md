@@ -24,8 +24,9 @@ At each ground-truth timestamp:
 - A pair is admissible only if the distance is at most the matching gate
   (`2.0 m` by default). No object and no track can be matched more than once in
   a frame.
-- Matching is independent at each timestamp; identity continuity is measured
-  afterwards, not enforced by the matcher.
+- Matching is a separate assignment at each timestamp, but the headline matcher
+  carries the previous frame's pairing as a preference (above), so frames are not
+  independent. Identity switches are counted afterwards from the matched pairs.
 
 ## Accuracy
 
