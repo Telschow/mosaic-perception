@@ -20,7 +20,7 @@ uv sync --locked --all-extras && uv run pytest
 uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
-CI runs the locked sync and test suite on every push, checks benchmark determinism by regenerating a small fixed benchmark and comparing it byte-for-byte with the committed golden files, and verifies the committed artifacts with `make provenance-check benchmark-golden-check`. The third command is the same benchmark code path as the golden check, at the published configuration.
+CI runs the locked sync and test suite on every push to `main` and every pull request to `main`, checks benchmark determinism by regenerating a small fixed benchmark and comparing it byte-for-byte with the committed golden files, and verifies the committed artifacts with `make provenance-check benchmark-golden-check`. The third command is the same benchmark code path as the golden check, at the published configuration.
 
 ### What the evidence shows, and what it does not
 
@@ -39,7 +39,7 @@ CI runs the locked sync and test suite on every push, checks benchmark determini
 - Deterministic IDs, explicit delivery/rejection statistics, and no ground-truth identities in the tracker.
 - Hand-constructed evaluator tests with exact expected values, plus end-to-end regression tests.
 - Reproducible benchmark artifacts generated from code: JSON, CSV and Markdown.
-- CI on every push: locked install, Ruff lint and format check, mypy, the full
+- CI on every push to `main` and every pull request to `main`: locked install, Ruff lint (`src tests`) and format check (full tree), mypy (`src`), the full
   test suite, CLI smoke tests, a pinned secret scan over full git history, and
   byte-level artifact provenance and golden-benchmark checks.
 
@@ -210,12 +210,12 @@ Headline observations from the current development benchmark:
   gate leaves about 1.3 updates per seed, so nothing is learned. The estimator
   assumes a constant bias and an unbiased range-bearing sensor.
 - **One-step-lag retrodiction** (`delivery_delay_retrodiction`, same delays as
-  `delivery_delay`): it improves position accuracy and consistency (RMSE 0.308
-  to 0.283 m range-only and 0.329 to 0.335 m fused; distance-only RMSE 0.285 to
-  0.252 and 0.268 to 0.251; position NEES per DOF 4.9 to 1.9 and 11.3 to 3.3)
+  `delivery_delay`): it improves range-only position accuracy (RMSE 0.308
+  to 0.283 m) but not fused (0.329 to 0.335 m, slightly worse), and improves distance-only RMSE (0.285 to
+  0.252 and 0.268 to 0.251) and consistency (position NEES per DOF 4.9 to 1.9 and 11.3 to 3.3)
   but makes identity switches and MOTA worse (switches 6.9 to 11.1 range-only
-  and 5.1 to 13.0 fused; MOTA 0.708 to 0.636 and 0.437 to 0.349). I have not
-  diagnosed why; association still gates delayed observations against the
+  and 5.1 to 13.0 fused; MOTA 0.708 to 0.636 and 0.437 to 0.349). The cause has not
+  been diagnosed; association still gates delayed observations against the
   delivery-time state, which is one candidate.
 - `crossing_targets` (one crossing of three targets) and `dense_clutter` are
   tested under global-nearest-neighbour association only. In `crossing_targets`

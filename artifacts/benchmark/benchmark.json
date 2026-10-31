@@ -1,6 +1,6 @@
 {
   "code": {
-    "git_commit": "68960de8fdfdb972a512f3f4a296b711adb914eb",
+    "git_commit": "35ffae36a815c6979bad46d71c809c9c7fd32291",
     "package_version": "0.1.0"
   },
   "command": "benchmark",

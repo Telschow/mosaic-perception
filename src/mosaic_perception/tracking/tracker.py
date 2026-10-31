@@ -201,6 +201,10 @@ class MultiSensorTracker:
             if group not in _GROUP_ORDER:
                 self._reject_invalid(observation, f"unsupported measurement group {group!r}")
                 continue
+            unknown = self._unknown_class_names(observation)
+            if unknown:
+                self._reject_invalid(observation, f"unknown class names {unknown!r}")
+                continue
             self._delivered_ages.append(age)
             valid_by_group.setdefault(group, []).append(observation)
 
@@ -429,7 +433,13 @@ class MultiSensorTracker:
                 # Range-only mode must not be influenced by vision in any way.
                 continue
             if observation.observation_id in self._seen_observation_ids:
-                raise ValueError(f"duplicate observation id {observation.observation_id!r}")
+                self.delivered_observations += 1
+                if is_vision_like:
+                    self._vision_delivered += 1
+                self._reject_invalid(
+                    observation, f"duplicate observation id {observation.observation_id!r}"
+                )
+                continue
             if not np.isfinite(observation.capture_time) or not np.isfinite(
                 observation.delivery_time
             ):
@@ -693,6 +703,11 @@ class MultiSensorTracker:
         best_class = max(class_probs, key=lambda name: class_probs[name])
         track.class_estimate = ObjectClass(best_class)
         track.class_confidence = float(class_probs[best_class])
+
+    @staticmethod
+    def _unknown_class_names(observation: SensorObservation) -> list[str]:
+        valid = {c.value for c in ObjectClass}
+        return sorted(name for name in observation.class_probs or {} if name not in valid)
 
     def _handle_invalid(self, association: GroupAssociation) -> None:
         for observation, reason in association.invalid:

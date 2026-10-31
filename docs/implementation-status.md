@@ -92,7 +92,7 @@ policy, deterministic track lifecycle.
   observations older than one epoch are rejected, not replayed, in the default
   mode; retrodiction covers only the one-epoch lag, gates against the
   delivery-time state, is off by default, and its benchmark effect on
-  identity switches and MOTA is diagnosed as worse and unexplained.
+  identity switches and MOTA is worse and its cause is undiagnosed.
 - Planned: none specific to tracking.
 
 ### Evaluation — **Implemented**
@@ -159,8 +159,12 @@ provenance and golden-benchmark checks. Least-privilege permissions, all
 actions pinned to commit SHAs.
 
 - Evidence: `.github/workflows/ci.yml` — jobs `test`, `secret-scan`,
-  `artifact-checks`; `make lint format-check typecheck test provenance-check
-  benchmark-golden-check`. Secret-scan result recorded on issue #29 (gitleaks
+  `artifact-checks`. CI invokes the tools directly rather than through `make`:
+  `ruff check src tests` (not `scripts/` or `app/`), `ruff format --check .`
+  (full tree, unlike `make format-check`, which covers `src tests`),
+  `mypy src`, `pytest`, then `scripts/check_artifact_provenance.py` and
+  `scripts/check_benchmark_golden.py` (the `make provenance-check` and
+  `make benchmark-golden-check` targets). Secret-scan result recorded on issue #29 (gitleaks
   8.30.1, 46 commits, no leaks).
 - Limitations: [docs/limitations.md](limitations.md) — Type checking and CI;
   mypy covers `src/` only, tests are linted but not type-checked.

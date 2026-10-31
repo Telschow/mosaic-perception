@@ -8,8 +8,8 @@
 > retained for context only and is **not** a current release checklist. The
 > v0.1.0 implementation contained the core defects documented in
 > [core-validity-audit.md](core-validity-audit.md); its benchmark numbers are
-> invalid and have been replaced. The current branch has not been released and
-> must not be pushed or tagged as part of the repair review.
+> invalid and have been replaced. The repair branch was merged afterwards (PR #35);
+> no release was tagged from it as part of the repair review.
 >
 > For current verification, see the commands recorded in
 > [core-validity-audit.md](core-validity-audit.md) and run the CI workflow

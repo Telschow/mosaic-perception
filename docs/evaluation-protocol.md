@@ -88,7 +88,7 @@ Definitions and denominators are in [metrics.md](metrics.md).
 
 ## Reproducibility checks in CI
 
-Two checks run on every push and pull request alongside the test suite.
+Two checks run on every push to `main` and every pull request to `main` alongside the test suite.
 
 **Golden benchmark** (`scripts/check_benchmark_golden.py`, `make
 benchmark-golden-check`). Regenerates a small fixed benchmark — scenarios
