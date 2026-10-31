@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `35ffae36a815c6979bad46d71c809c9c7fd32291`
+- Git commit: `77be5edc8924d88287d1a9fb6dbc35e83430bfd3`
 - Seeds: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -41,11 +41,11 @@ never a fabricated zero.
 | false_observations | range_only | 0.230 ± 0.051 | 0.208 | 0.306 | 0.977 | 0.840 | 0.833 | 296/303 | 3.0 | 3.0 | 6.6 | 10.0 | 0.0 | 0.765 | 0.611 | 1.145 |
 | false_observations | fused | 0.247 ± 0.064 | 0.189 | 0.309 | 0.979 | 0.639 | 0.743 | 297/303 | 12.5 | 6.0 | 5.2 | 10.3 | 0.0 | 0.399 | 0.577 | 2.212 |
 | false_observations | fused_bias_estimated | 0.260 ± 0.070 | 0.194 | 0.315 | 0.979 | 0.619 | 0.715 | 297/303 | 12.8 | 6.4 | 5.4 | 11.2 | 0.0 | 0.345 | 0.575 | 2.385 |
-| measurement_bias | range_only | 1.641 ± 0.032 | 1.594 | 0.521 | 0.889 | 0.715 | 0.001 | 269/303 | 1.7 | 1.1 | 11.4 | 13.7 | 5.3 | 0.495 | 0.299 | 5.590 |
-| measurement_bias | fused | 1.620 ± 0.029 | 1.556 | 0.498 | 0.909 | 0.599 | 0.006 | 275/303 | 3.0 | 1.8 | 11.0 | 14.1 | 4.1 | 0.255 | 0.291 | 6.283 |
+| measurement_bias | range_only | 1.641 ± 0.032 | 1.594 | 0.523 | 0.888 | 0.715 | 0.001 | 269/303 | 1.7 | 1.1 | 11.4 | 13.7 | 5.3 | 0.494 | 0.299 | 5.590 |
+| measurement_bias | fused | 1.620 ± 0.029 | 1.556 | 0.501 | 0.909 | 0.599 | 0.006 | 275/303 | 3.0 | 1.8 | 10.9 | 14.1 | 4.2 | 0.255 | 0.291 | 6.283 |
 | measurement_bias | fused_bias_estimated | 1.622 ± 0.027 | 1.556 | 0.495 | 0.915 | 0.598 | 0.006 | 277/303 | 2.8 | 1.6 | 11.0 | 14.0 | 3.8 | 0.255 | 0.290 | 6.313 |
-| moving_observer | range_only | 0.241 ± 0.077 | 0.218 | 0.345 | 0.975 | 0.833 | 0.832 | 296/303 | 3.6 | 3.6 | 5.8 | 8.4 | 0.1 | 0.754 | 0.665 | 1.219 |
-| moving_observer | fused | 0.260 ± 0.096 | 0.188 | 0.312 | 0.978 | 0.714 | 0.751 | 296/303 | 6.3 | 6.2 | 4.4 | 8.2 | 0.0 | 0.557 | 0.640 | 1.749 |
+| moving_observer | range_only | 0.242 ± 0.079 | 0.218 | 0.345 | 0.975 | 0.833 | 0.832 | 295/303 | 3.6 | 3.6 | 5.8 | 8.4 | 0.1 | 0.754 | 0.665 | 1.219 |
+| moving_observer | fused | 0.262 ± 0.098 | 0.188 | 0.312 | 0.978 | 0.714 | 0.751 | 296/303 | 6.3 | 6.2 | 4.4 | 8.2 | 0.0 | 0.557 | 0.640 | 1.749 |
 | moving_observer | fused_bias_estimated | 0.257 ± 0.078 | 0.203 | 0.309 | 0.978 | 0.698 | 0.711 | 296/303 | 6.0 | 5.9 | 4.6 | 9.8 | 0.0 | 0.521 | 0.626 | 1.892 |
 | nominal | range_only | 0.233 ± 0.061 | 0.213 | 0.309 | 0.977 | 0.826 | 0.813 | 296/303 | 3.1 | 3.1 | 6.1 | 8.9 | 0.0 | 0.746 | 0.639 | 1.231 |
 | nominal | fused | 0.253 ± 0.083 | 0.195 | 0.301 | 0.980 | 0.696 | 0.749 | 297/303 | 6.0 | 5.9 | 4.7 | 10.6 | 0.0 | 0.520 | 0.612 | 1.865 |
@@ -68,8 +68,8 @@ never a fabricated zero.
 | stale_rejection | range_only | N/A | N/A | N/A | 0.000 | N/A | N/A | 0/303 | 0.0 | 0.0 | N/A | N/A | N/A | 0.000 | 0.000 | 3.000 |
 | stale_rejection | fused | N/A | N/A | N/A | 0.000 | N/A | N/A | 0/303 | 0.0 | 0.0 | N/A | N/A | N/A | 0.000 | 0.000 | 3.000 |
 | stale_rejection | fused_bias_estimated | N/A | N/A | N/A | 0.000 | N/A | N/A | 0/303 | 0.0 | 0.0 | N/A | N/A | N/A | 0.000 | 0.000 | 3.000 |
-| uncertainty_miscalibration | range_only | 0.461 ± 0.066 | 0.431 | 0.627 | 0.521 | 0.832 | 0.089 | 158/303 | 2.8 | 2.8 | 25.6 | 28.2 | 15.6 | 0.330 | 0.136 | 2.339 |
-| uncertainty_miscalibration | fused | 0.525 ± 0.068 | 0.409 | 0.656 | 0.932 | 0.445 | 0.106 | 282/303 | 39.3 | 38.9 | 34.8 | 56.6 | 3.6 | -0.353 | 0.174 | 4.636 |
+| uncertainty_miscalibration | range_only | 0.460 ± 0.064 | 0.431 | 0.626 | 0.521 | 0.831 | 0.089 | 158/303 | 2.8 | 2.8 | 25.6 | 28.2 | 15.6 | 0.330 | 0.136 | 2.339 |
+| uncertainty_miscalibration | fused | 0.525 ± 0.068 | 0.409 | 0.654 | 0.932 | 0.445 | 0.106 | 282/303 | 39.3 | 38.9 | 34.7 | 56.6 | 3.6 | -0.353 | 0.174 | 4.636 |
 | uncertainty_miscalibration | fused_bias_estimated | 0.541 ± 0.056 | 0.419 | 0.703 | 0.924 | 0.448 | 0.091 | 280/303 | 37.6 | 37.3 | 37.2 | 59.0 | 3.9 | -0.347 | 0.163 | 4.613 |
 | vision_dropout | range_only | 0.233 ± 0.061 | 0.213 | 0.309 | 0.977 | 0.826 | 0.813 | 296/303 | 3.1 | 3.1 | 6.1 | 8.9 | 0.0 | 0.746 | 0.639 | 1.231 |
 | vision_dropout | fused | 0.241 ± 0.071 | 0.208 | 0.296 | 0.978 | 0.726 | 0.750 | 296/303 | 5.6 | 5.6 | 5.0 | 8.6 | 0.0 | 0.582 | 0.633 | 1.713 |
@@ -128,19 +128,19 @@ setup and is not a claim about other worlds.
 | false_observations | recall | 25 | +0.002 | [+0.001, +0.004] |
 | measurement_bias | gospa_p1 | 25 | +0.693 | [+0.573, +0.814] |
 | measurement_bias | idf1 | 25 | -0.008 | [-0.021, +0.005] |
-| measurement_bias | mota | 25 | -0.239 | [-0.289, -0.190] |
+| measurement_bias | mota | 25 | -0.239 | [-0.289, -0.189] |
 | measurement_bias | position_coverage_95 | 25 | +0.005 | [+0.002, +0.008] |
 | measurement_bias | position_rmse | 25 | -0.021 | [-0.034, -0.008] |
 | measurement_bias | position_rmse_distance_only | 25 | -0.038 | [-0.053, -0.024] |
-| measurement_bias | precision | 25 | -0.117 | [-0.137, -0.096] |
+| measurement_bias | precision | 25 | -0.116 | [-0.137, -0.096] |
 | measurement_bias | recall | 25 | +0.020 | [+0.007, +0.033] |
 | moving_observer | gospa_p1 | 25 | +0.530 | [+0.356, +0.704] |
 | moving_observer | idf1 | 25 | -0.024 | [-0.057, +0.009] |
-| moving_observer | mota | 25 | -0.197 | [-0.249, -0.144] |
+| moving_observer | mota | 25 | -0.196 | [-0.249, -0.144] |
 | moving_observer | position_coverage_95 | 25 | -0.080 | [-0.129, -0.031] |
-| moving_observer | position_rmse | 25 | +0.019 | [-0.015, +0.052] |
+| moving_observer | position_rmse | 25 | +0.019 | [-0.014, +0.053] |
 | moving_observer | position_rmse_distance_only | 25 | -0.029 | [-0.044, -0.014] |
-| moving_observer | precision | 25 | -0.119 | [-0.150, -0.089] |
+| moving_observer | precision | 25 | -0.119 | [-0.149, -0.089] |
 | moving_observer | recall | 25 | +0.002 | [+0.000, +0.004] |
 | nominal | gospa_p1 | 25 | +0.635 | [+0.447, +0.822] |
 | nominal | idf1 | 25 | -0.027 | [-0.064, +0.010] |
@@ -200,12 +200,12 @@ setup and is not a claim about other worlds.
 | stale_rejection | recall | 25 | +0.000 | [+0.000, +0.000] |
 | uncertainty_miscalibration | gospa_p1 | 25 | +2.297 | [+2.133, +2.461] |
 | uncertainty_miscalibration | idf1 | 25 | +0.037 | [+0.017, +0.058] |
-| uncertainty_miscalibration | mota | 25 | -0.682 | [-0.738, -0.627] |
+| uncertainty_miscalibration | mota | 25 | -0.683 | [-0.738, -0.627] |
 | uncertainty_miscalibration | position_coverage_95 | 25 | +0.017 | [-0.011, +0.045] |
-| uncertainty_miscalibration | position_rmse | 25 | +0.064 | [+0.031, +0.097] |
+| uncertainty_miscalibration | position_rmse | 25 | +0.065 | [+0.032, +0.098] |
 | uncertainty_miscalibration | position_rmse_distance_only | 25 | -0.022 | [-0.048, +0.003] |
 | uncertainty_miscalibration | precision | 25 | -0.386 | [-0.405, -0.367] |
-| uncertainty_miscalibration | recall | 25 | +0.411 | [+0.387, +0.435] |
+| uncertainty_miscalibration | recall | 25 | +0.411 | [+0.386, +0.435] |
 | vision_dropout | gospa_p1 | 25 | +0.482 | [+0.324, +0.641] |
 | vision_dropout | idf1 | 25 | -0.006 | [-0.036, +0.025] |
 | vision_dropout | mota | 25 | -0.163 | [-0.208, -0.119] |
@@ -263,20 +263,20 @@ Same conventions as the first comparison.
 | false_observations | recall | 25 | +0.000 | [+0.000, +0.000] |
 | measurement_bias | gospa_p1 | 25 | +0.030 | [-0.062, +0.122] |
 | measurement_bias | idf1 | 25 | -0.001 | [-0.010, +0.008] |
-| measurement_bias | mota | 25 | -0.001 | [-0.035, +0.034] |
+| measurement_bias | mota | 25 | -0.000 | [-0.035, +0.034] |
 | measurement_bias | position_coverage_95 | 25 | -0.000 | [-0.002, +0.001] |
 | measurement_bias | position_rmse | 25 | +0.002 | [-0.005, +0.009] |
 | measurement_bias | position_rmse_distance_only | 25 | +0.000 | [-0.008, +0.009] |
 | measurement_bias | precision | 25 | -0.000 | [-0.013, +0.012] |
-| measurement_bias | recall | 25 | +0.006 | [-0.004, +0.015] |
+| measurement_bias | recall | 25 | +0.006 | [-0.003, +0.016] |
 | moving_observer | gospa_p1 | 25 | +0.143 | [-0.031, +0.317] |
 | moving_observer | idf1 | 25 | -0.014 | [-0.037, +0.009] |
 | moving_observer | mota | 25 | -0.036 | [-0.086, +0.014] |
 | moving_observer | position_coverage_95 | 25 | -0.040 | [-0.085, +0.004] |
-| moving_observer | position_rmse | 25 | -0.003 | [-0.030, +0.025] |
+| moving_observer | position_rmse | 25 | -0.004 | [-0.033, +0.025] |
 | moving_observer | position_rmse_distance_only | 25 | +0.014 | [-0.000, +0.029] |
-| moving_observer | precision | 25 | -0.016 | [-0.041, +0.009] |
-| moving_observer | recall | 25 | +0.000 | [+0.000, +0.000] |
+| moving_observer | precision | 25 | -0.015 | [-0.041, +0.010] |
+| moving_observer | recall | 25 | +0.000 | [-0.000, +0.001] |
 | nominal | gospa_p1 | 25 | +0.135 | [-0.010, +0.279] |
 | nominal | idf1 | 25 | +0.005 | [-0.013, +0.023] |
 | nominal | mota | 25 | -0.038 | [-0.081, +0.005] |
@@ -337,7 +337,7 @@ Same conventions as the first comparison.
 | uncertainty_miscalibration | idf1 | 25 | -0.011 | [-0.030, +0.008] |
 | uncertainty_miscalibration | mota | 25 | +0.006 | [-0.029, +0.040] |
 | uncertainty_miscalibration | position_coverage_95 | 25 | -0.015 | [-0.041, +0.011] |
-| uncertainty_miscalibration | position_rmse | 25 | +0.016 | [-0.010, +0.043] |
+| uncertainty_miscalibration | position_rmse | 25 | +0.016 | [-0.010, +0.042] |
 | uncertainty_miscalibration | position_rmse_distance_only | 25 | +0.010 | [-0.005, +0.025] |
 | uncertainty_miscalibration | precision | 25 | +0.002 | [-0.005, +0.010] |
 | uncertainty_miscalibration | recall | 25 | -0.008 | [-0.015, -0.001] |
@@ -407,7 +407,7 @@ together.
 | stale_rejection | fused | N/A | N/A | N/A | 0.0 |
 | stale_rejection | fused_bias_estimated | N/A | N/A | N/A | 0.0 |
 | uncertainty_miscalibration | range_only | N/A | N/A | 0.000 | 0.0 |
-| uncertainty_miscalibration | fused | 0.998 | 0.997 | 0.637 | 179.8 |
+| uncertainty_miscalibration | fused | 0.997 | 0.997 | 0.637 | 179.8 |
 | uncertainty_miscalibration | fused_bias_estimated | 0.997 | 0.997 | 0.638 | 178.5 |
 | vision_dropout | range_only | N/A | N/A | 0.000 | 0.0 |
 | vision_dropout | fused | 0.999 | 0.999 | 0.658 | 195.0 |
@@ -448,11 +448,11 @@ falls: above means overconfident, below means underconfident.
 | false_observations | range_only | 1.709 [0.977, 1.023] above | 1.784 [0.977, 1.023] above | 0.829 [0.981, 1.019] below | 296 | 273.9 | 7 |
 | false_observations | fused | 2.429 [0.977, 1.023] above | 2.203 [0.977, 1.023] above | 0.780 [0.983, 1.017] below | 297 | 570.3 | 6 |
 | false_observations | fused_bias_estimated | 2.662 [0.977, 1.023] above | 2.242 [0.977, 1.023] above | 0.770 [0.983, 1.017] below | 297 | 568.9 | 6 |
-| measurement_bias | range_only | 75.000 [0.976, 1.024] above | 12.601 [0.976, 1.024] above | 0.839 [0.981, 1.020] below | 269 | 269.0 | 34 |
-| measurement_bias | fused | 72.993 [0.977, 1.024] above | 12.577 [0.977, 1.024] above | 0.788 [0.983, 1.017] below | 275 | 530.3 | 28 |
+| measurement_bias | range_only | 74.984 [0.976, 1.024] above | 12.605 [0.976, 1.024] above | 0.839 [0.981, 1.020] below | 269 | 269.0 | 34 |
+| measurement_bias | fused | 72.986 [0.977, 1.024] above | 12.604 [0.977, 1.024] above | 0.788 [0.983, 1.017] below | 275 | 530.3 | 28 |
 | measurement_bias | fused_bias_estimated | 72.886 [0.977, 1.024] above | 12.501 [0.977, 1.024] above | 0.785 [0.983, 1.017] below | 277 | 529.2 | 26 |
-| moving_observer | range_only | 1.814 [0.977, 1.023] above | 1.813 [0.977, 1.023] above | 0.818 [0.981, 1.020] below | 296 | 271.1 | 7 |
-| moving_observer | fused | 2.553 [0.977, 1.023] above | 2.264 [0.977, 1.023] above | 0.781 [0.983, 1.017] below | 296 | 532.1 | 7 |
+| moving_observer | range_only | 1.838 [0.977, 1.023] above | 1.812 [0.977, 1.023] above | 0.818 [0.981, 1.020] below | 295 | 271.1 | 8 |
+| moving_observer | fused | 2.620 [0.977, 1.023] above | 2.258 [0.977, 1.023] above | 0.781 [0.983, 1.017] below | 296 | 532.1 | 7 |
 | moving_observer | fused_bias_estimated | 2.637 [0.977, 1.023] above | 2.193 [0.977, 1.023] above | 0.777 [0.983, 1.017] below | 296 | 530.8 | 7 |
 | nominal | range_only | 1.854 [0.977, 1.023] above | 1.835 [0.977, 1.023] above | 0.814 [0.981, 1.019] below | 296 | 272.2 | 7 |
 | nominal | fused | 2.479 [0.977, 1.023] above | 2.193 [0.977, 1.023] above | 0.769 [0.983, 1.017] below | 297 | 532.9 | 6 |
@@ -475,9 +475,9 @@ falls: above means overconfident, below means underconfident.
 | stale_rejection | range_only | N/A | N/A | N/A | 0 | 0.0 | 303 |
 | stale_rejection | fused | N/A | N/A | 2.053 [0.001, 5.024] within | 0 | 0.0 | 303 |
 | stale_rejection | fused_bias_estimated | N/A | N/A | 2.053 [0.001, 5.024] within | 0 | 0.0 | 303 |
-| uncertainty_miscalibration | range_only | 26.776 [0.969, 1.031] above | 9.143 [0.969, 1.031] above | 1.051 [0.974, 1.026] above | 158 | 152.7 | 145 |
-| uncertainty_miscalibration | fused | 31.724 [0.977, 1.023] above | 9.849 [0.977, 1.023] above | 1.006 [0.979, 1.022] within | 282 | 379.5 | 21 |
-| uncertainty_miscalibration | fused_bias_estimated | 1274.515 [0.977, 1.024] above | 10.152 [0.977, 1.024] above | 1.006 [0.979, 1.022] within | 280 | 377.4 | 23 |
+| uncertainty_miscalibration | range_only | 26.716 [0.969, 1.031] above | 9.110 [0.969, 1.031] above | 1.051 [0.974, 1.026] above | 158 | 152.7 | 145 |
+| uncertainty_miscalibration | fused | 31.646 [0.977, 1.023] above | 9.593 [0.977, 1.023] above | 1.006 [0.979, 1.022] within | 282 | 379.5 | 21 |
+| uncertainty_miscalibration | fused_bias_estimated | 1274.590 [0.977, 1.024] above | 10.136 [0.977, 1.024] above | 1.006 [0.979, 1.022] within | 280 | 377.4 | 23 |
 | vision_dropout | range_only | 1.854 [0.977, 1.023] above | 1.835 [0.977, 1.023] above | 0.814 [0.981, 1.019] below | 296 | 272.2 | 7 |
 | vision_dropout | fused | 2.253 [0.977, 1.023] above | 1.989 [0.977, 1.023] above | 0.789 [0.982, 1.018] below | 296 | 404.9 | 7 |
 | vision_dropout | fused_bias_estimated | 2.510 [0.977, 1.023] above | 2.093 [0.977, 1.023] above | 0.788 [0.982, 1.018] below | 296 | 402.1 | 7 |
@@ -821,7 +821,7 @@ observations behind each mean age of information.
 | measurement_bias | 14 | 1.655 | 1.611 | -0.044 | 1.634 |
 | measurement_bias | 15 | 1.679 | 1.617 | -0.062 | 1.610 |
 | measurement_bias | 16 | 1.668 | 1.603 | -0.065 | 1.641 |
-| measurement_bias | 17 | 1.602 | 1.592 | -0.010 | 1.598 |
+| measurement_bias | 17 | 1.596 | 1.590 | -0.006 | 1.598 |
 | measurement_bias | 18 | 1.626 | 1.669 | +0.043 | 1.643 |
 | measurement_bias | 19 | 1.664 | 1.628 | -0.035 | 1.651 |
 | measurement_bias | 20 | 1.621 | 1.627 | +0.006 | 1.632 |
@@ -846,7 +846,7 @@ observations behind each mean age of information.
 | moving_observer | 14 | 0.171 | 0.116 | -0.056 | 0.156 |
 | moving_observer | 15 | 0.253 | 0.316 | +0.063 | 0.394 |
 | moving_observer | 16 | 0.173 | 0.112 | -0.061 | 0.155 |
-| moving_observer | 17 | 0.409 | 0.416 | +0.007 | 0.304 |
+| moving_observer | 17 | 0.436 | 0.453 | +0.017 | 0.304 |
 | moving_observer | 18 | 0.284 | 0.261 | -0.022 | 0.258 |
 | moving_observer | 19 | 0.261 | 0.249 | -0.012 | 0.231 |
 | moving_observer | 20 | 0.152 | 0.345 | +0.193 | 0.196 |
@@ -1046,11 +1046,11 @@ observations behind each mean age of information.
 | uncertainty_miscalibration | 14 | 0.432 | 0.567 | +0.135 | 0.581 |
 | uncertainty_miscalibration | 15 | 0.448 | 0.527 | +0.080 | 0.641 |
 | uncertainty_miscalibration | 16 | 0.545 | 0.438 | -0.107 | 0.521 |
-| uncertainty_miscalibration | 17 | 0.539 | 0.672 | +0.133 | 0.545 |
+| uncertainty_miscalibration | 17 | 0.512 | 0.672 | +0.160 | 0.545 |
 | uncertainty_miscalibration | 18 | 0.407 | 0.385 | -0.023 | 0.422 |
 | uncertainty_miscalibration | 19 | 0.501 | 0.549 | +0.048 | 0.574 |
-| uncertainty_miscalibration | 20 | 0.374 | 0.502 | +0.129 | 0.596 |
-| uncertainty_miscalibration | 21 | 0.364 | 0.594 | +0.230 | 0.649 |
+| uncertainty_miscalibration | 20 | 0.374 | 0.502 | +0.129 | 0.582 |
+| uncertainty_miscalibration | 21 | 0.364 | 0.588 | +0.224 | 0.649 |
 | uncertainty_miscalibration | 22 | 0.422 | 0.423 | +0.001 | 0.520 |
 | uncertainty_miscalibration | 23 | 0.417 | 0.457 | +0.040 | 0.506 |
 | uncertainty_miscalibration | 24 | 0.502 | 0.504 | +0.002 | 0.523 |
