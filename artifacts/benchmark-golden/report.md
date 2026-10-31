@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `77be5edc8924d88287d1a9fb6dbc35e83430bfd3`
+- Git commit: `d6ec3ec34b01bcda021fda1da0402a17ea331e47`
 - Seeds: 0, 1
 - Seed group: development
 - Duration: 2.0 s at dt=0.1 s
