@@ -64,6 +64,8 @@ Key properties:
     vision association/update;
   - one hit per epoch if at least one observation was applied, one miss
     otherwise; rejected/failed updates do not count as hits;
+  - confirmation counts total hits (`min_hits_confirm`), not consecutive hits; a
+    hit resets the miss counter and a miss does not reduce the hit count;
   - deterministic track IDs, lifecycle confirm/coast/delete, per-epoch
     snapshots and delivery statistics;
   - no broad exception swallowing and no ground-truth identity use.
