@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `7e3c9360038bcabac57d6a6aaf414fbe3c8c47f2`
+- Git commit: `8f24402f21498b363cab2be47c3bb744bea315b4`
 - Seeds: 0, 1
 - Seed group: development
 - Duration: 2.0 s at dt=0.1 s
@@ -44,22 +44,22 @@ setup and is not a claim about other worlds.
 
 | Scenario | Metric | n | Mean diff | 95% interval |
 |---|---|---|---|---|
+| nominal | gospa_p1 | 2 | +0.519 | [+0.228, +0.811] |
+| nominal | idf1 | 2 | +0.045 | [-1.295, +1.385] |
+| nominal | mota | 2 | -0.250 | [-0.401, -0.099] |
+| nominal | position_coverage_95 | 2 | -0.158 | [-2.164, +1.848] |
 | nominal | position_rmse | 2 | +0.006 | [-0.043, +0.056] |
 | nominal | position_rmse_distance_only | 2 | -0.010 | [-0.166, +0.146] |
-| nominal | recall | 2 | +0.036 | [-0.418, +0.490] |
 | nominal | precision | 2 | -0.207 | [-0.486, +0.072] |
-| nominal | position_coverage_95 | 2 | -0.158 | [-2.164, +1.848] |
-| nominal | mota | 2 | -0.250 | [-0.401, -0.099] |
-| nominal | idf1 | 2 | +0.045 | [-1.295, +1.385] |
-| nominal | gospa_p1 | 2 | +0.519 | [+0.228, +0.811] |
+| nominal | recall | 2 | +0.036 | [-0.418, +0.490] |
+| sensor_disagreement_within_gate | gospa_p1 | 2 | +0.959 | [-2.748, +4.667] |
+| sensor_disagreement_within_gate | idf1 | 2 | +0.000 | [-0.782, +0.783] |
+| sensor_disagreement_within_gate | mota | 2 | -0.369 | [-1.428, +0.690] |
+| sensor_disagreement_within_gate | position_coverage_95 | 2 | -0.803 | [-0.970, -0.635] |
 | sensor_disagreement_within_gate | position_rmse | 2 | +0.144 | [-0.900, +1.189] |
 | sensor_disagreement_within_gate | position_rmse_distance_only | 2 | +0.119 | [-1.058, +1.296] |
-| sensor_disagreement_within_gate | recall | 2 | +0.036 | [-0.418, +0.490] |
 | sensor_disagreement_within_gate | precision | 2 | -0.265 | [-1.129, +0.599] |
-| sensor_disagreement_within_gate | position_coverage_95 | 2 | -0.803 | [-0.970, -0.635] |
-| sensor_disagreement_within_gate | mota | 2 | -0.369 | [-1.428, +0.690] |
-| sensor_disagreement_within_gate | idf1 | 2 | +0.000 | [-0.782, +0.783] |
-| sensor_disagreement_within_gate | gospa_p1 | 2 | +0.959 | [-2.748, +4.667] |
+| sensor_disagreement_within_gate | recall | 2 | +0.036 | [-0.418, +0.490] |
 
 ## Paired differences (fused-bias-estimated minus fused)
 
@@ -67,22 +67,22 @@ Same conventions as the first comparison.
 
 | Scenario | Metric | n | Mean diff | 95% interval |
 |---|---|---|---|---|
+| nominal | gospa_p1 | 2 | +0.085 | [-0.547, +0.717] |
+| nominal | idf1 | 2 | +0.051 | [-0.794, +0.897] |
+| nominal | mota | 2 | -0.024 | [-0.326, +0.279] |
+| nominal | position_coverage_95 | 2 | -0.039 | [-0.541, +0.462] |
 | nominal | position_rmse | 2 | +0.027 | [-0.293, +0.347] |
 | nominal | position_rmse_distance_only | 2 | +0.009 | [-0.536, +0.554] |
-| nominal | recall | 2 | +0.000 | [+0.000, +0.000] |
 | nominal | precision | 2 | -0.018 | [-0.083, +0.046] |
-| nominal | position_coverage_95 | 2 | -0.039 | [-0.541, +0.462] |
-| nominal | mota | 2 | -0.024 | [-0.326, +0.279] |
-| nominal | idf1 | 2 | +0.051 | [-0.794, +0.897] |
-| nominal | gospa_p1 | 2 | +0.085 | [-0.547, +0.717] |
+| nominal | recall | 2 | +0.000 | [+0.000, +0.000] |
+| sensor_disagreement_within_gate | gospa_p1 | 2 | -0.188 | [-1.669, +1.294] |
+| sensor_disagreement_within_gate | idf1 | 2 | +0.090 | [+0.034, +0.146] |
+| sensor_disagreement_within_gate | mota | 2 | +0.060 | [-0.999, +1.118] |
+| sensor_disagreement_within_gate | position_coverage_95 | 2 | +0.382 | [-0.454, +1.218] |
 | sensor_disagreement_within_gate | position_rmse | 2 | -0.031 | [-0.089, +0.026] |
 | sensor_disagreement_within_gate | position_rmse_distance_only | 2 | -0.055 | [-0.493, +0.383] |
-| sensor_disagreement_within_gate | recall | 2 | +0.000 | [+0.000, +0.000] |
 | sensor_disagreement_within_gate | precision | 2 | +0.016 | [-0.470, +0.501] |
-| sensor_disagreement_within_gate | position_coverage_95 | 2 | +0.382 | [-0.454, +1.218] |
-| sensor_disagreement_within_gate | mota | 2 | +0.060 | [-0.999, +1.118] |
-| sensor_disagreement_within_gate | idf1 | 2 | +0.090 | [+0.034, +0.146] |
-| sensor_disagreement_within_gate | gospa_p1 | 2 | -0.188 | [-1.669, +1.294] |
+| sensor_disagreement_within_gate | recall | 2 | +0.000 | [+0.000, +0.000] |
 
 ## Class estimate accuracy
 
