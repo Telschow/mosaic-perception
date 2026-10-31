@@ -94,13 +94,28 @@ Two checks run on every push and pull request alongside the test suite.
 benchmark-golden-check`). Regenerates a small fixed benchmark — scenarios
 `nominal` and `sensor_disagreement_within_gate`, seeds 0 and 1, 2.0 s duration,
 2 objects — into a temporary directory and compares all three outputs
-(`benchmark.json`, `per_seed.csv`, `report.md`) byte for byte against the
-committed copies in `artifacts/benchmark-golden/`. Any nondeterminism or silent
-behaviour change fails the build. The recorded source commit differs on every
-commit by design, so both sides have 40-hex commit hashes replaced by a
-placeholder before comparison; commit correctness is the provenance check's
-job. When an output change is intended, refresh the goldens with the
-one-command step `make benchmark-golden` and commit the result.
+(`benchmark.json`, `per_seed.csv`, `report.md`) against the committed copies in
+`artifacts/benchmark-golden/`. Any nondeterminism or silent behaviour change
+fails the build.
+
+The structured outputs are compared field by field rather than byte for byte.
+Integer, string, boolean and structural fields (keys, row and column counts)
+must match exactly; float fields are compared with a tight relative tolerance
+of `1e-9` (with a `1e-12` absolute tolerance for values at or near zero).
+Byte-for-byte equality was relaxed because the same code produces
+floating-point/BLAS noise in the last one or two digits on different platforms
+— e.g. `anees_position` `4.2417037447519625` on Linux CI versus
+`4.24170374475195` on macOS arm64. That noise is ~`1e-15` relative, six orders
+of magnitude below the tolerance, so it no longer fails the check, while any
+real change in a count, identity, structure or value stays far above the
+tolerance and still fails. `report.md` is unstructured and its numbers are
+rounded for display, so it remains a byte-for-byte comparison.
+
+The recorded source commit differs on every commit by design, so both sides
+have 40-hex commit hashes replaced by a placeholder before comparison; commit
+correctness is the provenance check's job. When an output change is intended,
+refresh the goldens with the one-command step `make benchmark-golden` and
+commit the result.
 
 **Artifact provenance** (`scripts/check_artifact_provenance.py`, `make
 provenance-check`). Reads `artifacts/benchmark/benchmark.json` and verifies
