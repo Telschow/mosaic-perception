@@ -220,11 +220,14 @@ In particular, this project does **not** claim:
 ## Type checking and CI
 
 - Supported CI (`.github/workflows/ci.yml`) runs, on Python 3.12:
-  `ruff check src tests`, `ruff format --check .` (full tree), `mypy src`,
+  `ruff check src tests scripts app`, `ruff format --check src tests scripts app`
+  (the same paths as `make lint` and `make format-check`), `mypy src`,
   `pytest`, and smoke tests of `mosaic run`, `evaluate`, `compare` and
   `benchmark` (the last two check that the three canonical artifacts are
   written; `benchmark` runs three scenarios, checks each appears in the report
-  and checks that an unknown scenario name is rejected).
+  and checks that an unknown scenario name is rejected). uv is pinned to 0.13.6.
+  Only Python 3.12 is tested and `pyproject.toml` has `>=` bounds only; the
+  numpy and scipy versions used are recorded in `benchmark.json` (`code`).
 - Type checking uses `scipy-stubs` from the dev dependencies; no
   `type: ignore` comments or config-level suppressions are used for the source
   package.

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Annotated, Any
 
 import numpy as np
+import scipy
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -288,7 +289,12 @@ def _run_experiment(
     payload: dict[str, Any] = {
         "schema_version": 2,
         "command": command,
-        "code": {"package_version": __version__, "git_commit": commit},
+        "code": {
+            "package_version": __version__,
+            "git_commit": commit,
+            "numpy_version": np.__version__,
+            "scipy_version": scipy.__version__,
+        },
         "protocol": {
             "matching_gate_m": matching_gate_m,
             "matching_continuity": matching_continuity,

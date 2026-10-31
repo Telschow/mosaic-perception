@@ -24,14 +24,15 @@ jobs:
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           enable-cache: true
+          version: "0.13.6"
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
       - name: Install locked dependencies
         run: uv sync --locked --all-extras --python ${{ matrix.python-version }}
-      - name: Lint with ruff
-        run: uv run --python ${{ matrix.python-version }} ruff check src tests
-      - name: Format check (full tree)
-        run: uv run --python ${{ matrix.python-version }} ruff format --check .
+      - name: Lint with ruff (make lint)
+        run: uv run --python ${{ matrix.python-version }} ruff check src tests scripts app
+      - name: Format check (make format-check)
+        run: uv run --python ${{ matrix.python-version }} ruff format --check src tests scripts app
       - name: Type check
         run: uv run --python ${{ matrix.python-version }} mypy src
       - name: Test with pytest
@@ -111,6 +112,7 @@ jobs:
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with:
           enable-cache: true
+          version: "0.13.6"
       - name: Set up Python 3.12
         run: uv python install 3.12
       - name: Install locked dependencies

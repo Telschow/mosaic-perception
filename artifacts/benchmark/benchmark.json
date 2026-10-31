@@ -1,7 +1,9 @@
 {
   "code": {
-    "git_commit": "b286320c73991dbd997f1bce696b2f4795af2c82",
-    "package_version": "0.1.0"
+    "git_commit": "d57356666b2ffbb5d510e4491b08c0490084e2ed",
+    "numpy_version": "2.5.4",
+    "package_version": "0.1.0",
+    "scipy_version": "1.18.1"
   },
   "command": "benchmark",
   "protocol": {

@@ -158,11 +158,11 @@ suite, CLI smoke tests, a pinned secret scan over full history, artifact
 provenance and golden-benchmark checks. Least-privilege permissions, all
 actions pinned to commit SHAs.
 
-- Evidence: `.github/workflows/ci.yml` — jobs `test`, `secret-scan`,
-  `artifact-checks`. CI invokes the tools directly rather than through `make`:
-  `ruff check src tests` (not `scripts/` or `app/`), `ruff format --check .`
-  (full tree, unlike `make format-check`, which covers `src tests`),
-  `mypy src`, `pytest`, then `scripts/check_artifact_provenance.py` and
+- Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6): jobs `test`, `secret-scan`,
+  `artifact-checks`. CI invokes the tools directly rather than through `make`,
+  on the same paths as the Make targets: `ruff check src tests scripts app`
+  (`make lint`), `ruff format --check src tests scripts app`
+  (`make format-check`), `mypy src`, `pytest`, then `scripts/check_artifact_provenance.py` and
   `scripts/check_benchmark_golden.py` (the `make provenance-check` and
   `make benchmark-golden-check` targets). Secret-scan result recorded on issue #29 (gitleaks
   8.30.1, 46 commits, no leaks).
