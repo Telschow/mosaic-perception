@@ -35,3 +35,5 @@ outputs/
 !configs/**/*.json
 !configs/**/*.yaml
 .DS_Store
+
+node_modules/
