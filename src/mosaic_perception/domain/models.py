@@ -389,6 +389,7 @@ class EvaluationResult(BaseModel):
     unmatched_ground_truth_samples: int = 0
     unmatched_track_samples: int = 0
     coverage_samples: int = 0
+    coverage_skipped_samples: int = 0
     evaluated_frames: int = 0
     matching_gate_m: float = 2.0
     matching_continuity: bool = True
@@ -416,7 +417,9 @@ class EvaluationResult(BaseModel):
     nis_dof_sum: int = 0
     nis_updates: int = 0
     anis: float | None = None
-    nees_samples: int = 0
+    nees_samples: int = 0  # matched samples with a valid position block
+    nees_velocity_samples: int = 0
+    nees_skipped_samples: int = 0
     nees_position_sum: float = 0.0
     nees_velocity_sum: float = 0.0
     anees_position: float | None = None

@@ -258,7 +258,7 @@ def test_nees_position_and_velocity_use_their_own_covariance_blocks():
         covariance=np.diag([4.0, 4.0, 1.0, 1.0]),
     )
     sums = nees_sums([frame])
-    assert sums.samples == 1
+    assert sums.position_samples == sums.velocity_samples == 1
     assert sums.position == pytest.approx(0.25)  # 1^2 / 4
     assert sums.velocity == pytest.approx(4.0)  # 2^2 / 1
 
@@ -268,7 +268,7 @@ def test_nees_skips_samples_with_a_singular_covariance():
 
     frame = _nees_frame((1.0, 0.0), (0.0, 0.0), np.zeros((4, 4)))
     sums = nees_sums([frame])
-    assert sums.samples == 0
+    assert sums.position_samples == 0 and sums.skipped == 1
     assert sums.position == 0.0 and sums.velocity == 0.0
 
 
@@ -364,3 +364,43 @@ def test_continuity_outranks_match_count():
     assert identity_switches(frames) == 0
     plain = match_frames(by_time, worlds, gate_m=2.0, continuity=False)
     assert len(plain[1].matched_pairs) == 2
+
+
+# --- skips are visible (issue #67) --------------------------------------------------
+
+import numpy as np  # noqa: E402
+
+from mosaic_perception.evaluation.metrics import coverage_counts  # noqa: E402
+
+
+def test_duplicate_track_and_time_snapshots_raise():
+    snapshots = [make_snapshot(0.0, "t1", (0.0, 0.0)), make_snapshot(0.0, "t1", (1.0, 0.0))]
+    with pytest.raises(ValueError, match="duplicate"):
+        index_snapshots(snapshots)
+
+
+def test_snapshot_matching_no_world_state_time_raises():
+    worlds = [make_world_state(0.0, {"a": ((0.0, 0.0), (0.0, 0.0))})]
+    by_time = index_snapshots([make_snapshot(0.5, "t1", (0.0, 0.0))])
+    with pytest.raises(ValueError, match="world-state time"):
+        match_frames(by_time, worlds, gate_m=2.0)
+
+
+def test_coverage_rejects_indefinite_covariance_and_counts_the_skip():
+    frame = _nees_frame((1.0, 0.0), (0.0, 0.0), np.diag([1.0, -1.0, 1.0, 1.0]))
+    cov = coverage_counts([frame])
+    assert cov.samples == 0 and cov.skipped == 1
+
+
+def test_nees_rejects_indefinite_covariance_and_counts_the_skip():
+    frame = _nees_frame((1.0, 0.0), (0.0, 0.0), np.diag([1.0, -1.0, 1.0, 1.0]))
+    sums = nees_sums([frame])
+    assert sums.position_samples == 0 and sums.skipped == 1
+
+
+def test_nees_singular_velocity_block_keeps_the_position_sample():
+    frame = _nees_frame((1.0, 0.0), (0.0, 0.0), np.diag([4.0, 4.0, 0.0, 0.0]))
+    sums = nees_sums([frame])
+    assert sums.position_samples == 1
+    assert sums.position == pytest.approx(0.25)
+    assert sums.velocity_samples == 0 and sums.skipped == 1

@@ -217,6 +217,8 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     sandbox: docker(),
     name: "merger",
     maxIterations: 1,
+    // `make benchmark` is silent for well over the 600 s default.
+    idleTimeoutSeconds: 3600,
     agent: sandcastle.claudeCode(MODEL, { effort: "low" }),
     promptFile: "./.sandcastle/merge-prompt.md",
     promptArgs: {

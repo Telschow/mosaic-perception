@@ -53,8 +53,8 @@ At each ground-truth timestamp:
 | `class_classified_samples`, `class_correct_samples` | numerator and denominator of `class_accuracy` | count of matched samples |
 | `vision_bias_estimate`, `vision_bias_updates` | Final estimate (rad) of the vision bearing bias and the number of vision updates that fed it, for the bias-estimated fusion method only (`None` / 0 otherwise). A single global scalar Kalman filter on vision innovations of confirmed tracks, prior standard deviation 0.05 rad, random walk 1e-4 rad per epoch, fixed in advance; uncertain tracks are down-weighted by their larger innovation variance, and only gate-passing observations are applied, so a bias too large for the gate is never learned | applied vision updates |
 | `vision_bias_configured` | The bearing bias injected by the scenario, recorded for comparison with the estimate. Evaluator-side metadata; never an estimator input | none |
-| `nees_samples`, `nees_position_sum`, `nees_velocity_sum` | Matched samples with a valid covariance and the sums of their 2-DOF position and velocity normalised estimation error squared (NEES, `e' P^-1 e` with the position or velocity covariance block). Conditioned on the matching gate | matched samples |
-| `anees_position`, `anees_velocity` | Mean NEES per matched sample (`sum / samples`); nominal value 2 for a consistent filter. `None` without samples | `nees_samples` |
+| `nees_samples`, `nees_position_sum`, `nees_velocity_sum` | Matched samples with a valid position covariance and the sums of their 2-DOF position and velocity normalised estimation error squared (NEES, `e' P^-1 e` with the position or velocity covariance block). Conditioned on the matching gate | matched samples |
+| `anees_position`, `anees_velocity` | Mean NEES per valid block (`sum / samples`); nominal value 2 for a consistent filter. `None` without samples | `nees_samples` (position), `nees_velocity_samples` (velocity) |
 | `nis_updates`, `nis_sum`, `nis_dof_sum` | Applied filter updates, the sum of their normalised innovation squared (`v' S^-1 v`, from the filter's own innovation and covariance) and the sum of their measurement dimensions. No ground truth. Only updates that passed the gate are applied, so NIS is truncated | applied updates |
 | `anis` | `nis_sum / nis_dof_sum`, mean NIS per degree of freedom (nominal 1.0, slightly below under gating). `None` without updates | `nis_dof_sum` |
 | `anees_position_per_dof_pooled`, `anees_velocity_per_dof_pooled`, `anis_pooled` | Pooled over all seeds of a scenario: total NEES (or NIS) divided by the total degrees of freedom (`2 x samples` for NEES, `nis_dof_sum` for NIS). Reported with a two-sided 95% interval from the chi-square quantiles at those degrees of freedom divided by them (`_low`, `_high`, `_dof` in the aggregate). Samples within a track are correlated, so the interval is optimistic | pooled degrees of freedom |
@@ -72,6 +72,22 @@ The explicit count fields `matched_samples`, `ground_truth_samples`,
 `unmatched_track_samples` and `coverage_samples` are stored with every result so
 denominators can be audited. `evaluated_frames` and `matching_gate_m` are also
 recorded.
+
+### Skipped samples and invalid input
+
+Coverage and NEES use a covariance block only if it is finite, symmetric and
+positive definite. A non-PSD (for example `diag(1, -1, 1, 1)`), singular or
+non-finite block is skipped, not inverted. Each matched sample with a rejected
+block is counted: `coverage_skipped_samples` for the position coverage block,
+`nees_skipped_samples` for a sample missing a valid position or velocity block.
+The position and velocity blocks are judged separately, so a singular velocity
+block keeps the position sample: `nees_samples` counts valid position blocks,
+`nees_velocity_samples` valid velocity blocks, and `anees_position` and
+`anees_velocity` divide by their own counts.
+
+The evaluator raises `ValueError` rather than skipping when a track snapshot time
+matches no world-state time (within 1e-9 s), or when two snapshots share a
+`(track_id, time)`.
 
 ## Cross-check against TrackEval
 

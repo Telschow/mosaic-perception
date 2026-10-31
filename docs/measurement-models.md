@@ -81,11 +81,11 @@ Each observation has:
 
 The tracker holds observations in a pending queue until delivery. At each
 epoch it processes due observations sorted by `(delivery_time, capture_time,
-observation_id)`. An observation whose capture time is more than one tracker
-epoch (`dt + 1e-6`) in the past is rejected with a logged stale reason and
-counted in `rejected_out_of_sequence`. It is not replayed. In-flight
-observations at the end of the simulation are reported as
-`pending_observations`.
+observation_id)`. An observation whose delivery latency
+(`delivery_time - capture_time`) is more than one tracker epoch (`dt + 1e-6`)
+is rejected with a logged stale reason and counted in
+`rejected_out_of_sequence`. It is not replayed. In-flight observations at the
+end of the simulation are reported as `pending_observations`.
 
 **Delayed-observation state alignment (bounded-staleness approximation):**
 When an observation is processed, the tracker has already predicted all tracks
@@ -104,11 +104,12 @@ removes this approximation for observations up to one epoch old. See
   between capture and delivery is approximately `speed × observation_age`.
   Acceleration and observer-motion effects are not accounted for in this
   approximation and require additional consideration.
-- The reported age of information (`mean_age_of_information`) is measured at
-  tracker processing time (`now - capture_time`), not at `delivery_time`, so it
-  is quantised by the tick phase: capture 0.0, delivery 0.01, processed at 0.1
-  reports 0.1. The one-epoch staleness rule uses the same quantity. It is not
-  the estimation alignment error.
+- The reported age of information (`mean_age_of_information`) is the delivery
+  latency, `delivery_time - capture_time`, independent of the tracker tick
+  phase: capture 0.0, delivery 0.01, processed at 0.1 reports 0.01. The
+  staleness rule uses the same quantity: an observation is rejected when its
+  latency exceeds one epoch, however late the tracker happens to process it.
+  It is not the estimation alignment error.
 - Observations older than the staleness limit are rejected rather than
   replayed.
 - No claim of full out-of-sequence measurement fusion (retroactive state
