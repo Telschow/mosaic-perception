@@ -28,6 +28,14 @@ bearing = wrap(atan2(p_y - s_y, p_x - s_x) - ψ)
 range_rate = ((p - s) · (v - v_s)) / r
 ```
 
+Implementation details not shown in the formulas: the measured range is floored
+at 0.1 m *before* the configured range bias is added (so a floored sample sits at
+0.1 m + bias and the noise is no longer Gaussian within about 1 m of the observer);
+objects closer than 1e-6 m to the observer are skipped; and `frame_rate` is
+quantised to the simulation tick (the sensor emits on the first tick at least one
+period after its last emission, so a rate that does not divide the tick rate
+emits less often than configured).
+
 The measurement vector is `[range, bearing, range_rate]`, with a diagonal
 covariance in sensor units: m², rad² and (m/s)². Gaussian noise and optional
 constant bias are applied in those units.
@@ -96,8 +104,11 @@ removes this approximation for observations up to one epoch old. See
   between capture and delivery is approximately `speed × observation_age`.
   Acceleration and observer-motion effects are not accounted for in this
   approximation and require additional consideration.
-- The reported age of information (`mean_age_of_information`) reflects the
-  time between capture and delivery, not the estimation alignment error.
+- The reported age of information (`mean_age_of_information`) is measured at
+  tracker processing time (`now - capture_time`), not at `delivery_time`, so it
+  is quantised by the tick phase: capture 0.0, delivery 0.01, processed at 0.1
+  reports 0.1. The one-epoch staleness rule uses the same quantity. It is not
+  the estimation alignment error.
 - Observations older than the staleness limit are rejected rather than
   replayed.
 - No claim of full out-of-sequence measurement fusion (retroactive state

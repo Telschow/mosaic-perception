@@ -92,7 +92,7 @@ policy, deterministic track lifecycle.
   observations older than one epoch are rejected, not replayed, in the default
   mode; retrodiction covers only the one-epoch lag, gates against the
   delivery-time state, is off by default, and its benchmark effect on
-  identity switches and MOTA is diagnosed as worse and unexplained.
+  identity switches and MOTA is worse and its cause is undiagnosed.
 - Planned: none specific to tracking.
 
 ### Evaluation — **Implemented**

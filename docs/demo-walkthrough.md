@@ -65,8 +65,9 @@ uv run streamlit run app/streamlit_app.py
 ## Key takeaways
 
 - **Fusion is not always better.** In the current development benchmark, fused
-  position RMSE is often slightly lower, but precision is lower in every
-  scenario with defined precision, coverage is not improved overall, and the
+  position RMSE differences are small and depend on the matcher (under the headline
+  matcher fusion is better in 1 of 15 scenarios and worse in 6), and precision is
+  worse in 14 of the 15 scenarios with defined precision, coverage is not improved overall, and the
   miscalibration scenario remains badly calibrated.
 - **Association is per group.** A track can receive range and vision in the
   same epoch; within each group matching is one-to-one.

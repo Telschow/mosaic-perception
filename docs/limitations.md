@@ -110,9 +110,9 @@
     (association is not retrodicted), it is off by default, and it covers only the
     one-epoch lag, so it is not general out-of-sequence measurement fusion.
   - Measured on the benchmark (`delivery_delay` against `delivery_delay_retrodiction`,
-    same delays): retrodiction improves position accuracy and consistency (RMSE 0.308 to
-    0.283 m range-only, distance-only RMSE 0.285 to 0.252 and 0.268 to 0.251; position
-    NEES per DOF 4.9 to 1.9 and 11.3 to 3.3) but worsens identity switches (6.9 to 11.1
+    same delays): retrodiction improves range-only headline RMSE (0.308 to 0.283 m) but not fused
+    (0.329 to 0.335 m, slightly worse), and improves distance-only RMSE (0.285 to 0.252 and
+    0.268 to 0.251) and position NEES per DOF (4.9 to 1.9 and 11.3 to 3.3) but worsens identity switches (6.9 to 11.1
     range-only, 5.1 to 13.0 fused) and MOTA (0.708 to 0.636 and 0.437 to 0.349). The
     cause has not been diagnosed; gating delayed observations against the delivery-time
     state is one candidate, and nothing here shows retrodiction is better overall.
@@ -150,8 +150,9 @@
   `num_duplicate_tracks` metric counts them. It depends on the matching gate
   and cannot tell a duplicate of the right object from a track that merely
   passed near one.
-- The two sensor-disagreement scenarios are single, hand-chosen bias values on
-  a synthetic world. `sensor_disagreement_large_bias` (0.12 rad) mainly tests
+- The four sensor-disagreement scenarios (`_within_gate_low`, `_within_gate`,
+  `_within_gate_high` at 0.010, 0.015 and 0.020 rad, and `_large_bias`) are
+  single, hand-chosen bias values on a synthetic world. `sensor_disagreement_large_bias` (0.12 rad) mainly tests
   gate rejection (most, but not all, biased observations are rejected: see the
   vision acceptance table). `sensor_disagreement_within_gate` (0.015 rad) was
   fixed in advance, not tuned, and measures the effect of fusing accepted
@@ -161,13 +162,21 @@
   degree of freedom with a chi-square interval. The intervals treat samples as
   independent although samples within a track are correlated, so they are
   optimistic; the report shows how many ground-truth samples the gate excludes.
+- Tallies in the report's Findings and in the README count scenarios as if they
+  were independent, but they are not: `range_only` is bit-identical across six
+  scenarios (`nominal`, the four `sensor_disagreement_*` and `vision_dropout`), so the
+  same baseline is counted repeatedly, no multiplicity correction is applied across
+  16 scenarios and many metrics of 95% intervals, and scenarios with no matched
+  samples (`stale_rejection`) are left out of every count. Read the tallies as
+  descriptive counts, not as tests.
 - Coverage is empirical and only defined over matched samples. It is not a
   detection or association calibration metric.
 - Reported covariance can be badly miscalibrated. In the checked-in
-  `uncertainty_miscalibration` scenario, 95% coverage is roughly 0.12–0.14
-  rather than 0.95.
+  `uncertainty_miscalibration` scenario, 95% coverage is roughly 0.09–0.11
+  (0.089 range-only, 0.106 fused, 0.091 bias-estimated) rather than 0.95.
 - The benchmark shows only small position-RMSE differences between methods,
-  while fused precision is lower in every scenario with defined precision.
+  while fused precision is worse (interval excludes zero) in 14 of the 15 scenarios with
+  defined precision and inconclusive in the other.
   Accuracy alone is not
   evidence that fusion improved the tracker.
 - The `stale_rejection` scenario has no matched samples because its observations

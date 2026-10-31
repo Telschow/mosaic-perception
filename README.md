@@ -210,12 +210,12 @@ Headline observations from the current development benchmark:
   gate leaves about 1.3 updates per seed, so nothing is learned. The estimator
   assumes a constant bias and an unbiased range-bearing sensor.
 - **One-step-lag retrodiction** (`delivery_delay_retrodiction`, same delays as
-  `delivery_delay`): it improves position accuracy and consistency (RMSE 0.308
-  to 0.283 m range-only and 0.329 to 0.335 m fused; distance-only RMSE 0.285 to
-  0.252 and 0.268 to 0.251; position NEES per DOF 4.9 to 1.9 and 11.3 to 3.3)
+  `delivery_delay`): it improves range-only position accuracy (RMSE 0.308
+  to 0.283 m) but not fused (0.329 to 0.335 m, slightly worse), and improves distance-only RMSE (0.285 to
+  0.252 and 0.268 to 0.251) and consistency (position NEES per DOF 4.9 to 1.9 and 11.3 to 3.3)
   but makes identity switches and MOTA worse (switches 6.9 to 11.1 range-only
-  and 5.1 to 13.0 fused; MOTA 0.708 to 0.636 and 0.437 to 0.349). I have not
-  diagnosed why; association still gates delayed observations against the
+  and 5.1 to 13.0 fused; MOTA 0.708 to 0.636 and 0.437 to 0.349). The cause has not
+  been diagnosed; association still gates delayed observations against the
   delivery-time state, which is one candidate.
 - `crossing_targets` (one crossing of three targets) and `dense_clutter` are
   tested under global-nearest-neighbour association only. In `crossing_targets`

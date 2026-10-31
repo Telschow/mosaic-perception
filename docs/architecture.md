@@ -35,7 +35,7 @@ Key properties:
 
 ### Scenario layer (`scenarios.py`)
 
-- 10 named presets with sensor and observer overrides.
+- 16 named presets with sensor and observer overrides.
 - Resolution into a fully expanded `ScenarioConfig` with independent copies of
   nested noise/bias dictionaries.
 - Scenario names are validated by the CLI; ships no unused config files.
