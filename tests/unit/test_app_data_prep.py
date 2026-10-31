@@ -67,3 +67,10 @@ def test_format_metric_renders_undefined_as_na() -> None:
     assert format_metric(None) == "N/A"
     assert format_metric(0.12345) == "0.123"
     assert SIMULATED_LABEL.startswith("Simulated data")
+
+
+def test_default_seed_is_a_development_seed() -> None:
+    from app.data_prep import DEFAULT_SEED, MAX_DEV_SEED
+
+    assert 0 <= DEFAULT_SEED <= MAX_DEV_SEED
+    assert MAX_DEV_SEED < 25  # 25-49 is the reserved held-out range

@@ -121,7 +121,11 @@ commit the result.
 provenance-check`). Reads `artifacts/benchmark/benchmark.json` and verifies
 that the recorded source commit exists and is an ancestor of `HEAD`, that no
 artifact-producing source has changed since that commit, and that the recorded
-package version still matches `pyproject.toml`. The artifact-producing source
+package version still matches `pyproject.toml`. It also checks that
+`artifacts/benchmark/report.md` records the same commit as `benchmark.json` and
+is byte-identical to `render_report(benchmark.json)` (the render is a pure
+function), so a stale report fails. `per_seed.csv` records no commit and is not
+checked. The artifact-producing source
 set is `src/` — the package that generates the numbers. Tests, documentation,
 workflows and dependency manifests are excluded because they cannot change
 generated values; a dependency change that does change values is caught by the

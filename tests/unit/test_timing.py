@@ -437,3 +437,29 @@ def test_retrodiction_keeps_the_one_epoch_staleness_limit():
     assert stats.rejected_out_of_sequence == 1
     assert stats.age_samples == 0
     assert stale.associated_track_id is None
+
+
+def test_retrodiction_second_call_at_the_same_time_keeps_the_first_calls_updates():
+    tracker, track = _tracker_with_track("retrodiction", velocity=(0.0, 0.0))
+    ekf = ExtendedKalmanFilter(dt=0.1)
+    r0 = range_observation(
+        "r0", distance=10.0, bearing=0.0, range_rate=0.0, capture_time=0.0, delivery_time=0.0
+    )
+    r1 = range_observation(
+        "r1", distance=10.0, bearing=0.0, range_rate=0.0, capture_time=0.1, delivery_time=0.1
+    )
+    late = vision_observation("v-late", bearing=0.002, capture_time=0.0, delivery_time=0.1)
+    x0, p0 = track.state_array().copy(), track.cov_array().copy()
+
+    tracker.process_observations([r0], 0.0)
+    tracker.process_observations([r1], 0.1)
+    tracker.process_observations([late], 0.1)
+
+    # Time-ordered replay from the t=0 prior: r0 and v-late at t=0, then r1 at t=0.1.
+    x, p = _ekf_update(ekf, x0, p0, r0)
+    x, p = _ekf_update(ekf, x, p, late)
+    x, p = ekf.predict_over(x, p, 0.1)
+    x, p = _ekf_update(ekf, x, p, r1)
+    np.testing.assert_allclose(track.state_array(), x, atol=1e-9)
+    np.testing.assert_allclose(track.cov_array(), p, atol=1e-9)
+    assert {"r0", "r1", "v-late"} <= set(track.associated_observations)

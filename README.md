@@ -57,7 +57,7 @@ With `uv`, every command below can be run as `uv run mosaic ...`. A plain
 ### Run one scenario
 
 ```bash
-uv run mosaic run --scenario nominal --seed 42
+uv run mosaic run --scenario nominal --seed 1
 ```
 
 ### Compare across seeds

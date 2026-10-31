@@ -158,7 +158,9 @@ class MultiSensorTracker:
         if not np.isfinite(now):
             raise ValueError("current_time must be finite")
         self._now = now
-        self._epoch_applied = {}
+        if self._last_time is None or now > self._last_time + 1e-9:
+            # A repeated time stays in the same epoch: its earlier updates must be replayed.
+            self._epoch_applied = {}
         self._advance_time(now)
         self._enqueue(observations)
         due = self._take_due(now)
