@@ -7,13 +7,13 @@ test:
 	uv run pytest
 
 lint:
-	uv run ruff check src tests
+	uv run ruff check src tests scripts app
 
 format:
-	uv run ruff format src tests
+	uv run ruff format src tests scripts app
 
 format-check:
-	uv run ruff format --check src tests
+	uv run ruff format --check src tests scripts app
 
 typecheck:
 	uv run mypy src
