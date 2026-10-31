@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `d6ec3ec34b01bcda021fda1da0402a17ea331e47`
+- Git commit: `a8c7e52728772e6ab8c10f7df70c64db923a3228`
 - Seeds: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -629,12 +629,12 @@ observations behind each mean age of information.
 | crossing_targets | range_only | 289.2 | 0.0 | 0.0 | 0.0 | 0.000 | 289.2 |
 | crossing_targets | fused | 564.4 | 0.0 | 0.0 | 0.0 | 0.000 | 564.4 |
 | crossing_targets | fused_bias_estimated | 564.4 | 0.0 | 0.0 | 0.0 | 0.000 | 564.4 |
-| delivery_delay | range_only | 285.0 | 1.4 | 1.4 | 2.8 | 0.099 | 283.6 |
-| delivery_delay | fused | 556.3 | 3.0 | 3.0 | 5.6 | 0.099 | 553.3 |
-| delivery_delay | fused_bias_estimated | 556.3 | 3.0 | 3.0 | 5.6 | 0.099 | 553.3 |
-| delivery_delay_retrodiction | range_only | 285.0 | 1.4 | 1.4 | 2.8 | 0.099 | 283.6 |
-| delivery_delay_retrodiction | fused | 556.3 | 3.0 | 3.0 | 5.6 | 0.099 | 553.3 |
-| delivery_delay_retrodiction | fused_bias_estimated | 556.3 | 3.0 | 3.0 | 5.6 | 0.099 | 553.3 |
+| delivery_delay | range_only | 285.0 | 1.4 | 1.4 | 2.8 | 0.050 | 283.6 |
+| delivery_delay | fused | 556.3 | 3.0 | 3.0 | 5.6 | 0.050 | 553.3 |
+| delivery_delay | fused_bias_estimated | 556.3 | 3.0 | 3.0 | 5.6 | 0.050 | 553.3 |
+| delivery_delay_retrodiction | range_only | 285.0 | 1.4 | 1.4 | 2.8 | 0.050 | 283.6 |
+| delivery_delay_retrodiction | fused | 556.3 | 3.0 | 3.0 | 5.6 | 0.050 | 553.3 |
+| delivery_delay_retrodiction | fused_bias_estimated | 556.3 | 3.0 | 3.0 | 5.6 | 0.050 | 553.3 |
 | dense_clutter | range_only | 692.1 | 0.0 | 0.0 | 0.0 | 0.000 | 692.1 |
 | dense_clutter | fused | 1790.9 | 0.0 | 0.0 | 0.0 | 0.000 | 1790.9 |
 | dense_clutter | fused_bias_estimated | 1790.9 | 0.0 | 0.0 | 0.0 | 0.000 | 1790.9 |
@@ -665,9 +665,9 @@ observations behind each mean age of information.
 | sensor_disagreement_within_gate_low | range_only | 289.2 | 0.0 | 0.0 | 0.0 | 0.000 | 289.2 |
 | sensor_disagreement_within_gate_low | fused | 564.4 | 0.0 | 0.0 | 0.0 | 0.000 | 564.4 |
 | sensor_disagreement_within_gate_low | fused_bias_estimated | 564.4 | 0.0 | 0.0 | 0.0 | 0.000 | 564.4 |
-| stale_rejection | range_only | 279.0 | 278.4 | 278.4 | 8.8 | 0.100 | 0.6 |
-| stale_rejection | fused | 545.1 | 544.2 | 544.2 | 16.7 | 0.100 | 0.9 |
-| stale_rejection | fused_bias_estimated | 545.1 | 544.2 | 544.2 | 16.7 | 0.100 | 0.9 |
+| stale_rejection | range_only | 279.0 | 278.4 | 278.4 | 8.8 | 0.079 | 0.6 |
+| stale_rejection | fused | 545.1 | 544.2 | 544.2 | 16.7 | 0.083 | 0.9 |
+| stale_rejection | fused_bias_estimated | 545.1 | 544.2 | 544.2 | 16.7 | 0.083 | 0.9 |
 | uncertainty_miscalibration | range_only | 289.2 | 0.0 | 0.0 | 0.0 | 0.000 | 289.2 |
 | uncertainty_miscalibration | fused | 564.4 | 0.0 | 0.0 | 0.0 | 0.000 | 564.4 |
 | uncertainty_miscalibration | fused_bias_estimated | 564.4 | 0.0 | 0.0 | 0.0 | 0.000 | 564.4 |
