@@ -20,7 +20,7 @@ uv sync --locked --all-extras && uv run pytest
 uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
-CI runs the locked sync and test suite on every push, checks benchmark determinism by regenerating a small fixed benchmark and comparing it byte-for-byte with the committed golden files, and verifies the committed artifacts with `make provenance-check benchmark-golden-check`. The third command is the same benchmark code path as the golden check, at the published configuration.
+CI runs the locked sync and test suite on every push to `main` and every pull request to `main`, checks benchmark determinism by regenerating a small fixed benchmark and comparing it byte-for-byte with the committed golden files, and verifies the committed artifacts with `make provenance-check benchmark-golden-check`. The third command is the same benchmark code path as the golden check, at the published configuration.
 
 ### What the evidence shows, and what it does not
 
@@ -39,7 +39,7 @@ CI runs the locked sync and test suite on every push, checks benchmark determini
 - Deterministic IDs, explicit delivery/rejection statistics, and no ground-truth identities in the tracker.
 - Hand-constructed evaluator tests with exact expected values, plus end-to-end regression tests.
 - Reproducible benchmark artifacts generated from code: JSON, CSV and Markdown.
-- CI on every push: locked install, Ruff lint and format check, mypy, the full
+- CI on every push to `main` and every pull request to `main`: locked install, Ruff lint (`src tests`) and format check (full tree), mypy (`src`), the full
   test suite, CLI smoke tests, a pinned secret scan over full git history, and
   byte-level artifact provenance and golden-benchmark checks.
 

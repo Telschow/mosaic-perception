@@ -51,15 +51,15 @@ are regenerated after the repair; no old number is preserved for continuity.
 | V3 | Resolved | One convention: sensor-frame bearing = wrapped world line-of-sight minus observer heading, used by sensors, EKF prediction/Jacobians, gating and initiation. Tests: `test_bearing_is_sensor_relative_with_nonzero_heading`, `test_sensor_reports_sensor_frame_measurements_exactly`, finite-difference Jacobian tests. |
 | V4 | Resolved | `Pose2D` carries velocity; range rate uses object velocity minus observer velocity. Tests: `test_range_rate_is_relative_to_observer_velocity`, `test_range_rate_stationary_object_with_moving_observer`, `test_circle_observer_velocity_and_heading`, end-to-end moving-observer tests. |
 | V5 | Resolved | Evaluation uses per-epoch `TrackSnapshot` records, one-to-one gated Hungarian matching per timestamp, confirmed/coasting only, and χ²(2, 0.95)=5.991 coverage. Tests: `test_exact_rmse_matching_and_coverage`, `test_duplicate_tracks_are_matched_one_to_one`, `test_coverage_uses_chi_square_threshold_not_fixed_value`, `test_false_track_is_reported_without_inflating_recall`, `test_identity_switch_is_counted_when_track_id_changes_for_same_object`. |
-| V6 | Resolved as an explicit bounded-staleness policy | A pending queue holds observations until delivery. Those older than `dt + 1e-6` are rejected with a logged `stale` reason and counted in `rejected_out_of_sequence`; in-flight observations are reported as `pending_observations`. Full historical replay is explicitly not implemented. Tests: `test_future_delivery_is_queued_not_dropped`, `test_observation_older_than_one_epoch_is_rejected_and_counted`, `test_out_of_sequence_observations_are_explicitly_rejected`. |
+| V6 | Resolved as an explicit bounded-staleness policy | A pending queue holds observations until delivery. Those older than `dt + 1e-6` are rejected with a logged `stale` reason and counted in `rejected_out_of_sequence`; in-flight observations are reported as `pending_observations`. Full historical replay is explicitly not implemented. Tests: `test_future_delivery_is_queued_not_dropped`, `test_observation_older_than_one_epoch_is_rejected_and_counted`. |
 | V7 | Resolved | Sensors honour `frame_rate` instead of emitting every simulation step. Test: `test_sensor_frame_rate_is_honored`. |
-| V8 | Resolved | Scenario presets resolve real sensor/observer overrides; CLI validates names. There are 10 presets, including `delivery_delay`, `out_of_sequence` and `moving_observer`. Tests: `test_all_presets_resolve_with_two_sensor_groups`, `test_scenario_overrides_are_real_and_isolated`, `test_moving_observer_preset_uses_circle`. |
+| V8 | Resolved | Scenario presets resolve real sensor/observer overrides; CLI validates names. There were 10 presets at the time of the fix (16 now), including `delivery_delay`, `out_of_sequence` and `moving_observer`. Tests: `test_all_presets_resolve_with_two_sensor_groups`, `test_scenario_overrides_are_real_and_isolated`, `test_moving_observer_preset_uses_circle`. |
 | V9 | Resolved | Hits increment only for tracks with at least one successfully applied observation in the epoch; otherwise misses increment. Rejected/failed updates do not count as hits or reset misses. Broad exception swallowing was removed; update failures are logged and counted. Tests: `test_rejected_observation_does_not_count_as_hit_or_reset_misses`, `test_failed_update_does_not_count_as_hit`, `test_track_lifecycle_confirm_coast_delete`. |
-| V10 | Resolved | Recall, precision, identity switches and false tracks are computed with explicit denominators and sample counts. `track_fragmentation` is explicitly unsupported (`None`/`N/A`), not defaulted to zero. Tests: `test_exact_rmse_matching_and_coverage`, `test_missed_object_lowers_recall`, `test_no_valid_matches_reports_none_for_undefined_rmse_and_coverage`, `test_observation_statistics_are_propagated`. |
+| V10 | Resolved | Recall, precision, identity switches and false tracks are computed with explicit denominators and sample counts. At the time of the fix `track_fragmentation` was explicitly unsupported (`None`/`N/A`), not defaulted to zero. *Later superseded: fragmentation is now computed (`evaluation/metrics.py`).* Tests: `test_exact_rmse_matching_and_coverage`, `test_missed_object_lowers_recall`, `test_no_valid_matches_reports_none_for_undefined_rmse_and_coverage`, `test_observation_statistics_are_propagated`. |
 | V11 | Resolved | `uv.lock` is committed; CI uses `uv sync --locked --all-extras`, then Ruff check, format check and `pytest`. The workflow also runs a CLI smoke test. |
 | V12 | Resolved | `mosaic evaluate` is implemented and writes the same canonical JSON/CSV/Markdown artifacts as `benchmark`. Test: `test_evaluate_cli_is_reproducible`; README now documents implemented behavior. |
 
-## Current verification (local branch)
+## Verification at the time of the fix (historical; 77 tests then)
 
 ```
 uv run ruff check src tests                  -> pass
@@ -68,7 +68,7 @@ uv run pytest                                -> 77 passed
 uv run mosaic evaluate --scenario nominal --seeds 1 \
   --duration 1.0 --num-objects 1             -> writes benchmark.json, per_seed.csv, report.md
 benchmark --scenario all --seeds 1-5 --duration 10.0
-                                             -> 10 scenarios, development seeds only
+                                             -> 10 scenarios at the time, development seeds only
 ```
 
 The held-out seed range 25–49 was **not** run. The regenerated benchmark is a

@@ -20,7 +20,7 @@
 - [x] Unit tests
 - [x] CI workflow
 
-## Correctness and evaluation repair (current branch, unreleased)
+## Correctness and evaluation repair (merged; see [implementation-status.md](implementation-status.md) for current state)
 
 - [x] Per-group gated Hungarian association; one track may receive range and
       vision in the same epoch
@@ -37,7 +37,7 @@
 - [x] Deterministic IDs and artifact generation
 - [x] Paired same-world/same-range-stream comparison
 - [x] Implemented `mosaic evaluate`
-- [x] 77 tests, Ruff clean, locked CI with tests
+- [x] Ruff clean, locked CI with tests (77 tests at the time; the suite has grown since)
 - [x] Regenerated development benchmark; old numbers declared invalid
 
 ## Next (not done here)
@@ -49,7 +49,7 @@
 - [ ] Improve calibration under reported-covariance miscalibration
 - [ ] Add an oracle-association diagnostic to separate association errors from
       estimation errors
-- [ ] Multi-object crossing scenarios and association stress tests
+- [x] Multi-object crossing scenarios and association stress tests (`crossing_targets`, `dense_clutter`)
 - [ ] Optional 3-D extension
 - [ ] Performance profiling without mixing it with correctness claims
 
