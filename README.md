@@ -60,6 +60,9 @@ With `uv`, every command below can be run as `uv run mosaic ...`. A plain
 uv run mosaic run --scenario nominal --seed 1
 ```
 
+`mosaic run` evaluates two methods (`range_only` and `fused`). `compare`,
+`evaluate`, `benchmark` and the app run three (adding `fused_bias_estimated`).
+
 ### Compare across seeds
 
 ```bash

@@ -183,6 +183,14 @@
   exceed the staleness bound and are rejected. Accuracy is `N/A`; this is an
   explicit non-result, not a zero-error result.
 
+## Estimator inputs
+
+- The sensors pass the true observer pose to the estimator inside each
+  observation (`range_bearing.py`, `vision_bearing.py`), although `WorldState`
+  documents that true state must not leak into estimator inputs. Observer pose
+  is therefore treated as known perfectly; observer localisation error is not
+  modelled. Ground-truth object identity does not reach the estimator.
+
 ## Reproducibility boundaries
 
 - Results are deterministic for a fixed code commit, Python/dependency
