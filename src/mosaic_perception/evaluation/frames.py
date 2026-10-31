@@ -59,7 +59,8 @@ def match_frames(
 
     With ``continuity`` (the headline setting, as in TrackEval's CLEAR matching) the
     matcher prefers each object's track from the immediately preceding frame while
-    that pairing remains inside the gate; an object that was unmatched in the
+    that pairing remains inside the gate, even when that costs another object its
+    match (continuity outranks match count); an object that was unmatched in the
     preceding frame has no preference. Otherwise matching is distance-only.
     """
     frames: list[FrameMatch] = []
@@ -105,13 +106,21 @@ def match_frame(
     if not np.any(finite):
         return FrameMatch(index, time, tracks, objects, [], len(tracks), len(objects))
 
-    cost = distances.copy()
-    if previous:
+    if previous is None:
+        # Distance-only: maximise in-gate matches, then minimise total distance.
+        assignment_cost = np.where(finite, distances, 1e9)
+    else:
+        # Continuity-first, as TrackEval's CLEAR matching: maximise
+        # 1000 * previous_pairing + similarity over in-gate pairs only (similarity is
+        # zero outside the gate), so a still-valid previous pairing outranks match count.
+        score = np.where(finite, 1.0 - distances / gate_m, 0.0)
         for track_index, track in enumerate(tracks):
             for object_index, obj in enumerate(objects):
-                if previous.get(obj.object_id) == track.track_id:
-                    cost[track_index, object_index] -= _CONTINUITY_BONUS
-    assignment_cost = np.where(finite, cost, 1e9)
+                if finite[track_index, object_index] and (
+                    previous.get(obj.object_id) == track.track_id
+                ):
+                    score[track_index, object_index] += _CONTINUITY_BONUS
+        assignment_cost = -score
     rows, columns = linear_sum_assignment(assignment_cost)
     paired_rows: set[int] = set()
     paired_columns: set[int] = set()

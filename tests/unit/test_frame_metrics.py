@@ -343,3 +343,24 @@ def test_match_frames_defaults_to_the_headline_continuity_matcher():
     by_time, worlds = _flip_scenario()
     default = match_frames(by_time, worlds, gate_m=2.0)
     assert [pair[0].track_id for f in default for pair in f.matched_pairs] == ["t1", "t1"]
+
+
+def test_continuity_outranks_match_count():
+    """Keeping a valid pairing wins even when it costs another object its match (#58)."""
+    worlds = [
+        make_world_state(0.1 * i, {"a": ((0.0, 0.0), (0.0, 0.0)), "b": ((x_b, 0.0), (0.0, 0.0))})
+        for i, x_b in enumerate((10.0, 1.5))
+    ]
+    snapshots = [
+        make_snapshot(0.0, "t1", (0.0, 0.0)),
+        make_snapshot(0.0, "t2", (10.0, 0.0)),
+        make_snapshot(0.1, "t1", (0.5, 0.0)),  # in both gates
+        make_snapshot(0.1, "t2", (-1.8, 0.0)),  # in a's gate only
+    ]
+    by_time = index_snapshots(snapshots)
+    frames = match_frames(by_time, worlds, gate_m=2.0, continuity=True)
+    assert [len(f.matched_pairs) for f in frames] == [2, 1]
+    assert (frames[1].unmatched_tracks, frames[1].unmatched_objects) == (1, 1)
+    assert identity_switches(frames) == 0
+    plain = match_frames(by_time, worlds, gate_m=2.0, continuity=False)
+    assert len(plain[1].matched_pairs) == 2

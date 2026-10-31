@@ -14,6 +14,16 @@
       "idsw": 0,
       "mota": 1.0
     },
+    "continuity_over_cardinality": {
+      "clr_fn": 1,
+      "clr_fp": 1,
+      "clr_tp": 3,
+      "idf1": 0.75,
+      "idp": 0.75,
+      "idr": 0.75,
+      "idsw": 0,
+      "mota": 0.5
+    },
     "duplicate_track": {
       "clr_fn": 0,
       "clr_fp": 6,

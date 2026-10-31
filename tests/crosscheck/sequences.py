@@ -75,6 +75,7 @@ class FixedSequence:
     states: list[WorldState]
     snapshots: list[TrackSnapshot]
     description: str = field(default="")
+    box_size: float = BOX_SIZE
 
 
 def _clean_two_objects() -> FixedSequence:
@@ -141,6 +142,33 @@ def _miss_and_spurious() -> FixedSequence:
     )
 
 
+def _continuity_over_cardinality() -> FixedSequence:
+    """Keeping a valid previous pairing costs another object its match (#58).
+
+    Frame 0: A-T1 at 0 m, B-T2 at 10 m. Frame 1: A at 0, B at 1.5, T1 at 0.5 (in both
+    gates), T2 at -1.8 (A's gate only). Continuity keeps A-T1 and drops B. Six-metre
+    boxes make TrackEval's IoU > 0.5 threshold accept exactly offsets below 2 m, the
+    same as our 2 m gate, so both matchers see the same candidate pairs.
+    """
+    states = [
+        make_state(0, {"obj_a": (0.0, 0.0), "obj_b": (10.0, 0.0)}),
+        make_state(1, {"obj_a": (0.0, 0.0), "obj_b": (1.5, 0.0)}),
+    ]
+    snapshots = [
+        make_snapshot(0, "track_1", (0.0, 0.0)),
+        make_snapshot(0, "track_2", (10.0, 0.0)),
+        make_snapshot(1, "track_1", (0.5, 0.0)),
+        make_snapshot(1, "track_2", (-1.8, 0.0)),
+    ]
+    return FixedSequence(
+        name="continuity_over_cardinality",
+        states=states,
+        snapshots=snapshots,
+        description="A valid previous pairing outranks the match count (TrackEval CLEAR).",
+        box_size=6.0,
+    )
+
+
 def fixed_sequences() -> list[FixedSequence]:
     """The fixed cross-check sequences, at least three, one per corner case."""
     return [
@@ -148,4 +176,5 @@ def fixed_sequences() -> list[FixedSequence]:
         _duplicate_track(),
         _identity_switch(),
         _miss_and_spurious(),
+        _continuity_over_cardinality(),
     ]

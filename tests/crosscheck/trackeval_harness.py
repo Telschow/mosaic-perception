@@ -16,7 +16,7 @@ from typing import Any
 
 import numpy as np
 
-from .sequences import BOX_SIZE, FixedSequence
+from .sequences import FixedSequence
 
 TRACKEVAL_REPOSITORY = "https://github.com/JonathonLuiten/TrackEval"
 TRACKEVAL_COMMIT = "12c8791b303e0a0b50f753af204249e622d0281a"
@@ -40,9 +40,9 @@ def _legacy_numpy_aliases():
             delattr(np, name)
 
 
-def _box(position: tuple[float, float]) -> np.ndarray:
-    half = BOX_SIZE / 2.0
-    return np.array([position[0] - half, position[1] - half, BOX_SIZE, BOX_SIZE], dtype=float)
+def _box(position: tuple[float, float], size: float) -> np.ndarray:
+    half = size / 2.0
+    return np.array([position[0] - half, position[1] - half, size, size], dtype=float)
 
 
 def _iou_matrix(gt_boxes: np.ndarray, tracker_boxes: np.ndarray) -> np.ndarray:
@@ -79,7 +79,7 @@ def build_trackeval_data(sequence: FixedSequence) -> dict[str, Any]:
         for object_id, obj in state.objects.items():
             gt_label.setdefault(object_id, len(gt_label))
             gt_index.append(gt_label[object_id])
-            gt_boxes.append(_box((obj.position.x, obj.position.y)))
+            gt_boxes.append(_box((obj.position.x, obj.position.y), sequence.box_size))
 
         snapshots = [s for s in sequence.snapshots if round(s.time, 9) == round(state.time, 9)]
         trk_boxes = []
@@ -87,7 +87,7 @@ def build_trackeval_data(sequence: FixedSequence) -> dict[str, Any]:
         for snapshot in snapshots:
             tracker_label.setdefault(snapshot.track_id, len(tracker_label))
             trk_index.append(tracker_label[snapshot.track_id])
-            trk_boxes.append(_box((snapshot.state[0], snapshot.state[1])))
+            trk_boxes.append(_box((snapshot.state[0], snapshot.state[1]), sequence.box_size))
 
         gt_array = np.asarray(gt_boxes, dtype=float).reshape(-1, 4)
         trk_array = np.asarray(trk_boxes, dtype=float).reshape(-1, 4)
