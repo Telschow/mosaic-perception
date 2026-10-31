@@ -44,7 +44,7 @@ def index_snapshots(snapshots: list[TrackSnapshot]) -> dict[float, dict[str, Tra
     return by_time
 
 
-# Cost reduction for re-using last frame's pairing. Larger than any in-gate distance, so a
+# Score bonus for re-using last frame's pairing. Larger than any in-gate similarity sum, so a
 # still-valid previous pairing always beats a closer alternative (as in TrackEval's CLEAR).
 _CONTINUITY_BONUS = 1_000.0
 
