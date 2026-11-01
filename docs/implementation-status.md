@@ -156,10 +156,13 @@ runner exposes: `range_only`, `fused` and `fused_bias_estimated`.
 Locked dependency install, Ruff lint and format check, mypy, the full test
 suite, CLI smoke tests, a pinned secret scan over full history, artifact
 provenance and golden-benchmark checks. Least-privilege permissions, all
-actions pinned to commit SHAs.
+actions pinned to commit SHAs. An advisory `pip-audit` job reports known
+vulnerabilities in the locked dependencies without failing the build
+(`continue-on-error: true`), and Dependabot (`.github/dependabot.yml`, `uv` and
+`github-actions`, weekly, grouped minor/patch) proposes updates.
 
 - Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6): jobs `test`, `secret-scan`,
-  `artifact-checks`. CI invokes the tools directly rather than through `make`,
+  `artifact-checks`, `dependency-audit` (advisory, non-blocking). CI invokes the tools directly rather than through `make`,
   on the same paths as the Make targets: `ruff check src tests scripts app`
   (`make lint`), `ruff format --check src tests scripts app`
   (`make format-check`), `mypy src`, `pytest`, then `scripts/check_artifact_provenance.py` and

@@ -228,6 +228,11 @@ In particular, this project does **not** claim:
   and checks that an unknown scenario name is rejected). uv is pinned to 0.13.6.
   Only Python 3.12 is tested and `pyproject.toml` has `>=` bounds only; the
   numpy and scipy versions used are recorded in `benchmark.json` (`code`).
+- The `dependency-audit` job runs `pip-audit` on the locked dependencies and is
+  advisory: it has `continue-on-error: true`, so findings are reported but never
+  block a merge, and there is no severity threshold. It only knows published
+  advisories. Dependabot update PRs (`uv` and `github-actions`, weekly) are not
+  auto-merged.
 - Type checking uses `scipy-stubs` from the dev dependencies; no
   `type: ignore` comments or config-level suppressions are used for the source
   package.
