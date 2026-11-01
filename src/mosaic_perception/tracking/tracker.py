@@ -4,10 +4,12 @@ Multi-sensor tracker with per-group association and sequential fusion.
 Timing policy
 -------------
 Observations are held in a pending queue until ``delivery_time``. An
-observation whose capture time is at most one tracker epoch (``dt``) in the
-past may be applied at delivery time; this bounded-staleness approximation is
-documented and tested. Older observations are explicitly rejected and counted
-as ``rejected_out_of_sequence`` instead of being silently discarded. A
+observation whose latency (delivery time minus capture time) is at most one
+tracker epoch (``dt``) may be applied at delivery time, whether or not its
+capture time lies on the epoch grid; this bounded-staleness approximation is
+documented and tested. Observations with a larger latency are explicitly
+rejected and counted as ``rejected_out_of_sequence`` instead of being silently
+discarded. A repeated call time is merged into the current epoch. A
 tracker cannot use ground truth object identities: only observations, their
 observer poses, and configuration are available here.
 """
@@ -105,6 +107,10 @@ class MultiSensorTracker:
         self._now = 0.0
         self._prev_posterior: dict[str, tuple[np.ndarray, np.ndarray, float]] = {}
         self._epoch_applied: dict[str, list[SensorObservation]] = {}
+        # Pre-lifecycle counters and updated ids of the current epoch, so a repeated call
+        # time can be merged into it instead of counting a second epoch.
+        self._epoch_start: dict[str, tuple[int, int, int, TrackStatus, float]] = {}
+        self._epoch_updated: set[str] = set()
         self.use_vision = bool(use_vision)
         self.ekf = ExtendedKalmanFilter(dt=self.dt, accel_noise_std=accel_noise_std)
         self.associator = GatedHungarianAssociator(gates=gates)
@@ -162,8 +168,8 @@ class MultiSensorTracker:
         # Validate the whole batch before any state changes, so a rejected batch is a no-op.
         self._validate_batch(observations)
         self._now = now
-        if self._last_time is None or now > self._last_time + 1e-9:
-            # A repeated time stays in the same epoch: its earlier updates must be replayed.
+        repeated = self._last_time is not None and now <= self._last_time + 1e-9
+        if not repeated:
             self._epoch_applied = {}
         self._advance_time(now)
         self._enqueue(observations)
@@ -257,9 +263,16 @@ class MultiSensorTracker:
                         initiated_track_ids.add(track.track_id)
                         updated_track_ids.add(track.track_id)
 
-        self._finish_epoch(now, updated_track_ids)
+        if repeated:
+            # Merge into the epoch already counted: undo its lifecycle step and redo it with
+            # the union of updates, so hits, misses and age are not counted twice.
+            self._restore_epoch_start()
+            updated_track_ids |= self._epoch_updated
+        self._epoch_updated = set(updated_track_ids)
+        self._finish_epoch(now, updated_track_ids, replace_snapshots=repeated)
         self._last_time = now
-        self.epoch += 1
+        if not repeated:
+            self.epoch += 1
         return {
             track_id: track
             for track_id, track in self.tracks.items()
@@ -366,6 +379,8 @@ class MultiSensorTracker:
         """Reset all tracker state, snapshots and counters."""
         self._prev_posterior = {}
         self._epoch_applied = {}
+        self._epoch_start = {}
+        self._epoch_updated = set()
         self._now = 0.0
         self._bias = 0.0
         self._bias_var = BIAS_INITIAL_VARIANCE
@@ -668,6 +683,13 @@ class MultiSensorTracker:
         covariance[2, 2] = velocity_variance
         covariance[3, 3] = velocity_variance
 
+        # Position and covariance refer to the capture time; carry them to the ``now`` stamp.
+        state_now, covariance_now = self.ekf.predict_over(
+            np.array([position[0], position[1], velocity[0], velocity[1]]),
+            covariance,
+            max(now - observation.capture_time, 0.0),
+        )
+
         class_estimate = ObjectClass.UNKNOWN
         class_confidence = 0.0
         if observation.class_probs:
@@ -682,8 +704,8 @@ class MultiSensorTracker:
             status=TrackStatus.TENTATIVE,
             time=now,
             last_update_time=now,
-            state=[float(position[0]), float(position[1]), float(velocity[0]), float(velocity[1])],
-            covariance=covariance.tolist(),
+            state=state_now.tolist(),
+            covariance=covariance_now.tolist(),
             hits=0,
             misses=0,
             age=0,
@@ -727,7 +749,33 @@ class MultiSensorTracker:
         self.rejection_log.append((observation.observation_id, reason))
         observation.associated_track_id = None
 
-    def _finish_epoch(self, now: float, updated_track_ids: set[str]) -> None:
+    def _restore_epoch_start(self) -> None:
+        for track_id, (hits, misses, age, status, last_update) in self._epoch_start.items():
+            track = self.tracks.get(track_id)
+            if track is not None:
+                track.hits, track.misses, track.age = hits, misses, age
+                track.status, track.last_update_time = status, last_update
+
+    def _finish_epoch(
+        self, now: float, updated_track_ids: set[str], replace_snapshots: bool = False
+    ) -> None:
+        self._epoch_start = {
+            track.track_id: (
+                track.hits,
+                track.misses,
+                track.age,
+                track.status,
+                track.last_update_time,
+            )
+            for track in self.tracks.values()
+            if track.status != TrackStatus.DELETED
+        }
+        if replace_snapshots:
+            self.snapshots = [
+                snapshot
+                for snapshot in self.snapshots
+                if not (abs(snapshot.time - now) <= 1e-9 and snapshot.track_id in self.tracks)
+            ]
         for track in list(self.tracks.values()):
             if track.status == TrackStatus.DELETED:
                 continue
