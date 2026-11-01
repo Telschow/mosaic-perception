@@ -4,6 +4,8 @@ Specification for the three demonstrations (issue #47). This file specifies them
 
 Prototype: `make assets` writes `docs-site/src/assets/generated/position_rmse_paired.svg` from `artifacts/benchmark/` (`scripts/make_assets.py`); it refuses a stale artifact and a test checks the figure against the artifact.
 
+Beats 1 and 2 of demo 1: `make assets` also writes `docs-site/src/assets/generated/scenario_clip.gif` (nominal scenario, seed 1, one target; `scripts/make_clips.py`) with a manifest of the plotted data, `scenario_clip.json`, checked by `tests/unit/test_make_clips.py`.
+
 ## Headline
 
 > **More sensors don't automatically mean better tracking.**
