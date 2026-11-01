@@ -162,8 +162,8 @@ vulnerabilities in the locked dependencies without failing the build
 `github-actions`, weekly, grouped minor/patch) proposes updates.
 
 - Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6): jobs `test`, `secret-scan`,
-  `artifact-checks`, `dependency-audit` (advisory, non-blocking). CI invokes the tools directly rather than through `make`,
-  on the same paths as the Make targets: `ruff check src tests scripts app`
+  `artifact-checks`, `dependency-audit` (advisory, non-blocking). CI invokes the
+  tools directly rather than through `make`, on the same paths as the Make targets: `ruff check src tests scripts app`
   (`make lint`), `ruff format --check src tests scripts app`
   (`make format-check`), `mypy src`, `pytest`, then `scripts/check_artifact_provenance.py` and
   `scripts/check_benchmark_golden.py` (the `make provenance-check` and
