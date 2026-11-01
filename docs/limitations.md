@@ -71,11 +71,11 @@
 
 - Observations whose latency (delivery time minus capture time) exceeds one
   tracker epoch (`dt + 1e-6`) are explicitly rejected and counted; they are not
-  replayed against historical state, in either update mode. Fusion of observations older than one epoch is therefore
-  not measured.
+  replayed against historical state, in either update mode. Fusion of
+  observations older than one epoch is therefore not measured.
 - **Delayed-observation state alignment (bounded-staleness approximation):**
-  Observations whose latency is at most one epoch are admitted
-  to the tracker. When an observation is processed, the tracker has already
+  Observations whose latency is at most one epoch are admitted to the tracker.
+  When an observation is processed, the tracker has already
   predicted all tracks forward to the current processing time (the delivery
   epoch). The measurement geometry and observer pose refer to the observation's
   **capture time**, but the target state has been propagated to **delivery time**.
