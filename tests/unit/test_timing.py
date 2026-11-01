@@ -463,3 +463,57 @@ def test_retrodiction_second_call_at_the_same_time_keeps_the_first_calls_updates
     np.testing.assert_allclose(track.state_array(), x, atol=1e-9)
     np.testing.assert_allclose(track.cov_array(), p, atol=1e-9)
     assert {"r0", "r1", "v-late"} <= set(track.associated_observations)
+
+
+def test_repeated_call_time_merges_into_the_same_epoch():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=False)
+    tracker.process_observations([range_observation("a")], 0.0)
+    tracker.process_observations([range_observation("b")], 0.1)
+    epoch = tracker.epoch
+    track = next(iter(tracker.tracks.values()))
+    hits, misses, age = track.hits, track.misses, track.age
+
+    tracker.process_observations([], 0.1)
+
+    assert tracker.epoch == epoch
+    assert (track.hits, track.misses, track.age) == (hits, misses, age)
+    times = [(s.time, s.track_id) for s in tracker.snapshots]
+    assert len(times) == len(set(times))
+
+
+def test_repeated_call_time_with_new_observation_counts_one_hit():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=False)
+    tracker.process_observations([range_observation("a")], 0.0)
+    track = next(iter(tracker.tracks.values()))
+    assert track.hits == 1
+
+    tracker.process_observations([range_observation("b")], 0.0)
+
+    assert track.hits == 1
+    assert track.age == 1
+    assert [s.hits for s in tracker.snapshots] == [1]
+
+
+def test_off_grid_capture_older_than_one_epoch_follows_the_latency_rule():
+    # Admission is on latency (delivery - capture), not on capture age against the grid.
+    tracker = MultiSensorTracker(dt=0.1, use_vision=False)
+    tracker.process_observations([], 0.0)
+    observation = range_observation("off-grid", capture_time=0.03, delivery_time=0.1)
+    tracker.process_observations([observation], 0.1)
+    assert tracker.statistics().rejected_observations == 0
+    assert observation.associated_track_id is not None
+
+
+def test_track_initiated_from_delayed_observation_is_propagated_to_now():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=False)
+    tracker.process_observations([], 0.0)
+    observation = range_observation(
+        "delayed", distance=10.0, range_rate=5.0, capture_time=0.0, delivery_time=0.1
+    )
+    tracker.process_observations([observation], 0.1)
+    track = next(iter(tracker.tracks.values()))
+    assert track.time == pytest.approx(0.1)
+    assert track.last_update_time == pytest.approx(0.1)
+    # Position at capture is (10, 0) moving at 5 m/s along x; the stamp is now = capture + 0.1.
+    assert track.state[0] == pytest.approx(10.5)
+    assert track.state[2] == pytest.approx(5.0)
