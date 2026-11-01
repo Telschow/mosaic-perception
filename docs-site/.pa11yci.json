@@ -1,0 +1,10 @@
+{
+  "defaults": { "standard": "WCAG2AA", "chromeLaunchConfig": { "args": ["--no-sandbox"] } },
+  "urls": [
+    "http://localhost:4321/mosaic-perception/",
+    "http://localhost:4321/mosaic-perception/architecture/",
+    "http://localhost:4321/mosaic-perception/limitations/",
+    "http://localhost:4321/mosaic-perception/implementation-status/",
+    "http://localhost:4321/mosaic-perception/demos/"
+  ]
+}

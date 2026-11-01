@@ -1,0 +1,21 @@
+{
+  "name": "mosaic-docs-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "python ../scripts/sync_docs_site.py",
+    "dev": "npm run sync && astro dev",
+    "build": "npm run sync && astro build",
+    "preview": "astro preview",
+    "a11y": "pa11y-ci --config .pa11yci.json"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.34.0",
+    "astro": "^5.7.0",
+    "starlight-links-validator": "^0.16.0"
+  },
+  "devDependencies": {
+    "pa11y-ci": "^3.1.0",
+    "wait-on": "^9.5.1"
+  }
+}

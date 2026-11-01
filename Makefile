@@ -1,4 +1,4 @@
-.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets
+.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets docs-preview
 
 install:
 	uv sync --locked --all-extras
@@ -52,3 +52,6 @@ provenance-check:
 
 assets:
 	uv run python scripts/make_assets.py
+
+docs-preview:
+	cd docs-site && npm ci && npm run dev

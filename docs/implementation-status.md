@@ -133,6 +133,24 @@ evaluate / benchmark` commands, canonical artifacts regenerated from code.
   [docs/evaluation-protocol.md](evaluation-protocol.md)).
 - Limitations: [docs/limitations.md](limitations.md) — Reproducibility
   boundaries; artifacts record development seeds, no wall-clock timestamps.
+
+### Documentation site — **Implemented** (publishing is a human step)
+
+Astro Starlight project in `docs-site/`, generated from `docs/` and
+`CITATION.cff` by `scripts/sync_docs_site.py` (no copied content is committed).
+`.github/workflows/docs.yml` builds it, fails on broken internal links
+(`starlight-links-validator`) and on WCAG2AA errors (`pa11y-ci`), and deploys
+only from `main` with `pages: write` / `id-token: write` on the deploy job
+alone. Local preview: `make docs-preview`. The Streamlit app is linked, not
+embedded, and labelled optional.
+
+- Evidence: `tests/unit/test_sync_docs_site.py` (link rewriting, all
+  navigation pages generated, generated pages git-ignored).
+- Not yet done: GitHub Pages must be enabled (source: GitHub Actions) in the
+  repository settings; until then the deploy job cannot publish. The CI jobs
+  have not yet run on GitHub.
+- Limitations: [docs/limitations.md](limitations.md) — the site adds no claims
+  beyond this document and the limitations.
 - Planned: none; the static documentation site is a publishing concern → #34.
 
 ### App (Streamlit workbench) — **Implemented**
@@ -178,7 +196,6 @@ vulnerabilities in the locked dependencies without failing the build
 | Issue | Subsystem | What it adds |
 |---|---|---|
 | #7 | Evaluation | The one held-out evaluation run on frozen code (blocked by the remaining evaluation work) |
-| #34 | Reporting | Static documentation site published with GitHub Pages |
 
 Open issues are not implemented work. The live list is the issue tracker
 (`gh issue list --state open`); the table above is the curated subset that
