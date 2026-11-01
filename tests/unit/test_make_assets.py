@@ -124,11 +124,11 @@ def test_scoreboard_matches_report_findings():
         (r["comparison"], r["metric"]): r for r in ma.load_scoreboard_data(ma.BENCHMARK)["rows"]
     }
     findings = _findings()
-    better, worse = re.search(
+    lower, higher = re.search(
         r"Fused precision is lower .*? in (\d+) scenario\(s\) and higher in (\d+)", findings
     ).groups()
     row = rows["fused_vs_range_only", "precision"]
-    assert (row["worse"], row["better"]) == (int(better), int(worse))
+    assert (row["worse"], row["better"]) == (int(lower), int(higher))
     better, worse = re.search(
         r"MOTA, IDF1 and GOSPA .*?better in (\d+), \d+ and \d+ scenario\(s\) and worse in (\d+),",
         findings,

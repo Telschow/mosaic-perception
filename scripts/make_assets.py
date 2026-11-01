@@ -123,7 +123,7 @@ def load_recovery_data(benchmark: Path) -> dict[str, Any]:
     }
 
 
-RC_PARAMS = {
+RC_PARAMS: Any = {
     "svg.hashsalt": "mosaic-perception",
     "svg.fonttype": "none",
     "font.family": "DejaVu Sans",
@@ -206,13 +206,7 @@ def render_svg(data: dict[str, Any]) -> bytes:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    params = {
-        "svg.hashsalt": "mosaic-perception",
-        "svg.fonttype": "none",
-        "font.family": "DejaVu Sans",
-        "path.simplify": False,
-    }
-    with matplotlib.rc_context(params):
+    with matplotlib.rc_context(RC_PARAMS):
         rows = data["scenarios"]
         fig, ax = plt.subplots(figsize=(8, 0.42 * len(rows) + 1.8))
         offsets = {m: (i - 1) * 0.22 for i, m in enumerate(data["methods"])}
