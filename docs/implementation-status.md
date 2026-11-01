@@ -133,7 +133,25 @@ evaluate / benchmark` commands, canonical artifacts regenerated from code.
   [docs/evaluation-protocol.md](evaluation-protocol.md)).
 - Limitations: [docs/limitations.md](limitations.md) — Reproducibility
   boundaries; artifacts record development seeds, no wall-clock timestamps.
-- Planned: none; the static documentation site is a publishing concern → #34.
+
+### Documentation site — **Implemented** (publishing is a human step)
+
+Astro Starlight project in `docs-site/`, generated from `docs/` and
+`CITATION.cff` by `scripts/sync_docs_site.py` (no copied content is committed).
+`.github/workflows/docs.yml` builds it, fails on broken internal links
+(`starlight-links-validator`) and on WCAG2AA errors (`pa11y-ci`), and deploys
+only from `main` with `pages: write` / `id-token: write` on the deploy job
+alone. Local preview: `make docs-preview`. The Streamlit app is linked, not
+embedded, and labelled optional.
+
+- Evidence: `tests/unit/test_sync_docs_site.py` (link rewriting, all
+  navigation pages generated, generated pages git-ignored).
+- Not yet done: GitHub Pages must be enabled (source: GitHub Actions) in the
+  repository settings; until then the deploy job cannot publish. The CI jobs
+  have not yet run on GitHub.
+- Limitations: [docs/limitations.md](limitations.md). The site adds no claims
+  beyond this document and the limitations.
+- Planned: none.
 
 ### App (Streamlit workbench) — **Implemented**
 
@@ -156,11 +174,14 @@ runner exposes: `range_only`, `fused` and `fused_bias_estimated`.
 Locked dependency install, Ruff lint and format check, mypy, the full test
 suite, CLI smoke tests, a pinned secret scan over full history, artifact
 provenance and golden-benchmark checks. Least-privilege permissions, all
-actions pinned to commit SHAs.
+actions pinned to commit SHAs. An advisory `pip-audit` job reports known
+vulnerabilities in the locked dependencies without failing the build
+(`continue-on-error: true`), and Dependabot (`.github/dependabot.yml`, `uv` and
+`github-actions`, weekly, grouped minor/patch) proposes updates.
 
 - Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6): jobs `test`, `secret-scan`,
-  `artifact-checks`. CI invokes the tools directly rather than through `make`,
-  on the same paths as the Make targets: `ruff check src tests scripts app`
+  `artifact-checks`, `dependency-audit` (advisory, non-blocking). CI invokes the
+  tools directly rather than through `make`, on the same paths as the Make targets: `ruff check src tests scripts app`
   (`make lint`), `ruff format --check src tests scripts app`
   (`make format-check`), `mypy src`, `pytest`, then `scripts/check_artifact_provenance.py` and
   `scripts/check_benchmark_golden.py` (the `make provenance-check` and
@@ -175,7 +196,6 @@ actions pinned to commit SHAs.
 | Issue | Subsystem | What it adds |
 |---|---|---|
 | #7 | Evaluation | The one held-out evaluation run on frozen code (blocked by the remaining evaluation work) |
-| #34 | Reporting | Static documentation site published with GitHub Pages |
 
 Open issues are not implemented work. The live list is the issue tracker
 (`gh issue list --state open`); the table above is the curated subset that

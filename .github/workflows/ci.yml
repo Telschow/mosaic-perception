@@ -121,3 +121,23 @@ jobs:
         run: uv run --python 3.12 python scripts/check_artifact_provenance.py
       - name: Golden benchmark (byte-for-byte against committed goldens)
         run: uv run --python 3.12 python scripts/check_benchmark_golden.py
+
+  dependency-audit:
+    # Advisory only: reports known vulnerabilities in the locked dependencies
+    # but never fails the build.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          version: "0.13.6"
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+      - name: Export locked dependencies
+        run: uv export --locked --all-extras --no-emit-project --no-emit-package trackeval --python 3.12 -o "${RUNNER_TEMP}/locked-requirements.txt"
+      - name: pip-audit (advisory)
+        run: uv run --no-project --python 3.12 --with pip-audit pip-audit --no-deps --disable-pip -r "${RUNNER_TEMP}/locked-requirements.txt"

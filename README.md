@@ -276,6 +276,8 @@ See [docs/limitations.md](docs/limitations.md) for the full list.
 
 ## Documentation
 
+A static site is built from `docs/` with Astro Starlight (`docs-site/`). Preview it locally with `make docs-preview` (needs Node 22).
+
 - [Implementation status](docs/implementation-status.md) — what exists today, with evidence
 - [Architecture](docs/architecture.md)
 - [Measurement models](docs/measurement-models.md)
