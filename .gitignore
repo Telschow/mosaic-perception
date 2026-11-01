@@ -44,3 +44,6 @@ docs-site/dist/
 docs-site/.astro/
 docs-site/src/content/docs/*
 !docs-site/src/content/docs/index.mdx
+
+# Editor settings
+.vscode/
