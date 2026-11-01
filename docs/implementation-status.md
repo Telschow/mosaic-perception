@@ -149,9 +149,9 @@ embedded, and labelled optional.
 - Not yet done: GitHub Pages must be enabled (source: GitHub Actions) in the
   repository settings; until then the deploy job cannot publish. The CI jobs
   have not yet run on GitHub.
-- Limitations: [docs/limitations.md](limitations.md) — the site adds no claims
+- Limitations: [docs/limitations.md](limitations.md). The site adds no claims
   beyond this document and the limitations.
-- Planned: none; the static documentation site is a publishing concern → #34.
+- Planned: none.
 
 ### App (Streamlit workbench) — **Implemented**
 
