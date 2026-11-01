@@ -138,6 +138,6 @@ jobs:
       - name: Set up Python 3.12
         run: uv python install 3.12
       - name: Export locked dependencies
-        run: uv export --locked --all-extras --no-emit-project --python 3.12 -o "${RUNNER_TEMP}/locked-requirements.txt"
+        run: uv export --locked --all-extras --no-emit-project --no-emit-package trackeval --python 3.12 -o "${RUNNER_TEMP}/locked-requirements.txt"
       - name: pip-audit (advisory)
         run: uv run --no-project --python 3.12 --with pip-audit pip-audit --no-deps --disable-pip -r "${RUNNER_TEMP}/locked-requirements.txt"
