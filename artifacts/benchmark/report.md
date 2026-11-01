@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `d57356666b2ffbb5d510e4491b08c0490084e2ed`
+- Git commit: `2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d`
 - Seeds: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -29,12 +29,12 @@ never a fabricated zero.
 | crossing_targets | range_only | 0.151 ± 0.035 | 0.148 | 0.148 | 0.977 | 0.856 | 0.920 | 296/303 | 3.8 | 3.8 | 1.2 | 4.4 | 0.0 | 0.804 | 0.852 | 0.924 |
 | crossing_targets | fused | 0.160 ± 0.058 | 0.146 | 0.116 | 0.979 | 0.718 | 0.859 | 297/303 | 5.6 | 5.6 | 0.8 | 6.8 | 0.0 | 0.573 | 0.790 | 1.614 |
 | crossing_targets | fused_bias_estimated | 0.164 ± 0.054 | 0.152 | 0.119 | 0.979 | 0.727 | 0.835 | 297/303 | 5.5 | 5.5 | 1.0 | 6.7 | 0.0 | 0.590 | 0.801 | 1.576 |
-| delivery_delay | range_only | 0.308 ± 0.046 | 0.285 | 0.327 | 0.968 | 0.807 | 0.512 | 293/303 | 3.8 | 3.8 | 6.9 | 10.6 | 0.1 | 0.708 | 0.592 | 1.542 |
-| delivery_delay | fused | 0.329 ± 0.062 | 0.268 | 0.311 | 0.970 | 0.660 | 0.338 | 294/303 | 6.8 | 6.8 | 5.1 | 11.2 | 0.0 | 0.437 | 0.591 | 2.330 |
-| delivery_delay | fused_bias_estimated | 0.330 ± 0.063 | 0.277 | 0.302 | 0.970 | 0.660 | 0.311 | 294/303 | 7.0 | 7.0 | 5.2 | 12.0 | 0.0 | 0.442 | 0.593 | 2.341 |
-| delivery_delay_retrodiction | range_only | 0.283 ± 0.054 | 0.252 | 0.385 | 0.968 | 0.771 | 0.810 | 293/303 | 4.8 | 4.8 | 11.1 | 15.1 | 0.2 | 0.636 | 0.491 | 1.609 |
-| delivery_delay_retrodiction | fused | 0.335 ± 0.076 | 0.251 | 0.455 | 0.970 | 0.632 | 0.694 | 294/303 | 10.0 | 9.8 | 13.0 | 21.8 | 0.0 | 0.349 | 0.461 | 2.444 |
-| delivery_delay_retrodiction | fused_bias_estimated | 0.346 ± 0.091 | 0.258 | 0.457 | 0.970 | 0.637 | 0.666 | 294/303 | 10.4 | 10.2 | 12.9 | 21.8 | 0.0 | 0.359 | 0.480 | 2.432 |
+| delivery_delay | range_only | 0.320 ± 0.054 | 0.294 | 0.351 | 0.968 | 0.814 | 0.486 | 293/303 | 3.2 | 3.2 | 7.7 | 11.1 | 0.2 | 0.713 | 0.573 | 1.539 |
+| delivery_delay | fused | 0.315 ± 0.069 | 0.261 | 0.313 | 0.969 | 0.693 | 0.331 | 294/303 | 6.6 | 6.6 | 4.6 | 10.2 | 0.0 | 0.505 | 0.624 | 2.120 |
+| delivery_delay | fused_bias_estimated | 0.323 ± 0.053 | 0.266 | 0.312 | 0.969 | 0.680 | 0.325 | 294/303 | 6.1 | 6.1 | 5.4 | 11.1 | 0.0 | 0.474 | 0.597 | 2.215 |
+| delivery_delay_retrodiction | range_only | 0.277 ± 0.046 | 0.249 | 0.337 | 0.968 | 0.764 | 0.806 | 293/303 | 4.6 | 4.6 | 9.9 | 15.1 | 0.2 | 0.630 | 0.495 | 1.632 |
+| delivery_delay_retrodiction | fused | 0.328 ± 0.071 | 0.247 | 0.377 | 0.967 | 0.635 | 0.678 | 293/303 | 9.3 | 9.2 | 11.2 | 20.1 | 0.1 | 0.360 | 0.467 | 2.421 |
+| delivery_delay_retrodiction | fused_bias_estimated | 0.322 ± 0.074 | 0.251 | 0.377 | 0.966 | 0.632 | 0.679 | 293/303 | 9.6 | 9.5 | 11.5 | 21.6 | 0.1 | 0.350 | 0.462 | 2.458 |
 | dense_clutter | range_only | 0.242 ± 0.051 | 0.219 | 0.317 | 0.979 | 0.816 | 0.805 | 297/303 | 3.6 | 3.6 | 6.7 | 10.0 | 0.0 | 0.732 | 0.621 | 1.281 |
 | dense_clutter | fused | 0.285 ± 0.091 | 0.206 | 0.307 | 0.979 | 0.338 | 0.662 | 297/303 | 73.4 | 8.6 | 5.0 | 10.9 | 0.0 | -0.977 | 0.376 | 6.397 |
 | dense_clutter | fused_bias_estimated | 0.271 ± 0.083 | 0.204 | 0.307 | 0.980 | 0.341 | 0.680 | 297/303 | 73.9 | 9.1 | 5.0 | 12.0 | 0.0 | -0.956 | 0.382 | 6.324 |
@@ -94,22 +94,22 @@ setup and is not a claim about other worlds.
 | crossing_targets | position_rmse_distance_only | 25 | -0.002 | [-0.015, +0.011] |
 | crossing_targets | precision | 25 | -0.138 | [-0.171, -0.106] |
 | crossing_targets | recall | 25 | +0.002 | [+0.000, +0.003] |
-| delivery_delay | gospa_p1 | 25 | +0.788 | [+0.586, +0.991] |
-| delivery_delay | idf1 | 25 | -0.001 | [-0.037, +0.035] |
-| delivery_delay | mota | 25 | -0.270 | [-0.331, -0.210] |
-| delivery_delay | position_coverage_95 | 25 | -0.173 | [-0.238, -0.109] |
-| delivery_delay | position_rmse | 25 | +0.020 | [-0.005, +0.046] |
-| delivery_delay | position_rmse_distance_only | 25 | -0.017 | [-0.032, -0.003] |
-| delivery_delay | precision | 25 | -0.147 | [-0.174, -0.120] |
-| delivery_delay | recall | 25 | +0.001 | [+0.000, +0.002] |
-| delivery_delay_retrodiction | gospa_p1 | 25 | +0.834 | [+0.660, +1.008] |
-| delivery_delay_retrodiction | idf1 | 25 | -0.031 | [-0.065, +0.004] |
-| delivery_delay_retrodiction | mota | 25 | -0.288 | [-0.341, -0.234] |
-| delivery_delay_retrodiction | position_coverage_95 | 25 | -0.116 | [-0.143, -0.089] |
-| delivery_delay_retrodiction | position_rmse | 25 | +0.053 | [+0.031, +0.074] |
-| delivery_delay_retrodiction | position_rmse_distance_only | 25 | -0.001 | [-0.012, +0.010] |
-| delivery_delay_retrodiction | precision | 25 | -0.138 | [-0.163, -0.114] |
-| delivery_delay_retrodiction | recall | 25 | +0.002 | [+0.001, +0.003] |
+| delivery_delay | gospa_p1 | 25 | +0.580 | [+0.359, +0.802] |
+| delivery_delay | idf1 | 25 | +0.051 | [+0.006, +0.096] |
+| delivery_delay | mota | 25 | -0.209 | [-0.276, -0.141] |
+| delivery_delay | position_coverage_95 | 25 | -0.156 | [-0.219, -0.092] |
+| delivery_delay | position_rmse | 25 | -0.005 | [-0.032, +0.023] |
+| delivery_delay | position_rmse_distance_only | 25 | -0.033 | [-0.049, -0.017] |
+| delivery_delay | precision | 25 | -0.121 | [-0.154, -0.087] |
+| delivery_delay | recall | 25 | +0.001 | [-0.001, +0.002] |
+| delivery_delay_retrodiction | gospa_p1 | 25 | +0.789 | [+0.589, +0.990] |
+| delivery_delay_retrodiction | idf1 | 25 | -0.027 | [-0.065, +0.010] |
+| delivery_delay_retrodiction | mota | 25 | -0.270 | [-0.333, -0.207] |
+| delivery_delay_retrodiction | position_coverage_95 | 25 | -0.128 | [-0.163, -0.092] |
+| delivery_delay_retrodiction | position_rmse | 25 | +0.050 | [+0.027, +0.073] |
+| delivery_delay_retrodiction | position_rmse_distance_only | 25 | -0.003 | [-0.016, +0.010] |
+| delivery_delay_retrodiction | precision | 25 | -0.129 | [-0.157, -0.101] |
+| delivery_delay_retrodiction | recall | 25 | -0.001 | [-0.004, +0.003] |
 | dense_clutter | gospa_p1 | 25 | +5.115 | [+4.779, +5.452] |
 | dense_clutter | idf1 | 25 | -0.246 | [-0.277, -0.214] |
 | dense_clutter | mota | 25 | -1.709 | [-1.817, -1.602] |
@@ -229,22 +229,22 @@ Same conventions as the first comparison.
 | crossing_targets | position_rmse_distance_only | 25 | +0.006 | [-0.003, +0.015] |
 | crossing_targets | precision | 25 | +0.009 | [-0.017, +0.036] |
 | crossing_targets | recall | 25 | +0.000 | [-0.000, +0.000] |
-| delivery_delay | gospa_p1 | 25 | +0.010 | [-0.150, +0.171] |
-| delivery_delay | idf1 | 25 | +0.002 | [-0.022, +0.026] |
-| delivery_delay | mota | 25 | +0.005 | [-0.044, +0.053] |
-| delivery_delay | position_coverage_95 | 25 | -0.027 | [-0.068, +0.014] |
-| delivery_delay | position_rmse | 25 | +0.002 | [-0.017, +0.020] |
-| delivery_delay | position_rmse_distance_only | 25 | +0.008 | [-0.003, +0.020] |
-| delivery_delay | precision | 25 | +0.000 | [-0.021, +0.022] |
-| delivery_delay | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
-| delivery_delay_retrodiction | gospa_p1 | 25 | -0.011 | [-0.128, +0.106] |
-| delivery_delay_retrodiction | idf1 | 25 | +0.019 | [-0.005, +0.043] |
-| delivery_delay_retrodiction | mota | 25 | +0.010 | [-0.028, +0.048] |
-| delivery_delay_retrodiction | position_coverage_95 | 25 | -0.028 | [-0.063, +0.007] |
-| delivery_delay_retrodiction | position_rmse | 25 | +0.010 | [-0.012, +0.033] |
-| delivery_delay_retrodiction | position_rmse_distance_only | 25 | +0.007 | [-0.000, +0.014] |
-| delivery_delay_retrodiction | precision | 25 | +0.005 | [-0.010, +0.019] |
-| delivery_delay_retrodiction | recall | 25 | +0.000 | [+0.000, +0.000] (degenerate) |
+| delivery_delay | gospa_p1 | 25 | +0.095 | [-0.033, +0.223] |
+| delivery_delay | idf1 | 25 | -0.027 | [-0.046, -0.008] |
+| delivery_delay | mota | 25 | -0.031 | [-0.071, +0.010] |
+| delivery_delay | position_coverage_95 | 25 | -0.005 | [-0.041, +0.031] |
+| delivery_delay | position_rmse | 25 | +0.008 | [-0.011, +0.027] |
+| delivery_delay | position_rmse_distance_only | 25 | +0.005 | [-0.002, +0.012] |
+| delivery_delay | precision | 25 | -0.013 | [-0.031, +0.005] |
+| delivery_delay | recall | 25 | -0.000 | [-0.000, +0.000] |
+| delivery_delay_retrodiction | gospa_p1 | 25 | +0.037 | [-0.090, +0.163] |
+| delivery_delay_retrodiction | idf1 | 25 | -0.005 | [-0.025, +0.014] |
+| delivery_delay_retrodiction | mota | 25 | -0.011 | [-0.047, +0.026] |
+| delivery_delay_retrodiction | position_coverage_95 | 25 | +0.002 | [-0.032, +0.035] |
+| delivery_delay_retrodiction | position_rmse | 25 | -0.006 | [-0.031, +0.020] |
+| delivery_delay_retrodiction | position_rmse_distance_only | 25 | +0.004 | [-0.008, +0.016] |
+| delivery_delay_retrodiction | precision | 25 | -0.003 | [-0.017, +0.012] |
+| delivery_delay_retrodiction | recall | 25 | -0.001 | [-0.002, +0.001] |
 | dense_clutter | gospa_p1 | 25 | -0.073 | [-0.243, +0.098] |
 | dense_clutter | idf1 | 25 | +0.006 | [-0.007, +0.019] |
 | dense_clutter | mota | 25 | +0.021 | [-0.032, +0.073] |
@@ -368,11 +368,11 @@ together.
 | crossing_targets | fused | 0.990 | 0.990 | 0.657 | 194.9 |
 | crossing_targets | fused_bias_estimated | 0.989 | 0.989 | 0.660 | 195.8 |
 | delivery_delay | range_only | N/A | N/A | 0.000 | 0.0 |
-| delivery_delay | fused | 0.998 | 0.999 | 0.665 | 195.5 |
-| delivery_delay | fused_bias_estimated | 0.997 | 0.997 | 0.666 | 195.6 |
+| delivery_delay | fused | 1.000 | 1.000 | 0.666 | 195.4 |
+| delivery_delay | fused_bias_estimated | 0.999 | 0.999 | 0.666 | 195.5 |
 | delivery_delay_retrodiction | range_only | N/A | N/A | 0.000 | 0.0 |
-| delivery_delay_retrodiction | fused | 0.996 | 0.995 | 0.660 | 194.0 |
-| delivery_delay_retrodiction | fused_bias_estimated | 0.997 | 0.997 | 0.664 | 195.0 |
+| delivery_delay_retrodiction | fused | 0.994 | 0.993 | 0.663 | 194.4 |
+| delivery_delay_retrodiction | fused_bias_estimated | 0.994 | 0.993 | 0.662 | 194.0 |
 | dense_clutter | range_only | N/A | N/A | 0.000 | 0.0 |
 | dense_clutter | fused | 0.998 | 0.998 | 0.632 | 187.7 |
 | dense_clutter | fused_bias_estimated | 0.998 | 0.998 | 0.621 | 184.3 |
@@ -436,12 +436,12 @@ falls: above means overconfident, below means underconfident.
 | crossing_targets | range_only | 1.350 [0.977, 1.023] above | 0.556 [0.977, 1.023] below | 0.759 [0.981, 1.019] below | 296 | 276.6 | 7 |
 | crossing_targets | fused | 2.557 [0.977, 1.023] above | 0.558 [0.977, 1.023] below | 0.708 [0.983, 1.017] below | 297 | 542.7 | 6 |
 | crossing_targets | fused_bias_estimated | 1.811 [0.977, 1.023] above | 0.553 [0.977, 1.023] below | 0.717 [0.983, 1.017] below | 297 | 541.4 | 6 |
-| delivery_delay | range_only | 4.936 [0.977, 1.023] above | 2.219 [0.977, 1.023] above | 0.800 [0.980, 1.020] below | 293 | 265.9 | 10 |
-| delivery_delay | fused | 11.338 [0.977, 1.023] above | 2.732 [0.977, 1.023] above | 0.745 [0.983, 1.017] below | 294 | 521.6 | 9 |
-| delivery_delay | fused_bias_estimated | 11.750 [0.977, 1.023] above | 2.717 [0.977, 1.023] above | 0.751 [0.983, 1.017] below | 294 | 520.3 | 9 |
-| delivery_delay_retrodiction | range_only | 1.895 [0.977, 1.023] above | 1.975 [0.977, 1.023] above | 0.912 [0.980, 1.020] below | 293 | 260.8 | 10 |
-| delivery_delay_retrodiction | fused | 3.311 [0.977, 1.023] above | 2.833 [0.977, 1.023] above | 1.032 [0.982, 1.018] above | 294 | 482.7 | 9 |
-| delivery_delay_retrodiction | fused_bias_estimated | 3.393 [0.977, 1.023] above | 2.766 [0.977, 1.023] above | 1.070 [0.982, 1.018] above | 294 | 481.1 | 9 |
+| delivery_delay | range_only | 5.237 [0.977, 1.023] above | 2.375 [0.977, 1.023] above | 0.802 [0.980, 1.020] below | 293 | 264.8 | 10 |
+| delivery_delay | fused | 11.787 [0.977, 1.023] above | 2.706 [0.977, 1.023] above | 0.758 [0.983, 1.017] below | 294 | 519.5 | 9 |
+| delivery_delay | fused_bias_estimated | 11.611 [0.977, 1.023] above | 2.711 [0.977, 1.023] above | 0.756 [0.983, 1.017] below | 294 | 519.2 | 9 |
+| delivery_delay_retrodiction | range_only | 1.896 [0.977, 1.023] above | 1.788 [0.977, 1.023] above | 0.811 [0.980, 1.020] below | 293 | 262.2 | 10 |
+| delivery_delay_retrodiction | fused | 2.932 [0.977, 1.023] above | 2.331 [0.977, 1.023] above | 0.857 [0.982, 1.018] below | 293 | 482.4 | 10 |
+| delivery_delay_retrodiction | fused_bias_estimated | 2.945 [0.977, 1.023] above | 2.319 [0.977, 1.023] above | 0.869 [0.982, 1.018] below | 293 | 481.3 | 10 |
 | dense_clutter | range_only | 1.872 [0.977, 1.023] above | 1.834 [0.977, 1.023] above | 0.830 [0.981, 1.019] below | 297 | 282.0 | 6 |
 | dense_clutter | fused | 3.020 [0.977, 1.023] above | 2.326 [0.977, 1.023] above | 0.835 [0.985, 1.015] below | 297 | 829.0 | 6 |
 | dense_clutter | fused_bias_estimated | 3.148 [0.977, 1.023] above | 2.384 [0.977, 1.023] above | 0.845 [0.985, 1.015] below | 297 | 828.0 | 6 |
@@ -473,8 +473,8 @@ falls: above means overconfident, below means underconfident.
 | sensor_disagreement_within_gate_low | fused | 6.390 [0.977, 1.023] above | 2.504 [0.977, 1.023] above | 0.810 [0.983, 1.017] below | 297 | 523.8 | 6 |
 | sensor_disagreement_within_gate_low | fused_bias_estimated | 2.809 [0.977, 1.023] above | 2.282 [0.977, 1.023] above | 0.772 [0.983, 1.017] below | 297 | 529.8 | 6 |
 | stale_rejection | range_only | N/A | N/A | N/A | 0 | 0.0 | 303 |
-| stale_rejection | fused | N/A | N/A | 2.053 [0.001, 5.024] within | 0 | 0.0 | 303 |
-| stale_rejection | fused_bias_estimated | N/A | N/A | 2.053 [0.001, 5.024] within | 0 | 0.0 | 303 |
+| stale_rejection | fused | N/A | N/A | 1.171 [0.001, 5.024] within | 0 | 0.0 | 303 |
+| stale_rejection | fused_bias_estimated | N/A | N/A | 1.171 [0.001, 5.024] within | 0 | 0.0 | 303 |
 | uncertainty_miscalibration | range_only | 26.716 [0.969, 1.031] above | 9.110 [0.969, 1.031] above | 1.051 [0.974, 1.026] above | 158 | 152.7 | 145 |
 | uncertainty_miscalibration | fused | 31.646 [0.977, 1.023] above | 9.593 [0.977, 1.023] above | 1.006 [0.979, 1.022] within | 282 | 379.5 | 21 |
 | uncertainty_miscalibration | fused_bias_estimated | 1274.590 [0.977, 1.024] above | 10.136 [0.977, 1.024] above | 1.006 [0.979, 1.022] within | 280 | 377.4 | 23 |
@@ -495,12 +495,12 @@ duplicate count depends on that choice, not which gate is correct.
 | crossing_targets | range_only | 3.7 | 3.8 | 3.8 |
 | crossing_targets | fused | 5.2 | 5.6 | 5.6 |
 | crossing_targets | fused_bias_estimated | 5.0 | 5.5 | 5.5 |
-| delivery_delay | range_only | 3.6 | 3.8 | 3.8 |
-| delivery_delay | fused | 5.9 | 6.8 | 6.8 |
-| delivery_delay | fused_bias_estimated | 6.3 | 7.0 | 7.0 |
-| delivery_delay_retrodiction | range_only | 4.8 | 4.8 | 4.8 |
-| delivery_delay_retrodiction | fused | 8.5 | 9.8 | 10.0 |
-| delivery_delay_retrodiction | fused_bias_estimated | 9.2 | 10.2 | 10.5 |
+| delivery_delay | range_only | 3.1 | 3.2 | 3.2 |
+| delivery_delay | fused | 5.8 | 6.6 | 6.7 |
+| delivery_delay | fused_bias_estimated | 5.4 | 6.1 | 6.2 |
+| delivery_delay_retrodiction | range_only | 4.4 | 4.6 | 4.6 |
+| delivery_delay_retrodiction | fused | 8.3 | 9.2 | 9.2 |
+| delivery_delay_retrodiction | fused_bias_estimated | 8.6 | 9.5 | 9.5 |
 | dense_clutter | range_only | 3.6 | 3.6 | 3.6 |
 | dense_clutter | fused | 6.8 | 8.6 | 10.2 |
 | dense_clutter | fused_bias_estimated | 7.1 | 9.1 | 10.7 |
@@ -554,10 +554,10 @@ rejected outside association; `Applied` = used in a track update.
 |---|---|---|---|---|---|---|---|
 | crossing_targets | 275.2 | 275.2 | 9.0 | 0.2 | 0.0 | 0.0 | 266.0 |
 | crossing_targets | 275.2 | 275.2 | 10.2 | 0.1 | 0.0 | 0.0 | 264.9 |
-| delivery_delay | 274.1 | 271.3 | 13.5 | 0.8 | 0.0 | 1.6 | 255.3 |
-| delivery_delay | 274.1 | 271.3 | 14.4 | 0.7 | 0.0 | 1.6 | 254.5 |
-| delivery_delay_retrodiction | 274.1 | 271.3 | 41.4 | 0.9 | 0.0 | 1.6 | 227.4 |
-| delivery_delay_retrodiction | 274.1 | 271.3 | 43.1 | 0.6 | 0.0 | 1.6 | 225.9 |
+| delivery_delay | 274.1 | 271.3 | 14.0 | 0.8 | 0.0 | 1.6 | 254.8 |
+| delivery_delay | 274.1 | 271.3 | 14.3 | 0.7 | 0.0 | 1.6 | 254.7 |
+| delivery_delay_retrodiction | 274.1 | 271.3 | 42.5 | 0.8 | 0.0 | 1.6 | 226.4 |
+| delivery_delay_retrodiction | 274.1 | 271.3 | 42.4 | 0.7 | 0.0 | 1.6 | 226.5 |
 | dense_clutter | 1098.8 | 1098.8 | 532.6 | 19.3 | 0.0 | 0.0 | 547.0 |
 | dense_clutter | 1098.8 | 1098.8 | 533.0 | 19.6 | 0.0 | 0.0 | 546.2 |
 | false_observations | 577.7 | 577.7 | 278.2 | 2.8 | 0.0 | 0.0 | 296.8 |
@@ -598,8 +598,8 @@ also pull the track toward the biased bearing, which slows learning.
 | Scenario | Configured bias (rad) | Mean estimate (rad) | Estimator updates (mean) |
 |---|---|---|---|
 | crossing_targets | 0.0000 | -0.0002 | 183.2 |
-| delivery_delay | 0.0000 | 0.0002 | 152.2 |
-| delivery_delay_retrodiction | 0.0000 | 0.0001 | 109.9 |
+| delivery_delay | 0.0000 | 0.0001 | 153.1 |
+| delivery_delay_retrodiction | 0.0000 | 0.0000 | 109.6 |
 | dense_clutter | 0.0000 | 0.0002 | 149.1 |
 | false_observations | 0.0000 | 0.0003 | 156.9 |
 | measurement_bias | 0.0000 | 0.0001 | 149.5 |
@@ -704,56 +704,56 @@ observations behind each mean age of information.
 | crossing_targets | 22 | 0.135 | 0.135 | -0.001 | 0.180 |
 | crossing_targets | 23 | 0.145 | 0.107 | -0.038 | 0.105 |
 | crossing_targets | 24 | 0.156 | 0.105 | -0.051 | 0.146 |
-| delivery_delay | 0 | 0.318 | 0.344 | +0.026 | 0.379 |
-| delivery_delay | 1 | 0.285 | 0.352 | +0.067 | 0.354 |
-| delivery_delay | 2 | 0.290 | 0.243 | -0.047 | 0.227 |
-| delivery_delay | 3 | 0.272 | 0.321 | +0.049 | 0.346 |
-| delivery_delay | 4 | 0.263 | 0.289 | +0.026 | 0.240 |
-| delivery_delay | 5 | 0.392 | 0.280 | -0.112 | 0.292 |
-| delivery_delay | 6 | 0.256 | 0.375 | +0.119 | 0.248 |
-| delivery_delay | 7 | 0.218 | 0.326 | +0.108 | 0.319 |
-| delivery_delay | 8 | 0.328 | 0.338 | +0.010 | 0.331 |
-| delivery_delay | 9 | 0.343 | 0.337 | -0.006 | 0.359 |
-| delivery_delay | 10 | 0.325 | 0.454 | +0.129 | 0.432 |
-| delivery_delay | 11 | 0.261 | 0.272 | +0.011 | 0.269 |
-| delivery_delay | 12 | 0.286 | 0.237 | -0.049 | 0.243 |
-| delivery_delay | 13 | 0.291 | 0.264 | -0.026 | 0.265 |
-| delivery_delay | 14 | 0.286 | 0.304 | +0.018 | 0.350 |
-| delivery_delay | 15 | 0.305 | 0.401 | +0.095 | 0.413 |
-| delivery_delay | 16 | 0.294 | 0.295 | +0.001 | 0.295 |
-| delivery_delay | 17 | 0.428 | 0.441 | +0.013 | 0.443 |
-| delivery_delay | 18 | 0.314 | 0.422 | +0.108 | 0.429 |
-| delivery_delay | 19 | 0.338 | 0.356 | +0.017 | 0.382 |
-| delivery_delay | 20 | 0.272 | 0.304 | +0.032 | 0.318 |
-| delivery_delay | 21 | 0.323 | 0.305 | -0.018 | 0.288 |
-| delivery_delay | 22 | 0.379 | 0.412 | +0.033 | 0.344 |
-| delivery_delay | 23 | 0.311 | 0.309 | -0.003 | 0.331 |
-| delivery_delay | 24 | 0.329 | 0.235 | -0.093 | 0.361 |
-| delivery_delay_retrodiction | 0 | 0.287 | 0.416 | +0.129 | 0.382 |
-| delivery_delay_retrodiction | 1 | 0.318 | 0.489 | +0.171 | 0.493 |
-| delivery_delay_retrodiction | 2 | 0.208 | 0.318 | +0.111 | 0.352 |
-| delivery_delay_retrodiction | 3 | 0.284 | 0.386 | +0.102 | 0.478 |
-| delivery_delay_retrodiction | 4 | 0.235 | 0.207 | -0.028 | 0.186 |
-| delivery_delay_retrodiction | 5 | 0.249 | 0.311 | +0.062 | 0.520 |
-| delivery_delay_retrodiction | 6 | 0.333 | 0.431 | +0.098 | 0.438 |
-| delivery_delay_retrodiction | 7 | 0.199 | 0.195 | -0.005 | 0.199 |
-| delivery_delay_retrodiction | 8 | 0.258 | 0.302 | +0.044 | 0.349 |
-| delivery_delay_retrodiction | 9 | 0.340 | 0.350 | +0.010 | 0.293 |
-| delivery_delay_retrodiction | 10 | 0.326 | 0.389 | +0.063 | 0.422 |
-| delivery_delay_retrodiction | 11 | 0.305 | 0.348 | +0.043 | 0.342 |
-| delivery_delay_retrodiction | 12 | 0.237 | 0.251 | +0.013 | 0.258 |
-| delivery_delay_retrodiction | 13 | 0.222 | 0.246 | +0.024 | 0.268 |
-| delivery_delay_retrodiction | 14 | 0.260 | 0.268 | +0.008 | 0.267 |
-| delivery_delay_retrodiction | 15 | 0.260 | 0.364 | +0.104 | 0.400 |
-| delivery_delay_retrodiction | 16 | 0.186 | 0.237 | +0.051 | 0.195 |
-| delivery_delay_retrodiction | 17 | 0.356 | 0.442 | +0.086 | 0.434 |
-| delivery_delay_retrodiction | 18 | 0.364 | 0.354 | -0.010 | 0.362 |
-| delivery_delay_retrodiction | 19 | 0.395 | 0.363 | -0.033 | 0.357 |
-| delivery_delay_retrodiction | 20 | 0.286 | 0.411 | +0.125 | 0.345 |
-| delivery_delay_retrodiction | 21 | 0.292 | 0.297 | +0.005 | 0.290 |
-| delivery_delay_retrodiction | 22 | 0.338 | 0.394 | +0.056 | 0.407 |
-| delivery_delay_retrodiction | 23 | 0.249 | 0.301 | +0.052 | 0.327 |
-| delivery_delay_retrodiction | 24 | 0.278 | 0.313 | +0.035 | 0.279 |
+| delivery_delay | 0 | 0.373 | 0.275 | -0.099 | 0.293 |
+| delivery_delay | 1 | 0.276 | 0.422 | +0.146 | 0.420 |
+| delivery_delay | 2 | 0.320 | 0.256 | -0.064 | 0.275 |
+| delivery_delay | 3 | 0.282 | 0.276 | -0.006 | 0.366 |
+| delivery_delay | 4 | 0.250 | 0.213 | -0.037 | 0.284 |
+| delivery_delay | 5 | 0.405 | 0.454 | +0.048 | 0.307 |
+| delivery_delay | 6 | 0.318 | 0.341 | +0.023 | 0.337 |
+| delivery_delay | 7 | 0.218 | 0.318 | +0.099 | 0.315 |
+| delivery_delay | 8 | 0.395 | 0.270 | -0.125 | 0.261 |
+| delivery_delay | 9 | 0.298 | 0.310 | +0.012 | 0.350 |
+| delivery_delay | 10 | 0.386 | 0.362 | -0.024 | 0.336 |
+| delivery_delay | 11 | 0.269 | 0.274 | +0.006 | 0.289 |
+| delivery_delay | 12 | 0.292 | 0.217 | -0.075 | 0.210 |
+| delivery_delay | 13 | 0.284 | 0.267 | -0.017 | 0.273 |
+| delivery_delay | 14 | 0.286 | 0.335 | +0.049 | 0.348 |
+| delivery_delay | 15 | 0.322 | 0.393 | +0.071 | 0.399 |
+| delivery_delay | 16 | 0.289 | 0.286 | -0.003 | 0.315 |
+| delivery_delay | 17 | 0.437 | 0.451 | +0.013 | 0.432 |
+| delivery_delay | 18 | 0.312 | 0.380 | +0.068 | 0.395 |
+| delivery_delay | 19 | 0.340 | 0.388 | +0.049 | 0.342 |
+| delivery_delay | 20 | 0.264 | 0.256 | -0.009 | 0.317 |
+| delivery_delay | 21 | 0.328 | 0.311 | -0.017 | 0.285 |
+| delivery_delay | 22 | 0.349 | 0.312 | -0.037 | 0.346 |
+| delivery_delay | 23 | 0.393 | 0.312 | -0.081 | 0.314 |
+| delivery_delay | 24 | 0.318 | 0.211 | -0.107 | 0.273 |
+| delivery_delay_retrodiction | 0 | 0.290 | 0.412 | +0.122 | 0.438 |
+| delivery_delay_retrodiction | 1 | 0.279 | 0.354 | +0.075 | 0.409 |
+| delivery_delay_retrodiction | 2 | 0.249 | 0.429 | +0.180 | 0.368 |
+| delivery_delay_retrodiction | 3 | 0.274 | 0.423 | +0.149 | 0.283 |
+| delivery_delay_retrodiction | 4 | 0.238 | 0.264 | +0.027 | 0.309 |
+| delivery_delay_retrodiction | 5 | 0.240 | 0.263 | +0.023 | 0.453 |
+| delivery_delay_retrodiction | 6 | 0.344 | 0.400 | +0.057 | 0.274 |
+| delivery_delay_retrodiction | 7 | 0.208 | 0.199 | -0.010 | 0.197 |
+| delivery_delay_retrodiction | 8 | 0.325 | 0.281 | -0.043 | 0.293 |
+| delivery_delay_retrodiction | 9 | 0.307 | 0.335 | +0.028 | 0.324 |
+| delivery_delay_retrodiction | 10 | 0.317 | 0.394 | +0.078 | 0.399 |
+| delivery_delay_retrodiction | 11 | 0.279 | 0.369 | +0.090 | 0.340 |
+| delivery_delay_retrodiction | 12 | 0.240 | 0.251 | +0.010 | 0.244 |
+| delivery_delay_retrodiction | 13 | 0.262 | 0.311 | +0.049 | 0.280 |
+| delivery_delay_retrodiction | 14 | 0.234 | 0.252 | +0.018 | 0.240 |
+| delivery_delay_retrodiction | 15 | 0.238 | 0.350 | +0.112 | 0.378 |
+| delivery_delay_retrodiction | 16 | 0.218 | 0.211 | -0.007 | 0.216 |
+| delivery_delay_retrodiction | 17 | 0.345 | 0.442 | +0.097 | 0.458 |
+| delivery_delay_retrodiction | 18 | 0.302 | 0.279 | -0.023 | 0.280 |
+| delivery_delay_retrodiction | 19 | 0.380 | 0.373 | -0.007 | 0.388 |
+| delivery_delay_retrodiction | 20 | 0.218 | 0.250 | +0.032 | 0.254 |
+| delivery_delay_retrodiction | 21 | 0.275 | 0.286 | +0.012 | 0.273 |
+| delivery_delay_retrodiction | 22 | 0.333 | 0.369 | +0.036 | 0.372 |
+| delivery_delay_retrodiction | 23 | 0.235 | 0.352 | +0.117 | 0.284 |
+| delivery_delay_retrodiction | 24 | 0.306 | 0.341 | +0.036 | 0.290 |
 | dense_clutter | 0 | 0.286 | 0.477 | +0.191 | 0.468 |
 | dense_clutter | 1 | 0.199 | 0.375 | +0.176 | 0.344 |
 | dense_clutter | 2 | 0.192 | 0.196 | +0.004 | 0.301 |
@@ -1084,7 +1084,7 @@ observations behind each mean age of information.
 
 - Position RMSE: the paired interval excludes zero in favour of fusion in 1 scenario(s) and against fusion in 6 scenario(s); it includes zero (or has fewer than two seeds) in 8 scenario(s).
 - The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in 7 scenario(s), against fusion in 3, and includes zero in 5.
-- MOTA, IDF1 and GOSPA (interval excludes zero): fusion better in 0, 2 and 0 scenario(s) and worse in 14, 5 and 14, respectively.
+- MOTA, IDF1 and GOSPA (interval excludes zero): fusion better in 0, 3 and 0 scenario(s) and worse in 14, 5 and 14, respectively.
 - fused-bias-estimated against fused (interval excludes zero): position RMSE: better in 3, worse in 0, inconclusive in 12; precision: better in 3, worse in 1, inconclusive in 11; MOTA: better in 3, worse in 1, inconclusive in 12; GOSPA: better in 3, worse in 1, inconclusive in 12.
 - Fused precision is lower (interval excludes zero) in 14 scenario(s) and higher in 0; fused 95% coverage is lower in 12 and higher in 1. Accuracy alone does not establish that fusion improved association or calibration.
 - Fusion is not guaranteed to improve accuracy. Systematic sensor bias,
