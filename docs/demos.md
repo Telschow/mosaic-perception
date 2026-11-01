@@ -8,6 +8,8 @@ Beats 1 and 2 of demo 1: `make assets` also writes `docs-site/src/assets/generat
 
 Beats 3 and 4 of demo 1: `make assets` also writes `scoreboard.svg` (precision and MOTA paired tallies, counted by the report's own rule) and `measurement_bias_recovery.svg` (how much of fusion's loss `fused_bias_estimated` recovers) to the same folder, checked by `tests/unit/test_make_assets.py` against the artifact and the report's Findings.
 
+The finished clip: `make assets` also assembles `summary_clip.gif` (under 60 s, all five beats, GIF only because ffmpeg is not a documented dependency) from the pieces above with `scripts/make_summary_clip.py`, plus `summary_clip.json`, a manifest of the beat order, source files and timings, checked by `tests/unit/test_make_summary_clip.py`. Regenerate it with `make assets` (or `uv run python scripts/make_summary_clip.py` alone). It lives at [docs-site/src/assets/generated/summary_clip.gif](../docs-site/src/assets/generated/summary_clip.gif) and is embedded, with alt text for each beat, on the landing page of the documentation site.
+
 ## Headline
 
 > **More sensors don't automatically mean better tracking.**
