@@ -2,6 +2,8 @@
 
 Specification for the three demonstrations (issue #47). This file specifies them; it does not contain the media. Media is produced later from `artifacts/benchmark/` by the asset pipeline (#43) and linked from the documentation site (#34). The existing live walkthrough in [demo-script.md](demo-script.md) is the basis for the five-minute demo.
 
+Prototype: `make assets` writes `docs-site/src/assets/generated/position_rmse_paired.svg` from `artifacts/benchmark/` (`scripts/make_assets.py`); it refuses a stale artifact and a test checks the figure against the artifact.
+
 ## Headline
 
 > **More sensors don't automatically mean better tracking.**
