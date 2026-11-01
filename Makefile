@@ -53,6 +53,7 @@ provenance-check:
 assets:
 	uv run python scripts/make_assets.py
 	uv run python scripts/make_clips.py
+	uv run python scripts/make_summary_clip.py
 
 docs-preview:
 	cd docs-site && npm ci && npm run dev

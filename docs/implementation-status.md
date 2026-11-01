@@ -146,6 +146,11 @@ embedded, and labelled optional.
 
 - Evidence: `tests/unit/test_sync_docs_site.py` (link rewriting, all
   navigation pages generated, generated pages git-ignored).
+- Summary clip: `make assets` assembles the sixty-second demo 1 clip
+  (`docs-site/src/assets/generated/summary_clip.gif`, GIF only) and a manifest
+  of beats, sources and timings; embedded on the landing page with alt text.
+  Evidence: `tests/unit/test_make_summary_clip.py`. The docs build and a11y
+  check have not been run on it locally (no `node_modules`).
 - Not yet done: GitHub Pages must be enabled (source: GitHub Actions) in the
   repository settings; until then the deploy job cannot publish. The CI jobs
   have not yet run on GitHub.

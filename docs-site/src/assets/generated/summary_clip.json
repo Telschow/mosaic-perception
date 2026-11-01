@@ -1,0 +1,64 @@
+{
+ "label": "Synthetic world",
+ "headline": "More sensors don't automatically mean better tracking.",
+ "subline": "I added a camera to a tracker and, in a simulated world, it mostly got worse. Here is why, and when it helps.",
+ "end_card": "Synthetic world. Full results and limits:",
+ "url": "https://telschow.github.io/mosaic-perception/",
+ "size": [
+  640,
+  620
+ ],
+ "frame_count": 63,
+ "total_ms": 46800,
+ "beats": [
+  {
+   "id": "range_only",
+   "sources": [
+    "docs-site/src/assets/generated/scenario_clip.json",
+    "scripts/make_clips.py"
+   ],
+   "frame_count": 25,
+   "start_ms": 0,
+   "duration_ms": 4400
+  },
+  {
+   "id": "fused",
+   "sources": [
+    "docs-site/src/assets/generated/scenario_clip.json",
+    "scripts/make_clips.py"
+   ],
+   "frame_count": 35,
+   "start_ms": 4400,
+   "duration_ms": 6400
+  },
+  {
+   "id": "scoreboard",
+   "sources": [
+    "docs-site/src/assets/generated/scoreboard.svg",
+    "artifacts/benchmark/benchmark.json"
+   ],
+   "frame_count": 1,
+   "start_ms": 10800,
+   "duration_ms": 14000
+  },
+  {
+   "id": "recovery",
+   "sources": [
+    "docs-site/src/assets/generated/measurement_bias_recovery.svg",
+    "artifacts/benchmark/benchmark.json"
+   ],
+   "frame_count": 1,
+   "start_ms": 24800,
+   "duration_ms": 14000
+  },
+  {
+   "id": "end_card",
+   "sources": [
+    "docs/demos.md"
+   ],
+   "frame_count": 1,
+   "start_ms": 38800,
+   "duration_ms": 8000
+  }
+ ]
+}

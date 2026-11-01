@@ -3,6 +3,8 @@ title: Mosaic Perception
 description: A reproducible synthetic workbench for multi-sensor perception, tracking and uncertainty.
 ---
 
+import summaryClip from '../../assets/generated/summary_clip.gif';
+
 Mosaic is a reproducible synthetic workbench for investigating when combining
 noisy, asynchronous sensor observations improves object state estimates, and
 when fusion can make results worse.
@@ -11,6 +13,19 @@ This site is built from the Markdown in the repository's `docs/` directory.
 It makes no claim beyond [Implementation status](/mosaic-perception/implementation-status/) and
 [Limitations](/mosaic-perception/limitations/). Benchmark numbers live only in the committed
 [benchmark report](https://github.com/Telschow/mosaic-perception/blob/main/artifacts/benchmark/report.md).
+
+## Sixty-second summary
+
+<img
+  src={summaryClip.src}
+  width={summaryClip.width}
+  height={summaryClip.height}
+  alt="Animated summary of a simulated, synthetic world, in five beats. One: a moving target is tracked by a range sensor alone. Two: a camera is added and the track looks better. Three: a scoreboard shows the fused tracker is worse than range-only on precision and MOTA in most scenarios. Four: in the one scenario with a miscalibrated sensor, estimating the bias recovers part of fusion's loss. Five: an end card reading Synthetic world, full results and limits, with this site's address."
+/>
+
+More sensors don't automatically mean better tracking, in the synthetic scenarios
+and settings tested. The clip is generated from the benchmark artifact; see
+[Demos](/mosaic-perception/demos/) for how it is made.
 
 ## Where to start
 
