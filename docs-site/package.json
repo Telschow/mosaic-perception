@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "sync": "python ../scripts/sync_docs_site.py",
+    "sync": "python3 ../scripts/sync_docs_site.py",
     "dev": "npm run sync && astro dev",
     "build": "npm run sync && astro build",
     "preview": "astro preview",
