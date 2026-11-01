@@ -143,61 +143,87 @@ def _to_svg(fig: Any, data: dict[str, Any], title: str) -> bytes:
 
 
 def render_scoreboard(data: dict[str, Any]) -> bytes:
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    with matplotlib.rc_context(RC_PARAMS):
-        rows = data["rows"]
-        fig, ax = plt.subplots(figsize=(8, 3.6))
-        for y, row in enumerate(rows):
-            left = 0
-            for key in ("better", "worse", "inconclusive"):
-                count = row[key]
-                fill, ink = TALLY_COLORS[key]
-                ax.barh(y, count, left=left, color=fill, height=0.6, label=key if y == 0 else None)
-                if count:
-                    ax.text(left + count / 2, y, str(count), ha="center", va="center", color=ink)
-                left += count
-        names = [f"{COMPARISON_LABELS[r['comparison']]}: {r['metric']}" for r in rows]
-        ax.set_yticks(range(len(rows)), names, fontsize=8)
-        ax.invert_yaxis()
-        ax.set_xlabel("scenarios (paired 95% interval, treatment vs baseline)", fontsize=8)
-        ax.set_title(f"Scoreboard: precision and MOTA\n{LABEL}", fontsize=10)
-        ax.legend(fontsize=8, loc="lower right")
-        fig.text(0.99, 0.005, f"artifact commit {data['commit'][:12]}", ha="right", fontsize=7)
-        fig.tight_layout(rect=(0, 0.02, 1, 1))
-        svg = _to_svg(fig, data, "Scoreboard: scenarios where the treatment is better or worse")
-        plt.close(fig)
-    return svg
+    return _render(
+        scoreboard_figure, data, "Scoreboard: scenarios where the treatment is better or worse"
+    )
 
 
 def render_recovery(data: dict[str, Any]) -> bytes:
+    return _render(recovery_figure, data, "Measurement-bias scenario: precision and MOTA by method")
+
+
+def _render(build: Any, data: dict[str, Any], title: str) -> bytes:
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    methods = ("range_only", "fused", "fused_bias_estimated")
     with matplotlib.rc_context(RC_PARAMS):
-        fig, axes = plt.subplots(1, len(RECOVERY_METRICS), figsize=(8, 3.8))
-        for ax, metric in zip(axes, RECOVERY_METRICS, strict=True):
-            values = data["metrics"][metric]
-            for x, method in enumerate(methods):
-                ax.bar(x, values[method], color=COLORS[method], width=0.6)
-                ax.text(x, values[method] + 0.01, f"{values[method]:.3f}", ha="center", fontsize=8)
-            share = values["recovered_share"]
-            note = "no gap" if share is None else f"recovered {share * 100:.1f}% of fused's loss"
-            ax.set_title(f"{metric}\n{note}", fontsize=9)
-            ax.set_xticks(range(3), ["range-only", "fused", "fused_bias_\nestimated"], fontsize=8)
-            ax.set_ylim(0, 1)
-        fig.suptitle(f"{data['scenario']}: bias estimation vs fusion's loss\n{LABEL}", fontsize=10)
-        fig.text(0.99, 0.005, f"artifact commit {data['commit'][:12]}", ha="right", fontsize=7)
-        fig.tight_layout(rect=(0, 0.03, 1, 0.88))
-        svg = _to_svg(fig, data, "Measurement-bias scenario: precision and MOTA by method")
+        fig = build(data)
+        svg = _to_svg(fig, data, title)
         plt.close(fig)
     return svg
+
+
+def to_png(build: Any, data: dict[str, Any], dpi: int = 100) -> bytes:
+    """Rasterise a panel (``scoreboard_figure`` or ``recovery_figure``) for the clip."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    with matplotlib.rc_context(RC_PARAMS):
+        fig = build(data)
+        buffer = io.BytesIO()
+        fig.savefig(buffer, format="png", dpi=dpi)
+        plt.close(fig)
+    return buffer.getvalue()
+
+
+def scoreboard_figure(data: dict[str, Any]) -> Any:
+    import matplotlib.pyplot as plt
+
+    rows = data["rows"]
+    fig, ax = plt.subplots(figsize=(8, 3.6))
+    for y, row in enumerate(rows):
+        left = 0
+        for key in ("better", "worse", "inconclusive"):
+            count = row[key]
+            fill, ink = TALLY_COLORS[key]
+            ax.barh(y, count, left=left, color=fill, height=0.6, label=key if y == 0 else None)
+            if count:
+                ax.text(left + count / 2, y, str(count), ha="center", va="center", color=ink)
+            left += count
+    names = [f"{COMPARISON_LABELS[r['comparison']]}: {r['metric']}" for r in rows]
+    ax.set_yticks(range(len(rows)), names, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xlabel("scenarios (paired 95% interval, treatment vs baseline)", fontsize=8)
+    ax.set_title(f"Scoreboard: precision and MOTA\n{LABEL}", fontsize=10)
+    ax.legend(fontsize=8, loc="lower right")
+    fig.text(0.99, 0.005, f"artifact commit {data['commit'][:12]}", ha="right", fontsize=7)
+    fig.tight_layout(rect=(0, 0.02, 1, 1))
+    return fig
+
+
+def recovery_figure(data: dict[str, Any]) -> Any:
+    import matplotlib.pyplot as plt
+
+    methods = ("range_only", "fused", "fused_bias_estimated")
+    fig, axes = plt.subplots(1, len(RECOVERY_METRICS), figsize=(8, 3.8))
+    for ax, metric in zip(axes, RECOVERY_METRICS, strict=True):
+        values = data["metrics"][metric]
+        for x, method in enumerate(methods):
+            ax.bar(x, values[method], color=COLORS[method], width=0.6)
+            ax.text(x, values[method] + 0.01, f"{values[method]:.3f}", ha="center", fontsize=8)
+        share = values["recovered_share"]
+        note = "no gap" if share is None else f"recovered {share * 100:.1f}% of fused's loss"
+        ax.set_title(f"{metric}\n{note}", fontsize=9)
+        ax.set_xticks(range(3), ["range-only", "fused", "fused_bias_\nestimated"], fontsize=8)
+        ax.set_ylim(0, 1)
+    fig.suptitle(f"{data['scenario']}: bias estimation vs fusion's loss\n{LABEL}", fontsize=10)
+    fig.text(0.99, 0.005, f"artifact commit {data['commit'][:12]}", ha="right", fontsize=7)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.88))
+    return fig
 
 
 def render_svg(data: dict[str, Any]) -> bytes:

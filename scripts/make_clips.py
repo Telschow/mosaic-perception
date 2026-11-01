@@ -111,7 +111,8 @@ def _palette_image():
     return image
 
 
-def render_gif(data: dict[str, Any]) -> bytes:
+def render_frames(data: dict[str, Any]) -> list[Any]:
+    """The RGB frames of the clip: range-only first, then the fused track added."""
     from PIL import Image, ImageDraw
 
     paths = [p for key in ("ground_truth", "range_only", "fused") for p in data[key] if p]
@@ -154,7 +155,16 @@ def render_gif(data: dict[str, Any]) -> bytes:
         caption = "Range sensor alone" if i < RANGE_ONLY_FRAMES else "Range sensor plus camera"
         draw.text((10, 8), caption, fill=COLORS["text"], font=title)
         draw.text((10, height - 24), LABEL, fill=COLORS["text"], font=small)
-        frames.append(image.quantize(palette=_palette_image(), dither=Image.Dither.NONE))
+        frames.append(image)
+    return frames
+
+
+def render_gif(data: dict[str, Any]) -> bytes:
+    from PIL import Image
+
+    frames = [
+        f.quantize(palette=_palette_image(), dither=Image.Dither.NONE) for f in render_frames(data)
+    ]
     durations = [FRAME_MS] * (FRAME_COUNT - 1) + [LAST_FRAME_MS]
     buffer = io.BytesIO()
     frames[0].save(
