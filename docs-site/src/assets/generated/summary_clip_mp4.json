@@ -1,0 +1,75 @@
+{
+ "label": "Synthetic world",
+ "source_commit": "2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d",
+ "total_ms": 31800,
+ "min_text_px": 56,
+ "outputs": {
+  "9x16": {
+   "file": "summary_clip_9x16.mp4",
+   "size": [
+    1080,
+    1920
+   ]
+  },
+  "16x9": {
+   "file": "summary_clip_16x9.mp4",
+   "size": [
+    1920,
+    1080
+   ]
+  }
+ },
+ "srt": "summary_clip.srt",
+ "poster": "summary_clip_poster.png",
+ "cues": [
+  {
+   "id": "range_only",
+   "start_ms": 0,
+   "end_ms": 4400,
+   "text": "More sensors don't automatically mean better tracking.",
+   "facts": []
+  },
+  {
+   "id": "fused",
+   "start_ms": 4400,
+   "end_ms": 10800,
+   "text": "Add a camera. The track looks better.",
+   "facts": []
+  },
+  {
+   "id": "scoreboard",
+   "start_ms": 10800,
+   "end_ms": 18800,
+   "text": "Scored across many runs, it is mostly worse.",
+   "facts": [
+    "Precision: worse in 14 scenarios, better in 0, unclear in 1."
+   ]
+  },
+  {
+   "id": "recovery",
+   "start_ms": 18800,
+   "end_ms": 26800,
+   "text": "A small camera bias can be estimated and partly fixed.",
+   "facts": [
+    "Scenario: sensor_disagreement_within_gate_high",
+    "Bias estimation recovers 45% of fused's precision loss."
+   ]
+  },
+  {
+   "id": "end_card",
+   "start_ms": 26800,
+   "end_ms": 31800,
+   "text": "Synthetic world. Full results and limits: https://telschow.github.io/mosaic-perception/",
+   "facts": []
+  }
+ ],
+ "sources": [
+  "artifacts/benchmark/benchmark.json",
+  "docs/demos.md",
+  "docs-site/src/assets/generated/summary_clip.json",
+  "docs-site/src/assets/generated/scenario_clip.json",
+  "docs-site/src/assets/generated/scoreboard.svg",
+  "docs-site/src/assets/generated/bias_recovery.svg",
+  "scripts/make_mp4.py"
+ ]
+}

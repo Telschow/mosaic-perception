@@ -151,6 +151,12 @@ embedded, and labelled optional.
   of beats, sources and timings; embedded on the landing page with alt text.
   Evidence: `tests/unit/test_make_summary_clip.py`. The docs build and a11y
   check have not been run on it locally (no `node_modules`).
+- README hero and feed formats: `make assets` writes two three-panel stills
+  (scenarios chosen by a rule on the artifact) and `alt_text.json`; `make mp4`
+  renders 9:16 and 16:9 H.264 cuts with captions and an `.srt` when `ffmpeg` is
+  installed (optional). Evidence: `tests/unit/test_make_hero.py`,
+  `tests/unit/test_make_mp4.py`, `tests/unit/test_alt_text.py`. The stills draw one
+  seed; the numbers on them are the paired benchmark values.
 - Not yet done: GitHub Pages must be enabled (source: GitHub Actions) in the
   repository settings; until then the deploy job cannot publish. The CI jobs
   have not yet run on GitHub.

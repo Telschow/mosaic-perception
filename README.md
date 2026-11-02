@@ -2,6 +2,12 @@
 
 **A reproducible workbench for multi-sensor perception, object tracking and uncertainty.**
 
+<p align="center">
+  <img src="docs-site/src/assets/generated/hero_recovers.png" alt="Three panels of one simulated target in the sensor_disagreement_within_gate_high scenario of a synthetic world: range sensor only (baseline), camera added: worse here, and bias corrected: partly recovered. Ground truth is dashed; each panel marks the 95% position uncertainty at the end of the track. Paired precision difference, bias-estimated against fused: +0.131, 95% interval [+0.100, +0.162]." width="620">
+</p>
+
+<p align="center"><em>Synthetic world, one drawn run. The figures are paired results over the 25 development seeds. Chosen by a rule from the benchmark artifact, not by hand; see <a href="docs/demos.md">docs/demos.md</a>.</em></p>
+
 Mosaic is a deterministic synthetic workbench for investigating a narrow but important question: *when does combining noisy, asynchronous sensor observations improve an estimate of a moving object's state, and when can fusion make the result worse?*
 
 It compares a **range-bearing-sensor-only baseline** (method identifier `range_only`, no vision at all) with a **fused** method that adds vision-like bearing observations, and a third method, **fused_bias_estimated**, that also estimates a constant vision bearing bias and removes it before gating and updating. All methods run on the same worlds and the same sensor random streams, so the comparisons are paired rather than comparisons of unrelated runs.

@@ -140,14 +140,12 @@ def build_manifest(payload: dict[str, Any]) -> dict[str, Any]:
             "precision": interval,
             "panel_labels": labels,
             "source_commit": commit[:12],
-            "alt": _alt(key, names[key], labels, interval, spec["comparison"]),
+            "alt": _alt(names[key], labels, interval, spec["comparison"]),
         }
     return {"label": LABEL, "commit": commit, "stills": stills}
 
 
-def _alt(
-    key: str, scenario: str, labels: dict[str, str], interval: dict[str, float], comparison: str
-) -> str:
+def _alt(scenario: str, labels: dict[str, str], interval: dict[str, float], comparison: str) -> str:
     what = (
         "fused against range-only"
         if comparison == "fused_vs_range_only"
