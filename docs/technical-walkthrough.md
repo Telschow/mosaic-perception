@@ -43,7 +43,7 @@ trade-off in a controlled synthetic setting with paired comparisons.
   logged and counted; in-flight observations are reported as pending. Admitted
   delayed observations are applied to the delivery-time state using the
   capture-time observer pose; no rewind/replay is done (displacement scale
-  ~speed x age under constant velocity, not a strict bound).
+  ~speed x (processing_time - capture_time) under constant velocity, not a strict bound).
 - **Simplicity over completeness**: 2-D, point-measurement sensor models, no
   raw images, no occlusion, no MHT/JPDA, no full out-of-sequence replay.
 

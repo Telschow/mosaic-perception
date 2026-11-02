@@ -100,8 +100,10 @@ replays the epoch from the stored previous posterior in capture-time order, whic
 removes this approximation for observations up to one epoch old. See
 `docs/limitations.md` for what it does and does not cover.
 
-- Under a constant-velocity approximation, the target-state displacement
-  between capture and delivery is approximately `speed × observation_age`.
+- Under a constant-velocity approximation, the update is applied at processing
+  time, so the target-state displacement it must absorb is approximately
+  `speed × (processing_time - capture_time)`. This is larger than
+  `speed × delivery latency` by the wait until the next tick.
   Acceleration and observer-motion effects are not accounted for in this
   approximation and require additional consideration.
 - The reported age of information (`mean_age_of_information`) is the delivery

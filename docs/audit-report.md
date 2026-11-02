@@ -17,7 +17,7 @@
 
 **Date:** 2026-10-24  
 **Auditor:** AI Assistant  
-**Repository:** /Users/daniel/Development/mosaic-perception  
+**Repository:** mosaic-perception  
 **Commit:** 6782de4 (Initial implementation)  
 **Branch:** main  
 

@@ -1,6 +1,16 @@
 # Mosaic Perception: Comprehensive Audit
 
-The current, evidence-backed audit of this repository. It is assembled from five
+> **Historical document.** This audit is pinned to `d3e88d9`. About 120 commits
+> have landed since, and most defects it lists are fixed. The **Status** column
+> in the summary table records, for each finding, whether it is fixed or open and
+> the commit that fixed it, checked against the code at `dbdc87f`. The body text
+> below is unchanged and describes the state at the pinned commit. A later
+> addendum dated 2026-11-01 (`docs/audits/2026-11-01-comprehensive-audit.md`, on
+> branch `claude/hopeful-faraday-7h5ofd`, not yet on `main`) reconciles the
+> findings against newer code; this status column was built independently from
+> `git log` and the code because that branch could not be fetched.
+
+The evidence-backed audit of this repository at the pinned commit. It is assembled from five
 source-level research findings (issues #38 to #42) under map #36. No defect is
 fixed here and no benchmark artifact was regenerated. Fix tickets are a
 separate step (#46).
@@ -41,20 +51,20 @@ R, D and the numbering of the source report, so each can be looked up there.
 
 ## Summary
 
-| ID | Sev | Kind | One line |
-|---|---|---|---|
-| R-F2 / D-F1 | P1 | Defect | `artifacts/benchmark/report.md` is stale against `benchmark.json`; README and walkthrough quote it |
-| E-F1 | P2 | Defect | Continuity matcher maximises match count first; documented as TrackEval CLEAR |
-| A-F1 | P2 | Defect | Retrodiction drops earlier updates on a repeated `current_time` |
-| A-F4 | P2 | Defect | Unknown class name in `class_probs` raises after the state update |
-| R-F3 | P2 | Defect | Provenance check reads only `benchmark.json` |
-| D-F2 | P2 | Defect | "CI on every push" is wrong |
-| D-F3 | P2 | Defect | Reserved held-out seed 42 is the default in README, demo and app |
-| D-F4 | P2 | Defect | `core-validity-audit.md` V10 still says fragmentation is unsupported |
-| D-F5, D-F6 | P2 | Defect | Wrong coverage range, "every scenario" precision and "often lower" RMSE wording |
-| R-F1 / D-F12 | P2 | Defect, resolved at HEAD by #49 | Golden check was byte-exact on floats |
-| R-F10 | P2 | Unimplemented | No dependency-vulnerability monitoring |
-| R-F9 | P2 | Hypothesis | Branch protection on the CI jobs could not be checked |
+| ID | Sev | Kind | One line | Status |
+|---|---|---|---|---|
+| R-F2 / D-F1 | P1 | Defect | `artifacts/benchmark/report.md` is stale against `benchmark.json`; README and walkthrough quote it | Fixed, `26d2517` (artifacts regenerated), `cf24d71` (provenance checks every artifact directory) |
+| E-F1 | P2 | Defect | Continuity matcher maximises match count first; documented as TrackEval CLEAR | Fixed, `029b9b5` (continuity-first headline matcher) |
+| A-F1 | P2 | Defect | Retrodiction drops earlier updates on a repeated `current_time` | Fixed, `f108893` (repeated call time merged into the epoch) |
+| A-F4 | P2 | Defect | Unknown class name in `class_probs` raises after the state update | Fixed, `83ac125` (unknown class names rejected as invalid) |
+| R-F3 | P2 | Defect | Provenance check reads only `benchmark.json` | Fixed, `7845140`, `cf24d71` |
+| D-F2 | P2 | Defect | "CI on every push" is wrong | Fixed, `67c2d9f` (README wording); CI description re-synced in #94 |
+| D-F3 | P2 | Defect | Reserved held-out seed 42 is the default in README, demo and app | Mostly fixed, `3d3837f` (app and docs default to seed 1). Open: `mosaic run --seed` still defaults to 42 |
+| D-F4 | P2 | Defect | `core-validity-audit.md` V10 still says fragmentation is unsupported | Fixed, `044bb2f`, `2e87d36` |
+| D-F5, D-F6 | P2 | Defect | Wrong coverage range, "every scenario" precision and "often lower" RMSE wording | Fixed, `2e87d36`, `044bb2f` |
+| R-F1 / D-F12 | P2 | Defect, resolved at HEAD by #49 | Golden check was byte-exact on floats | Fixed, `f40664f` (tolerant golden check, rtol 1e-9) |
+| R-F10 | P2 | Unimplemented | No dependency-vulnerability monitoring | Fixed, `03f6ba1` (advisory pip-audit), `.github/dependabot.yml` |
+| R-F9 | P2 | Hypothesis | Branch protection on the CI jobs could not be checked | Open: branch protection cannot be read from the repository |
 
 No P0 finding was reported. The verified-correct list (next section) is as
 important as the defects: the core maths, GOSPA, paired intervals and

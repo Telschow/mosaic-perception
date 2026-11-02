@@ -20,7 +20,7 @@ uv sync --locked --all-extras && uv run pytest
 uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
-CI runs the locked sync and test suite on every push to `main` and every pull request to `main`, checks benchmark determinism by regenerating a small fixed benchmark and comparing it byte-for-byte with the committed golden files, and verifies the committed artifacts with `make provenance-check benchmark-golden-check`. The third command is the same benchmark code path as the golden check, at the published configuration.
+CI runs the locked sync and test suite on every push to `main` and every pull request to `main`, lints and format-checks `src tests scripts app`, checks benchmark determinism by regenerating a small fixed benchmark and comparing it with the committed golden files (JSON and CSV with relative tolerance 1e-9, `report.md` byte for byte), and verifies the committed artifacts with `make provenance-check benchmark-golden-check`. The third command is the same benchmark code path as the golden check, at the published configuration.
 
 ### What the evidence shows, and what it does not
 
@@ -39,9 +39,10 @@ CI runs the locked sync and test suite on every push to `main` and every pull re
 - Deterministic IDs, explicit delivery/rejection statistics, and no ground-truth identities in the tracker.
 - Hand-constructed evaluator tests with exact expected values, plus end-to-end regression tests.
 - Reproducible benchmark artifacts generated from code: JSON, CSV and Markdown.
-- CI on every push to `main` and every pull request to `main`: locked install, Ruff lint (`src tests`) and format check (full tree), mypy (`src`), the full
-  test suite, CLI smoke tests, a pinned secret scan over full git history, and
-  byte-level artifact provenance and golden-benchmark checks.
+- CI on every push to `main` and every pull request to `main`: locked install, Ruff lint and format check (`src tests scripts app`), mypy (`src`), the full
+  test suite (checked out with full history), CLI smoke tests, a pinned secret
+  scan over full git history, and artifact provenance and golden-benchmark checks
+  (JSON and CSV compared with rtol 1e-9).
 
 ## Quickstart
 
@@ -125,8 +126,8 @@ Metrics and denominators:
 - **Unmatched confirmed tracks** (`num_unmatched_confirmed_tracks`): confirmed tracks that were never matched to a true object. Many appear to be duplicates near true objects, so this is not a count of spurious objects.
 - **95% / 68% coverage**: matched position errors against the reported 2×2
   position covariance, using χ²(2, 0.95) = 5.991 and χ²(2, 0.68) ≈ 2.279.
-- **Age of information**: mean processing age of observations admitted by the
-  staleness policy.
+- **Age of information**: mean delivery latency (`delivery_time - capture_time`) of
+  observations admitted by the staleness policy.
 - **Track fragmentation**: interruptions in an object's matched frames (a gap
   of one or more frames between two matched frames counts once), summed over
   objects; `N/A` if no object is ever matched, never a fabricated zero.
@@ -264,7 +265,7 @@ been superseded; they are not preserved as a baseline for comparison.**
   replayed, in the default mode; fusion of observations older than one epoch
   is therefore not measured. Within one epoch the tracker applies
   observations to the delivery-time state (an approximation of scale
-  ~speed × age), with an opt-in one-step-lag retrodiction mode; see
+  ~speed × (processing_time − capture_time)), with an opt-in one-step-lag retrodiction mode; see
   [docs/limitations.md](docs/limitations.md).
 - Association is gated Hungarian within each measurement group, not MHT/JPDA.
 - Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. The generator and code are shared with the development seeds, so this is not a hidden test set.
