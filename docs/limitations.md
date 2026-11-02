@@ -125,9 +125,7 @@
 
 ## Evaluation
 
-- The checked-in benchmark uses **development seeds 0–24 only**. Seeds 25–49 are
-  reserved and have not been run, so no held-out or generalization claim is
-  made.
+- The checked-in benchmark uses **development seeds 0–24 only**. Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. No generalization claim is made.
 - Position RMSE also depends on the matcher: the continuity preference can keep an
   object paired with a farther duplicate track, which raises RMSE, while a
   distance-only matcher picks the nearest track and flatters accuracy when

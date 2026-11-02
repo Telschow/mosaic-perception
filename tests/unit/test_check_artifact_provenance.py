@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -12,6 +13,7 @@ _spec = importlib.util.spec_from_file_location(
 )
 assert _spec is not None and _spec.loader is not None
 provenance = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = provenance
 _spec.loader.exec_module(provenance)
 
 COMMIT = "a" * 40
@@ -42,3 +44,38 @@ def test_committed_artifacts_pass() -> None:
     report = (directory / "report.md").read_text()
     assert provenance.check_report_commit(report, payload["code"]["git_commit"]) == []
     assert provenance.check_report_render(report, payload) == []
+
+
+def test_frozen_declaration_matching_commit_passes(tmp_path: Path) -> None:
+    (tmp_path / "FROZEN").write_text(f"{COMMIT}\n")
+    declared = provenance.read_frozen(tmp_path)
+    assert declared == COMMIT
+    assert provenance.check_frozen_declaration(declared, COMMIT) == []
+
+
+def test_frozen_declaration_mismatch_fails() -> None:
+    assert provenance.check_frozen_declaration(OTHER, COMMIT) != []
+
+
+def test_no_frozen_file_means_not_frozen(tmp_path: Path) -> None:
+    assert provenance.read_frozen(tmp_path) is None
+
+
+def test_artifact_directories_include_every_benchmark_json() -> None:
+    names = {d.name for d in provenance.artifact_directories(_ROOT / "artifacts")}
+    assert {"benchmark", "benchmark-golden", "held-out"} <= names
+
+
+def test_frozen_held_out_directory_reports_delta_and_passes() -> None:
+    result = provenance.check_directory(_ROOT / "artifacts" / "held-out")
+    assert result.failures == []
+    assert result.frozen_at is not None and result.frozen_at.startswith("8baa778")
+
+
+def test_frozen_directory_with_disagreeing_report_fails(tmp_path: Path) -> None:
+    payload = {"code": {"git_commit": COMMIT, "package_version": "0.1.0"}}
+    (tmp_path / "benchmark.json").write_text(json.dumps(payload))
+    (tmp_path / "report.md").write_text(f"- Git commit: `{OTHER}`\n")
+    (tmp_path / "FROZEN").write_text(COMMIT)
+    result = provenance.check_directory(tmp_path)
+    assert any("report.md" in f for f in result.failures)

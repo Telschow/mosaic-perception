@@ -116,7 +116,7 @@ class accuracy, paired statistics across seeds.
 - Limitations: [docs/metrics.md](metrics.md) Reporting rules;
   [docs/limitations.md](limitations.md) — Evaluation; development seeds only
   unless an artifact states otherwise.
-- Planned: run the held-out evaluation once on frozen code → #7.
+- Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`.
 
 ### Reporting and CLI — **Implemented**
 
@@ -206,7 +206,6 @@ the move to Astro 7 (2026-11-02). Dependabot groups `astro`, `@astrojs/*` and
 
 | Issue | Subsystem | What it adds |
 |---|---|---|
-| #7 | Evaluation | The one held-out evaluation run on frozen code (blocked by the remaining evaluation work) |
 
 Open issues are not implemented work. The live list is the issue tracker
 (`gh issue list --state open`); the table above is the curated subset that

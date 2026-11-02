@@ -68,7 +68,7 @@ def test_rejects_non_development_seed_group(tmp_path):
 REPORT = ROOT / "artifacts/benchmark/report.md"
 PANELS = {
     "scoreboard": ("scoreboard.svg", "load_scoreboard_data", "render_scoreboard"),
-    "recovery": ("measurement_bias_recovery.svg", "load_recovery_data", "render_recovery"),
+    "recovery": ("bias_recovery.svg", "load_recovery_data", "render_recovery"),
 }
 
 
@@ -169,7 +169,9 @@ def test_scoreboard_matches_report_findings():
 def test_recovery_values_match_report_table():
     ma = _load()
     data = ma.load_recovery_data(ma.BENCHMARK)
-    lines = [ln for ln in REPORT.read_text().splitlines() if ln.startswith("| measurement_bias |")]
+    lines = [
+        ln for ln in REPORT.read_text().splitlines() if ln.startswith(f"| {data['scenario']} |")
+    ]
     header = next(
         ln
         for ln in REPORT.read_text().splitlines()
@@ -193,3 +195,32 @@ def test_panels_refuse_non_development_artifact(tmp_path):
     for load in (ma.load_scoreboard_data, ma.load_recovery_data):
         with pytest.raises(ValueError, match="development"):
             load(bad)
+
+
+def test_recovery_scenario_is_chosen_by_rule_not_by_hand():
+    ma = _load()
+    payload = json.loads(ma.BENCHMARK.read_text())
+    name = ma.choose_recovery_scenario(payload)
+    assert name != "measurement_bias"
+    assert ma.load_recovery_data(ma.BENCHMARK)["scenario"] == name
+    gains = {
+        s["scenario"]["name"]: s["paired_differences"]["bias_estimated_vs_fused"]["precision"]
+        for s in payload["scenarios"]
+    }
+    assert gains[name]["ci95_low"] > 0
+    assert all(g["mean"] <= gains[name]["mean"] for g in gains.values() if (g["ci95_low"] or 0) > 0)
+
+
+def test_caption_says_recovers_only_with_positive_share_and_interval_above_zero():
+    ma = _load()
+    for scenario in ("measurement_bias", ma.load_recovery_data(ma.BENCHMARK)["scenario"]):
+        data = ma.load_recovery_data(ma.BENCHMARK, scenario)
+        for values in data["metrics"].values():
+            says = ma.recovery_verdict(values) == "recovers"
+            earned = values["recovered_share"] > 0 and values["paired"]["ci95_low"] > 0
+            assert says == earned
+    # the chosen scenario's panel may say "recovers"; measurement_bias's must not
+    chosen = ma.load_recovery_data(ma.BENCHMARK)["metrics"]["precision"]
+    assert ma.recovery_verdict(chosen) == "recovers"
+    biased = ma.load_recovery_data(ma.BENCHMARK, "measurement_bias")["metrics"]["precision"]
+    assert ma.recovery_verdict(biased) == "does not recover"
