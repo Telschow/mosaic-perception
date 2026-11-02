@@ -18,14 +18,10 @@ Work test first. Write one failing test, make it pass, repeat. Then tidy.
 
 Run these before each commit:
 
-1. `ruff check src tests scripts`
-2. `ruff format --check src tests scripts`
-3. `mypy src --ignore-missing-imports`
-4. `python -m pytest -q -x` on the test files for the area you changed
+1. `make format-check lint typecheck`
+2. `python -m pytest -q -x` on the test files for the area you changed
 
-Do not run the full suite. It takes 4 to 5 minutes and the merge step runs it once.
-
-If you change benchmark output, also run `make benchmark-golden-check` and `make provenance-check`.
+The full suite is slow, so leave it to `make check`, which the merge step runs once. If you change benchmark output, also run `make benchmark-golden-check` and `make provenance-check`.
 
 # COMMIT
 

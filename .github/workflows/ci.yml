@@ -32,14 +32,8 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
       - name: Install locked dependencies
         run: uv sync --locked --all-extras --python ${{ matrix.python-version }}
-      - name: Lint with ruff (make lint)
-        run: uv run --python ${{ matrix.python-version }} ruff check src tests scripts app
-      - name: Format check (make format-check)
-        run: uv run --python ${{ matrix.python-version }} ruff format --check src tests scripts app
-      - name: Type check
-        run: uv run --python ${{ matrix.python-version }} mypy src
-      - name: Test with pytest
-        run: uv run --python ${{ matrix.python-version }} pytest
+      - name: Check (make check: format, lint, types, tests, provenance, golden benchmark)
+        run: make check
       - name: CLI smoke test (run)
         run: uv run --python ${{ matrix.python-version }} mosaic run --scenario nominal --seed 1 --duration 0.5 --num-objects 1
       - name: CLI smoke test (evaluate)
@@ -121,9 +115,9 @@ jobs:
       - name: Install locked dependencies
         run: uv sync --locked --all-extras --python 3.12
       - name: Artifact provenance (recorded commit, unchanged source, version)
-        run: uv run --python 3.12 python scripts/check_artifact_provenance.py
+        run: make provenance-check
       - name: Golden benchmark (byte-for-byte against committed goldens)
-        run: uv run --python 3.12 python scripts/check_benchmark_golden.py
+        run: make benchmark-golden-check
 
   dependency-audit:
     # Advisory only: reports known vulnerabilities in the locked dependencies
