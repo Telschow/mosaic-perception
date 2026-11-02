@@ -80,8 +80,8 @@ existing tracks when fusion is enabled, but range-bearing observations are
 required to initiate them.
 
 **Q: Are the checked-in results held out?**
-A: No. The benchmark uses development seeds 0–24. Seeds 25–49 are reserved and
-have not been run. The published v0.1.0 numbers are invalid and superseded; do
+A: No. The benchmark uses development seeds 0–24. Held-out: Run once at `8baa778` on seeds 25-49;
+see `artifacts/held-out/report.md`. The published v0.1.0 numbers are invalid and superseded; do
 not use them as a baseline.
 
 **Q: What would be needed before real-sensor claims?**

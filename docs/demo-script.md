@@ -52,8 +52,7 @@ than one epoch are rejected and counted, not silently used.
 "These are synthetic 2-D results with simplified sensors. Vision alone cannot
 initiate tracks. Stale observations are rejected rather than replayed, so
 stale-data fusion is not evaluated. Track fragmentation counts gaps in matched
-frames and says nothing about identity. The benchmark uses development seeds only; the reserved
-held-out seeds 25–49 have not been run. And the published v0.1.0 numbers are
+frames and says nothing about identity. The benchmark uses development seeds only; held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. And the published v0.1.0 numbers are
 invalid and superseded."
 
 ## Notes
