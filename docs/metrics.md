@@ -174,8 +174,8 @@ small and produces coverage far below 0.95.
 | `rejected_out_of_sequence` | observations older than the one-epoch staleness bound |
 | `rejected_invalid` | observations with invalid metadata, covariance, frame, or a failed update |
 | `pending_observations` | observations still queued at the end of the run |
-| `age_samples` | number of observations whose processing age contributed to mean AoI |
-| `mean_age_of_information` | mean of `processing_time - capture_time` for observations admitted by the staleness and group checks, seconds |
+| `age_samples` | number of observations whose delivery latency contributed to mean AoI |
+| `mean_age_of_information` | mean of the delivery latency `delivery_time - capture_time` for observations admitted by the staleness and group checks, seconds |
 | `vision_generated` | vision observations produced by vision sensors (fused method only) |
 | `vision_delivered` | vision observations removed from the pending queue (generated minus those still pending) |
 | `vision_gate_rejected` | delivered vision observations for which at least one track was evaluated and none passed the chi-square gate |
