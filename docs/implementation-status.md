@@ -182,18 +182,13 @@ provenance and golden-benchmark checks. Least-privilege permissions, all
 actions pinned to commit SHAs. An advisory `pip-audit` job reports known
 vulnerabilities in the locked dependencies without failing the build
 (`continue-on-error: true`), and Dependabot (`.github/dependabot.yml`, `uv` and
-`github-actions`, `npm` for `/` and `/docs-site`, weekly, grouped minor/patch)
+`github-actions`, `npm` for `/` and `/docs-site`, weekly, grouped minor/patch, Astro packages in one group)
 proposes updates. `docs.yml` runs an advisory `npm audit --omit=dev`
 (`continue-on-error: true`).
 
-**Known advisories (docs-site, `npm audit --omit=dev`, 2026-11-01).** `astro`
-5.18.2 (critical, plus `sharp`, `zod`, `zod-to-ts` high) is flagged; every fix
-requires `astro` 7.x, a breaking major bump, so it is deferred. The advisories
-concern server rendering, server islands, dev-server behaviour, image
-optimisation and untrusted-input XSS. The site is a static build from
-author-controlled content in `docs/`, with no SSR, no user input and no image
-service exposed at runtime, so they do not apply to the published site.
-Revisit when moving to Astro 7.
+**Docs-site advisories.** `npm audit --omit=dev` reported 0 vulnerabilities after
+the move to Astro 7 (2026-11-02). Dependabot groups `astro`, `@astrojs/*` and
+`starlight-*` into one PR, because their peer ranges must move together.
 
 - Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6): jobs `test`, `secret-scan`,
   `artifact-checks`, `dependency-audit` (advisory, non-blocking). CI invokes the
