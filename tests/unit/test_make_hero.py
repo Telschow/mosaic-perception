@@ -112,3 +112,12 @@ def test_label_and_commit_are_burned_into_every_still():
 def test_script_reads_only_the_development_artifact():
     text = SCRIPT.read_text()
     assert "held-out" not in text and "held_out" not in text
+
+
+def test_committed_manifest_matches_the_artifact():
+    """Drift check: regenerate with `make assets` when this fails."""
+    mh = _load()
+    committed = json.loads((ROOT / "docs-site/src/assets/generated/hero.json").read_text())
+    assert mh.build_manifest(json.loads(mh.BENCHMARK.read_text())) == committed
+    for still in committed["stills"].values():
+        assert (ROOT / "docs-site/src/assets/generated" / still["file"]).exists()

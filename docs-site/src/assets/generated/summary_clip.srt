@@ -1,0 +1,22 @@
+1
+00:00:00,000 --> 00:00:04,400
+More sensors don't automatically mean better tracking.
+
+2
+00:00:04,400 --> 00:00:10,800
+Add a camera. The track looks better.
+
+3
+00:00:10,800 --> 00:00:18,800
+Scored across many runs, it is mostly worse.
+Precision: worse in 14 scenarios, better in 0, unclear in 1.
+
+4
+00:00:18,800 --> 00:00:26,800
+A small camera bias can be estimated and partly fixed.
+Scenario: sensor_disagreement_within_gate_high
+Bias estimation recovers 45% of fused's precision loss.
+
+5
+00:00:26,800 --> 00:00:31,800
+Synthetic world. Full results and limits: https://telschow.github.io/mosaic-perception/

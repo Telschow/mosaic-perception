@@ -1,4 +1,4 @@
-.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets docs-preview
+.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets mp4 docs-preview
 
 install:
 	uv sync --locked --all-extras
@@ -54,6 +54,11 @@ assets:
 	uv run python scripts/make_assets.py
 	uv run python scripts/make_clips.py
 	uv run python scripts/make_summary_clip.py
+	uv run python scripts/make_hero.py
+	uv run python scripts/make_alt_text.py
+
+mp4:
+	uv run python scripts/make_summary_clip.py --format mp4
 
 docs-preview:
 	cd docs-site && npm ci && npm run dev

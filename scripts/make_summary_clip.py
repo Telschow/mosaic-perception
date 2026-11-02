@@ -12,6 +12,7 @@ ffmpeg is not a documented dependency.
 
 from __future__ import annotations
 
+import argparse
 import functools
 import io
 import json
@@ -157,6 +158,7 @@ def build_beats() -> list[dict[str, Any]]:
                 "id": beat_id,
                 "sources": BEAT_SOURCES[beat_id],
                 "frames": [_canvas(image) for image in images],
+                "panels": images,
                 "durations": durations,
                 **({"scenario": recovery["scenario"]} if beat_id == "recovery" else {}),
             }
@@ -216,7 +218,18 @@ def render_gif(beats: list[dict[str, Any]]) -> bytes:
     return buffer.getvalue()
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--format",
+        choices=("gif", "mp4"),
+        default="gif",
+        help="gif (default) or mp4: the 9:16 and 16:9 cuts, which need ffmpeg (see make_mp4.py)",
+    )
+    if parser.parse_args(argv).format == "mp4":
+        import make_mp4
+
+        return make_mp4.main()
     beats = build_beats()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_bytes(render_gif(beats))

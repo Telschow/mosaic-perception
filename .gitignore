@@ -28,6 +28,7 @@ env/
 results/
 outputs/
 *.png
+!docs-site/src/assets/generated/*.png
 *.html
 *.csv
 !artifacts/benchmark/per_seed.csv
