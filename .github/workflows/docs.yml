@@ -28,6 +28,10 @@ jobs:
       - name: Install dependencies
         working-directory: docs-site
         run: npm ci
+      - name: npm audit (advisory, does not fail the build)
+        working-directory: docs-site
+        continue-on-error: true
+        run: npm audit --omit=dev
       - name: Build site (fails on any broken internal link)
         working-directory: docs-site
         run: npm run build

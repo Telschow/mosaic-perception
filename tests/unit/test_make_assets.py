@@ -5,7 +5,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+from collections import Counter
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 
@@ -89,6 +91,26 @@ def test_panel_is_deterministic_labelled_and_accessible(name):
     assert 'role="img"' in text
 
 
+def _structure(svg):
+    """Platform-tolerant SVG fingerprint: tags, attribute names and text; no geometry."""
+    root = ElementTree.fromstring(svg)
+    elements = [(el.tag, tuple(sorted(el.attrib))) for el in root.iter()]
+    texts = [(el.tag, el.text.strip()) for el in root.iter() if el.text and el.text.strip()]
+    return Counter(elements), texts
+
+
+def test_structure_ignores_coordinates():
+    a = b'<svg><text x="1" y="2">hi</text></svg>'
+    b = b'<svg><text x="1.5" y="2.5">hi</text></svg>'
+    assert _structure(a) == _structure(b)
+
+
+def test_structure_detects_changed_data_and_label():
+    base = b'<svg><desc>{"v": 1}</desc><text x="1">hi</text></svg>'
+    assert _structure(base) != _structure(base.replace(b'"v": 1', b'"v": 2'))
+    assert _structure(base) != _structure(base.replace(b">hi<", b">ho<"))
+
+
 @pytest.mark.parametrize("name", PANELS)
 def test_committed_panel_data_matches_artifact(name):
     """Drift check: regenerate with `make assets` when this fails."""
@@ -97,7 +119,7 @@ def test_committed_panel_data_matches_artifact(name):
     match = re.search(r"<desc>(.*?)</desc>", path.read_text(), re.DOTALL)
     assert match, "panel has no embedded data"
     assert json.loads(match.group(1)) == load(ma.BENCHMARK)
-    assert path.read_bytes() == render(load(ma.BENCHMARK))
+    assert _structure(path.read_bytes()) == _structure(render(load(ma.BENCHMARK)))
 
 
 def _luminance(color):

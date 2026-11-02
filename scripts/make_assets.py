@@ -6,8 +6,9 @@ seeds 0-24; nothing is re-simulated) and writes SVGs to
 ``docs-site/src/assets/generated/``: the paired-RMSE figure, the scoreboard
 (paired tallies, counted by the report's own rule) and the measurement-bias
 recovery panel. Every plotted value comes from the artifact.
-The output is byte-deterministic: bundled font, no text-as-path variation, fixed
-hash salt, no timestamps. The plotted data is embedded in the SVG ``<desc>`` so a
+Data and text are exact and reproducible: bundled font, fixed hash salt, no
+timestamps. Geometry (coordinates, paths) may vary across platforms, so tests
+compare structure, not bytes. The plotted data is embedded in the SVG ``<desc>`` so a
 test can detect drift from the artifact. Refuses a stale artifact by running
 ``scripts/check_artifact_provenance.py`` first.
 """
