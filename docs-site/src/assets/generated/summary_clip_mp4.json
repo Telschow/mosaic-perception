@@ -1,6 +1,7 @@
 {
  "label": "Synthetic world",
  "source_commit": "2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d",
+ "seed_label": "development seeds 0-24",
  "total_ms": 31800,
  "min_text_px": 56,
  "outputs": {

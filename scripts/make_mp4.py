@@ -22,6 +22,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import _draw  # noqa: E402
 import make_assets  # noqa: E402
 import make_summary_clip  # noqa: E402
 
@@ -106,7 +107,14 @@ def build_plan(summary: dict[str, Any], commit: str) -> dict[str, Any]:
             }
         )
         start += duration
-    return {"commit": commit, "total_ms": start, "cues": cues, "sources": SOURCES}
+    seeds = json.loads(make_assets.BENCHMARK.read_text())["protocol"]["seeds"]
+    return {
+        "commit": commit,
+        "seed_label": f"development seeds {seeds[0]}-{seeds[-1]}",
+        "total_ms": start,
+        "cues": cues,
+        "sources": SOURCES,
+    }
 
 
 def srt_time(ms: int) -> str:
@@ -161,6 +169,7 @@ def build_manifest(plan: dict[str, Any]) -> dict[str, Any]:
     return {
         "label": LABEL,
         "source_commit": plan["commit"],
+        "seed_label": plan["seed_label"],
         "total_ms": plan["total_ms"],
         "min_text_px": CAPTION_PX,
         "outputs": {
@@ -175,7 +184,7 @@ def build_manifest(plan: dict[str, Any]) -> dict[str, Any]:
 
 
 def _compose(
-    panel: Any, lines: list[str], facts: list[str], size: tuple[int, int], commit: str
+    panel: Any, lines: list[str], facts: list[str], size: tuple[int, int], footer: list[str]
 ) -> Any:
     """Caption band on top, the beat's panel scaled to fit, the evidence label below."""
     from PIL import Image, ImageDraw
@@ -183,21 +192,21 @@ def _compose(
     width, height = size
     image = Image.new("RGB", size, make_summary_clip.WHITE)
     draw = ImageDraw.Draw(image)
-    body = make_summary_clip._font(CAPTION_PX, bold=True)
+    body = _draw.font(CAPTION_PX, bold=True)
     wrapped: list[str] = []
     for line in lines:
-        wrapped += make_summary_clip._wrap(draw, line, body, width - 80)
+        wrapped += _draw.wrap(draw, line, body, width - 80)
     y = 60
     for line in wrapped:
         draw.text((40, y), line, fill=make_summary_clip.INK, font=body)
         y += CAPTION_PX + 14
-    fact_font = make_summary_clip._font(LABEL_PX)
+    fact_font = _draw.font(LABEL_PX)
     for fact in facts:
-        for line in make_summary_clip._wrap(draw, fact, fact_font, width - 80):
+        for line in _draw.wrap(draw, fact, fact_font, width - 80):
             draw.text((40, y + 10), line, fill=make_summary_clip.INK, font=fact_font)
             y += LABEL_PX + 10
         y += 10
-    bottom = height - 150
+    bottom = height - 40 - len(footer) * (LABEL_PX + 8)
     if panel is not None:
         room = (width - 80, bottom - (y + 30))
         scale = min(room[0] / panel.width, room[1] / panel.height)
@@ -205,12 +214,13 @@ def _compose(
             (round(panel.width * scale), round(panel.height * scale)), Image.Resampling.LANCZOS
         )
         image.paste(panel, ((width - panel.width) // 2, y + 30))
-    draw.text(
-        (40, height - 100),
-        f"{LABEL.upper()}  {commit[:12]}",
-        fill=make_summary_clip.INK,
-        font=make_summary_clip._font(LABEL_PX, bold=True),
-    )
+    for row, line in enumerate(footer):
+        draw.text(
+            (40, height - 30 - (len(footer) - row) * (LABEL_PX + 8)),
+            line,
+            fill=make_summary_clip.INK,
+            font=_draw.font(LABEL_PX, bold=row == 0),
+        )
     return image
 
 
@@ -238,6 +248,11 @@ def _chart(beat_id: str) -> Any:
 def render_timeline(plan: dict[str, Any], size: tuple[int, int]) -> list[tuple[Any, int, str]]:
     """(image, duration_ms, beat id) for every frame of one cut."""
     beats = {b["id"]: b for b in make_summary_clip.build_beats()}
+    footer = [
+        LABEL.upper(),
+        plan["seed_label"],
+        f"artifact commit {plan['commit'][:12]}",
+    ]
     timeline: list[tuple[Any, int, str]] = []
     for cue in plan["cues"]:
         beat = beats[cue["id"]]
@@ -254,7 +269,7 @@ def render_timeline(plan: dict[str, Any], size: tuple[int, int]) -> list[tuple[A
         )
         for panel, duration in zip(panels, durations, strict=True):
             timeline.append(
-                (_compose(panel, text, cue["facts"], size, plan["commit"]), duration, cue["id"])
+                (_compose(panel, text, cue["facts"], size, footer), duration, cue["id"])
             )
     return timeline
 

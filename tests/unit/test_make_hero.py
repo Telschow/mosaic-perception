@@ -64,7 +64,7 @@ def test_hurt_scenario_rule_refuses_when_fusion_never_reliably_hurts():
 
 def test_stills_use_the_rule_not_a_hand_picked_scenario_or_seed():
     mh = _load()
-    payload = json.loads(mh.BENCHMARK.read_text())
+    payload = json.loads(mh.make_assets.BENCHMARK.read_text())
     manifest = mh.build_manifest(payload)
     ma_choice = mh.make_assets.choose_recovery_scenario(payload)
     assert manifest["stills"]["hurts"]["scenario"] == mh.choose_hurt_scenario(payload)
@@ -74,7 +74,7 @@ def test_stills_use_the_rule_not_a_hand_picked_scenario_or_seed():
 
 def test_manifest_numbers_are_the_artifacts_numbers():
     mh = _load()
-    payload = json.loads(mh.BENCHMARK.read_text())
+    payload = json.loads(mh.make_assets.BENCHMARK.read_text())
     manifest = mh.build_manifest(payload)
     assert manifest["commit"] == payload["code"]["git_commit"]
     for still in manifest["stills"].values():
@@ -89,7 +89,7 @@ def test_manifest_numbers_are_the_artifacts_numbers():
 
 def test_panel_labels_say_what_the_numbers_show():
     mh = _load()
-    payload = json.loads(mh.BENCHMARK.read_text())
+    payload = json.loads(mh.make_assets.BENCHMARK.read_text())
     manifest = mh.build_manifest(payload)
     hurts, recovers = manifest["stills"]["hurts"], manifest["stills"]["recovers"]
     assert hurts["precision"]["ci95_high"] < 0
@@ -101,7 +101,7 @@ def test_panel_labels_say_what_the_numbers_show():
 def test_label_and_commit_are_burned_into_every_still():
     mh = _load()
     assert mh.LABEL == "SYNTHETIC WORLD"
-    payload = json.loads(mh.BENCHMARK.read_text())
+    payload = json.loads(mh.make_assets.BENCHMARK.read_text())
     manifest = mh.build_manifest(payload)
     assert manifest["label"] == mh.LABEL
     for still in manifest["stills"].values():
@@ -118,6 +118,6 @@ def test_committed_manifest_matches_the_artifact():
     """Drift check: regenerate with `make assets` when this fails."""
     mh = _load()
     committed = json.loads((ROOT / "docs-site/src/assets/generated/hero.json").read_text())
-    assert mh.build_manifest(json.loads(mh.BENCHMARK.read_text())) == committed
+    assert mh.build_manifest(json.loads(mh.make_assets.BENCHMARK.read_text())) == committed
     for still in committed["stills"].values():
         assert (ROOT / "docs-site/src/assets/generated" / still["file"]).exists()

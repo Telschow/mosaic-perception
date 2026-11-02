@@ -23,14 +23,13 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import _draw  # noqa: E402
 import make_assets  # noqa: E402
-import make_clips  # noqa: E402
 
 from mosaic_perception.domain.models import TrackStatus  # noqa: E402
 from mosaic_perception.experiment import run_pair  # noqa: E402
 from mosaic_perception.scenarios import resolve_scenario  # noqa: E402
 
-BENCHMARK = make_assets.BENCHMARK
 OUTPUT_DIR = Path("docs-site/src/assets/generated")
 MANIFEST = OUTPUT_DIR / "hero.json"
 LABEL = "SYNTHETIC WORLD"
@@ -207,19 +206,6 @@ def _ellipse(
     return points
 
 
-def _wrap(draw: Any, text: str, font: Any, width: int) -> list[str]:
-    lines: list[str] = []
-    line = ""
-    for word in text.split():
-        trial = f"{line} {word}".strip()
-        if line and draw.textlength(trial, font=font) > width:
-            lines.append(line)
-            line = word
-        else:
-            line = trial
-    return [*lines, line]
-
-
 def render_still(data: dict[str, Any], still: dict[str, Any]) -> Any:
     """Three columns (the tracks are tall and narrow), caption band above, label below."""
     from PIL import Image, ImageDraw
@@ -227,7 +213,7 @@ def render_still(data: dict[str, Any], still: dict[str, Any]) -> Any:
     width, height = SIZE
     image = Image.new("RGB", SIZE, COLORS["background"])
     draw = ImageDraw.Draw(image)
-    title, body, small = make_clips._font(40), make_clips._font(30), make_clips._font(26)
+    title, body, small = _draw.font(40), _draw.font(30), _draw.font(26)
     p = still["precision"]
     draw.text((30, 24), still["title"], fill=COLORS["text"], font=title)
     draw.text(
@@ -261,11 +247,11 @@ def render_still(data: dict[str, Any], still: dict[str, Any]) -> Any:
             draw.line((left, HEADER_H, left, height - FOOTER_H), fill=(210, 210, 210), width=2)
         color = COLORS["text"] if method == "range_only" else COLORS[method]
         y = HEADER_H + 10
-        for line in _wrap(draw, still["panel_labels"][method], body, col_w - 30)[:3]:
+        for line in _draw.wrap(draw, still["panel_labels"][method], body, col_w - 30)[:3]:
             draw.text((left + 15, y), line, fill=color, font=body)
             y += 36
         y = HEADER_H + 10 + 3 * 36 + 4
-        for line in _wrap(draw, METHOD_NAMES[method], small, col_w - 30)[:2]:
+        for line in _draw.wrap(draw, METHOD_NAMES[method], small, col_w - 30)[:2]:
             draw.text((left + 15, y), line, fill=COLORS["text"], font=small)
             y += 30
 
@@ -288,7 +274,7 @@ def render_still(data: dict[str, Any], still: dict[str, Any]) -> Any:
             )
     draw.text(
         (30, height - FOOTER_H + 6),
-        f"{LABEL}   source {still['source_commit']}",
+        f"{LABEL}   artifact commit {still['source_commit']}",
         fill=COLORS["text"],
         font=small,
     )
@@ -302,7 +288,7 @@ def render_still(data: dict[str, Any], still: dict[str, Any]) -> Any:
 
 
 def main() -> int:
-    payload = json.loads(BENCHMARK.read_text())
+    payload = json.loads(make_assets.BENCHMARK.read_text())
     manifest = build_manifest(payload)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     for still in manifest["stills"].values():

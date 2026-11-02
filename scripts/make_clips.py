@@ -18,9 +18,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from mosaic_perception.domain.models import TrackStatus
-from mosaic_perception.experiment import RunRecord, run_pair
-from mosaic_perception.scenarios import resolve_scenario
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import _draw  # noqa: E402
+
+from mosaic_perception.domain.models import TrackStatus  # noqa: E402
+from mosaic_perception.experiment import RunRecord, run_pair  # noqa: E402
+from mosaic_perception.scenarios import resolve_scenario  # noqa: E402
 
 SCENARIO = "nominal"
 SEED = 1
@@ -92,14 +96,6 @@ def build_manifest(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _font(size: int):
-    import matplotlib
-    from PIL import ImageFont
-
-    path = Path(matplotlib.get_data_path()) / "fonts" / "ttf" / "DejaVuSans.ttf"
-    return ImageFont.truetype(str(path), size)
-
-
 def _palette_image():
     """Fixed palette: the clip colors plus a grey ramp for anti-aliased text edges."""
     from PIL import Image
@@ -131,7 +127,7 @@ def render_frames(data: dict[str, Any]) -> list[Any]:
         )
 
     n = len(data["times"])
-    title, small = _font(18), _font(14)
+    title, small = _draw.font(18), _draw.font(14)
     labels = {
         "ground_truth": "ground truth",
         "range_only": "range-only track",
