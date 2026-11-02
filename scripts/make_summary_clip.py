@@ -43,14 +43,14 @@ BEAT_SOURCES = {
     "fused": [f"{GENERATED}/scenario_clip.json", "scripts/make_clips.py"],
     "scoreboard": [f"{GENERATED}/scoreboard.svg", "artifacts/benchmark/benchmark.json"],
     "recovery": [
-        f"{GENERATED}/measurement_bias_recovery.svg",
+        f"{GENERATED}/bias_recovery.svg",
         "artifacts/benchmark/benchmark.json",
     ],
     "end_card": ["docs/demos.md"],
 }
 PANEL_HEADERS = {
     "scoreboard": "Adding the camera: the scoreboard",
-    "recovery": "The one scenario where it helps",
+    "recovery": "Where bias estimation helps",
 }
 INK = (40, 40, 40)
 WHITE = (255, 255, 255)
@@ -158,6 +158,7 @@ def build_beats() -> list[dict[str, Any]]:
                 "sources": BEAT_SOURCES[beat_id],
                 "frames": [_canvas(image) for image in images],
                 "durations": durations,
+                **({"scenario": recovery["scenario"]} if beat_id == "recovery" else {}),
             }
         )
     return beats
@@ -172,6 +173,7 @@ def build_manifest(beats: list[dict[str, Any]]) -> dict[str, Any]:
         entries.append(
             {
                 "id": beat["id"],
+                **({"scenario": beat["scenario"]} if "scenario" in beat else {}),
                 "sources": beat["sources"],
                 "frame_count": len(beat["frames"]),
                 "start_ms": start,
