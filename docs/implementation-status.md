@@ -149,17 +149,13 @@ embedded, and labelled optional.
 - Summary clip: `make assets` assembles the sixty-second demo 1 clip
   (`docs-site/src/assets/generated/summary_clip.gif`, GIF only) and a manifest
   of beats, sources and timings; embedded on the landing page with alt text.
-  Evidence: `tests/unit/test_make_summary_clip.py`. The docs build and a11y
-  check have not been run on it locally (no `node_modules`).
+  Evidence: `tests/unit/test_make_summary_clip.py`.
 - README hero and feed formats: `make assets` writes two three-panel stills
   (scenarios chosen by a rule on the artifact) and `alt_text.json`; `make mp4`
   renders 9:16 and 16:9 H.264 cuts with captions and an `.srt` when `ffmpeg` is
   installed (optional). Evidence: `tests/unit/test_make_hero.py`,
   `tests/unit/test_make_mp4.py`, `tests/unit/test_alt_text.py`. The stills draw one
   seed; the numbers on them are the paired benchmark values.
-- Not yet done: GitHub Pages must be enabled (source: GitHub Actions) in the
-  repository settings; until then the deploy job cannot publish. The CI jobs
-  have not yet run on GitHub.
 - Limitations: [docs/limitations.md](limitations.md). The site adds no claims
   beyond this document and the limitations.
 - Planned: none.
