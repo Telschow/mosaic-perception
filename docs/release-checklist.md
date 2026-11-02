@@ -13,8 +13,7 @@
 >
 > For current verification, see the commands recorded in
 > [core-validity-audit.md](core-validity-audit.md) and run the CI workflow
-> locally (`uv sync --locked --all-extras`, `uv run ruff check src tests`,
-> `uv run ruff format --check src tests`, `uv run pytest`).
+> locally (`uv sync --locked --all-extras`, then `make check`).
 
 ## Verified locally
 - [x] Tests pass (14/14)

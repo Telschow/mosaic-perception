@@ -1,7 +1,10 @@
-.PHONY: install test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets mp4 docs-preview
+.PHONY: install check test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets mp4 docs-preview
 
 install:
 	uv sync --locked --all-extras
+
+# The one pre-push gate: CI and the Sandcastle merger both run this.
+check: format-check lint typecheck test provenance-check benchmark-golden-check
 
 test:
 	uv run pytest
