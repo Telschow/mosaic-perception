@@ -2,6 +2,8 @@
 
 Before merging, run `gh issue view <ID> --json labels` for each issue below. An issue labelled `wayfinder:research` is a findings report: do not merge its branch. Push that branch with `git push origin <branch>`, comment on the issue with its link, and leave the issue open.
 
+First run `git branch --show-current`. If it prints `main`, run `git switch -c sandcastle/merge-<issue ids joined by dashes>` before merging anything. Merging on `main` skips the pull request.
+
 Merge these branches into the current branch, one at a time:
 
 {{BRANCHES}}
