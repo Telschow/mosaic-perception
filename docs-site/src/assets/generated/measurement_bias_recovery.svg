@@ -16,7 +16,7 @@
   </rdf:RDF>
  </metadata>
  <title>Measurement-bias scenario: precision and MOTA by method</title>
- <desc>{"commit": "d57356666b2ffbb5d510e4491b08c0490084e2ed", "metrics": {"mota": {"fused": 0.25504950495049505, "fused_bias_estimated": 0.25478547854785477, "range_only": 0.49412541254125414, "recovered_share": -0.0011043622308117846}, "precision": {"fused": 0.5986307059836605, "fused_bias_estimated": 0.5984531885192974, "range_only": 0.7150246359866557, "recovered_share": -0.0015251436596268502}}, "scenario": "measurement_bias"}</desc>
+ <desc>{"commit": "2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d", "metrics": {"mota": {"fused": 0.25504950495049505, "fused_bias_estimated": 0.25478547854785477, "range_only": 0.49412541254125414, "recovered_share": -0.0011043622308117846}, "precision": {"fused": 0.5986307059836605, "fused_bias_estimated": 0.5984531885192974, "range_only": 0.7150246359866557, "recovered_share": -0.0015251436596268502}}, "scenario": "measurement_bias"}</desc>
  <defs>
   <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
  </defs>
@@ -368,7 +368,7 @@ L 565.2 105.06534
    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(183.811719 26.074148)">Synthetic world, development seeds 0-24</text>
   </g>
   <g id="text_28">
-   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="272.232" transform="rotate(-0 570.24 272.232)">artifact commit d57356666b2f</text>
+   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="272.232" transform="rotate(-0 570.24 272.232)">artifact commit 2d560be933f2</text>
   </g>
  </g>
  <defs>
