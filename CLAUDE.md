@@ -11,3 +11,7 @@ Default five-label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, 
 ### Domain docs
 
 Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Generated assets
+
+Commit regenerated assets only when a manifest changes (macOS bytes differ from CI). See `docs/demos.md`, "Media and deliverable locations".
