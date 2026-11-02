@@ -6,7 +6,7 @@ Prototype: `make assets` writes `docs-site/src/assets/generated/position_rmse_pa
 
 Beats 1 and 2 of demo 1: `make assets` also writes `docs-site/src/assets/generated/scenario_clip.gif` (nominal scenario, seed 1, one target; `scripts/make_clips.py`) with a manifest of the plotted data, `scenario_clip.json`, checked by `tests/unit/test_make_clips.py`.
 
-Beats 3 and 4 of demo 1: `make assets` also writes `scoreboard.svg` (precision and MOTA paired tallies, counted by the report's own rule) and `measurement_bias_recovery.svg` (how much of fusion's loss `fused_bias_estimated` recovers) to the same folder, checked by `tests/unit/test_make_assets.py` against the artifact and the report's Findings.
+Beats 3 and 4 of demo 1: `make assets` also writes `scoreboard.svg` (precision and MOTA paired tallies, counted by the report's own rule) and `bias_recovery.svg` (how much of fusion's loss `fused_bias_estimated` recovers, in the scenario `make_assets.py` picks by rule: the largest paired precision gain whose 95% interval excludes zero) to the same folder, checked by `tests/unit/test_make_assets.py` against the artifact and the report's Findings.
 
 The finished clip: `make assets` also assembles `summary_clip.gif` (under 60 s, all five beats, GIF only because ffmpeg is not a documented dependency) from the pieces above with `scripts/make_summary_clip.py`, plus `summary_clip.json`, a manifest of the beat order, source files and timings, checked by `tests/unit/test_make_summary_clip.py`. Regenerate it with `make assets` (or `uv run python scripts/make_summary_clip.py` alone). It lives at [docs-site/src/assets/generated/summary_clip.gif](../docs-site/src/assets/generated/summary_clip.gif) and is embedded, with alt text for each beat, on the landing page of the documentation site.
 
@@ -38,7 +38,7 @@ Beats:
 1. A moving target seen by the range sensor alone, with its track.
 2. A camera is added and the track looks better.
 3. The scoreboard shows the fused version is worse on precision and MOTA.
-4. The one scenario where it helps: a miscalibrated sensor (measurement bias), where the bias-estimated method recovers part of the loss.
+4. Where it helps: `sensor_disagreement_within_gate_high`, a vision sensor with a 0.020 rad bearing bias small enough to pass the association gate. The bias-estimated method recovers part of the loss (precision +0.131, 95% interval [0.100, 0.162]; MOTA +0.359, [0.281, 0.436]). In `measurement_bias`, where the bias is on the range sensor, it recovers nothing.
 5. End card: "Synthetic world. Full results and limits: link."
 
 Commands and artifacts: `uv run mosaic compare --scenario nominal --seeds 1,2,3,4,5`; `artifacts/benchmark/report.md`.

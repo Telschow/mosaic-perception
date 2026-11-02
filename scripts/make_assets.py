@@ -29,7 +29,7 @@ BENCHMARK = Path("artifacts/benchmark/benchmark.json")
 PER_SEED = BENCHMARK.with_name("per_seed.csv")
 OUTPUT = Path("docs-site/src/assets/generated/position_rmse_paired.svg")
 SCOREBOARD_OUTPUT = OUTPUT.with_name("scoreboard.svg")
-RECOVERY_OUTPUT = OUTPUT.with_name("measurement_bias_recovery.svg")
+RECOVERY_OUTPUT = OUTPUT.with_name("bias_recovery.svg")
 METRIC = "position_rmse"
 # (comparison, metric, lower is better), as tallied in the report's Findings.
 SCOREBOARD_ROWS = (
@@ -42,7 +42,6 @@ COMPARISON_LABELS = {
     "fused_vs_range_only": "fused vs range-only",
     "bias_estimated_vs_fused": "fused_bias_estimated vs fused",
 }
-RECOVERY_SCENARIO = "measurement_bias"
 RECOVERY_METRICS = ("precision", "mota")
 # (fill, text) pairs used on the panels; tests check WCAG AA (4.5:1) for each.
 TALLY_COLORS = {
@@ -107,19 +106,47 @@ def load_scoreboard_data(benchmark: Path) -> dict[str, Any]:
     return {"commit": payload["code"]["git_commit"], "rows": rows}
 
 
-def load_recovery_data(benchmark: Path) -> dict[str, Any]:
+def choose_recovery_scenario(payload: dict[str, Any]) -> str:
+    """The scenario where bias estimation helps most: the largest paired precision gain
+    of ``bias_estimated_vs_fused`` whose 95% interval excludes zero."""
+    best: tuple[float, str] | None = None
+    for scenario in payload["scenarios"]:
+        paired = scenario["paired_differences"]["bias_estimated_vs_fused"]["precision"]
+        low = paired["ci95_low"]
+        if low is not None and low > 0 and (best is None or paired["mean"] > best[0]):
+            best = (paired["mean"], scenario["scenario"]["name"])
+    if best is None:
+        raise ValueError("no scenario where bias estimation reliably improves precision")
+    return best[1]
+
+
+def recovery_verdict(values: dict[str, Any]) -> str:
+    """'recovers' only if the recovered share is positive and the paired interval excludes zero."""
+    share = values["recovered_share"]
+    low = values["paired"]["ci95_low"]
+    return (
+        "recovers"
+        if share is not None and share > 0 and low is not None and low > 0
+        else "does not recover"
+    )
+
+
+def load_recovery_data(benchmark: Path, scenario_name: str | None = None) -> dict[str, Any]:
     payload = _load_development(benchmark)
-    scenario = next(s for s in payload["scenarios"] if s["scenario"]["name"] == RECOVERY_SCENARIO)
+    name = scenario_name or choose_recovery_scenario(payload)
+    scenario = next(s for s in payload["scenarios"] if s["scenario"]["name"] == name)
     metrics: dict[str, Any] = {}
     for metric in RECOVERY_METRICS:
         values = {m: scenario["aggregate"][m][metric] for m in payload["protocol"]["methods"]}
         loss = values["range_only"] - values["fused"]
         recovered = values["fused_bias_estimated"] - values["fused"]
         values["recovered_share"] = recovered / loss if loss else None
+        paired = scenario["paired_differences"]["bias_estimated_vs_fused"][metric]
+        values["paired"] = {k: paired[k] for k in ("mean", "ci95_low", "ci95_high")}
         metrics[metric] = values
     return {
         "commit": payload["code"]["git_commit"],
-        "scenario": RECOVERY_SCENARIO,
+        "scenario": name,
         "metrics": metrics,
     }
 
@@ -150,7 +177,7 @@ def render_scoreboard(data: dict[str, Any]) -> bytes:
 
 
 def render_recovery(data: dict[str, Any]) -> bytes:
-    return _render(recovery_figure, data, "Measurement-bias scenario: precision and MOTA by method")
+    return _render(recovery_figure, data, "Bias recovery scenario: precision and MOTA by method")
 
 
 def _render(build: Any, data: dict[str, Any], title: str) -> bytes:
@@ -217,7 +244,13 @@ def recovery_figure(data: dict[str, Any]) -> Any:
             ax.bar(x, values[method], color=COLORS[method], width=0.6)
             ax.text(x, values[method] + 0.01, f"{values[method]:.3f}", ha="center", fontsize=8)
         share = values["recovered_share"]
-        note = "no gap" if share is None else f"recovered {share * 100:.1f}% of fused's loss"
+        paired = values["paired"]
+        note = (
+            "no gap"
+            if share is None
+            else f"{recovery_verdict(values)}: {share * 100:.1f}% of fused's loss"
+            f"\npaired gain {paired['mean']:+.3f} [{paired['ci95_low']:+.3f}, {paired['ci95_high']:+.3f}]"
+        )
         ax.set_title(f"{metric}\n{note}", fontsize=9)
         ax.set_xticks(range(3), ["range-only", "fused", "fused_bias_\nestimated"], fontsize=8)
         ax.set_ylim(0, 1)
