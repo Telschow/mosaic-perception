@@ -32,7 +32,7 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
       - name: Install locked dependencies
         run: uv sync --locked --all-extras --python ${{ matrix.python-version }}
-      - name: Check (make check: format, lint, types, tests, provenance, golden benchmark)
+      - name: "Check (make check: format, lint, types, tests, provenance, golden benchmark)"
         run: make check
       - name: CLI smoke test (run)
         run: uv run --python ${{ matrix.python-version }} mosaic run --scenario nominal --seed 1 --duration 0.5 --num-objects 1
