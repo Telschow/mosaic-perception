@@ -265,7 +265,7 @@ been superseded; they are not preserved as a baseline for comparison.**
   replayed, in the default mode; fusion of observations older than one epoch
   is therefore not measured. Within one epoch the tracker applies
   observations to the delivery-time state (an approximation of scale
-  ~speed × (processing_time − capture_time)), with an opt-in one-step-lag retrodiction mode; see
+  ~speed × (processing_time - capture_time)), with an opt-in one-step-lag retrodiction mode; see
   [docs/limitations.md](docs/limitations.md).
 - Association is gated Hungarian within each measurement group, not MHT/JPDA.
 - Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. The generator and code are shared with the development seeds, so this is not a hidden test set.
