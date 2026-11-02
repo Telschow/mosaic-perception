@@ -23,6 +23,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import _draw  # noqa: E402
 import make_assets  # noqa: E402
 import make_clips  # noqa: E402
 
@@ -66,27 +67,6 @@ def read_captions(demos: Path = DEMOS) -> tuple[str, str]:
     return headline.group(1), subline.group(1)
 
 
-def _font(size: int, bold: bool = False):
-    import matplotlib
-    from PIL import ImageFont
-
-    name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
-    return ImageFont.truetype(str(Path(matplotlib.get_data_path()) / "fonts" / "ttf" / name), size)
-
-
-def _wrap(draw: Any, text: str, font: Any, width: int) -> list[str]:
-    lines: list[str] = []
-    line = ""
-    for word in text.split():
-        trial = f"{line} {word}".strip()
-        if line and draw.textlength(trial, font=font) > width:
-            lines.append(line)
-            line = word
-        else:
-            line = trial
-    return [*lines, line]
-
-
 def _canvas(panel: Any) -> Any:
     """Place a 640x480 panel above the caption band: headline, subline, label."""
     from PIL import Image, ImageDraw
@@ -96,11 +76,11 @@ def _canvas(panel: Any) -> Any:
     image.paste(panel, (0, 0))
     draw = ImageDraw.Draw(image)
     draw.line((0, PANEL_SIZE[1], SIZE[0], PANEL_SIZE[1]), fill=(200, 200, 200), width=1)
-    draw.text((10, 488), headline, fill=INK, font=_font(16, bold=True))
-    small = _font(13)
-    for row, line in enumerate(_wrap(draw, subline, small, SIZE[0] - 20)[:3]):
+    draw.text((10, 488), headline, fill=INK, font=_draw.font(16, bold=True))
+    small = _draw.font(13)
+    for row, line in enumerate(_draw.wrap(draw, subline, small, SIZE[0] - 20)[:3]):
         draw.text((10, 514 + 19 * row), line, fill=INK, font=small)
-    draw.text((10, FOOTER_BOX[1] + 4), LABEL, fill=INK, font=_font(15, bold=True))
+    draw.text((10, FOOTER_BOX[1] + 4), LABEL, fill=INK, font=_draw.font(15, bold=True))
     return image
 
 
@@ -111,7 +91,7 @@ def _panel_frame(build: Any, data: dict[str, Any], header: str) -> Any:
     width = PANEL_SIZE[0]
     png = png.resize((width, round(png.height * width / png.width)), Image.Resampling.LANCZOS)
     panel = Image.new("RGB", PANEL_SIZE, WHITE)
-    ImageDraw.Draw(panel).text((10, 8), header, fill=INK, font=_font(18))
+    ImageDraw.Draw(panel).text((10, 8), header, fill=INK, font=_draw.font(18))
     panel.paste(png, (0, 40 + (PANEL_SIZE[1] - 40 - png.height) // 2))
     return panel
 
@@ -122,7 +102,7 @@ def _end_card() -> Any:
     panel = Image.new("RGB", PANEL_SIZE, WHITE)
     draw = ImageDraw.Draw(panel)
     for y, (text, size) in zip((200, 250), ((END_CARD, 20), (URL, 17)), strict=True):
-        font = _font(size, bold=y == 200)
+        font = _draw.font(size, bold=y == 200)
         x = (PANEL_SIZE[0] - draw.textlength(text, font=font)) / 2
         draw.text((x, y), text, fill=INK, font=font)
     return panel

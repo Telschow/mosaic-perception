@@ -128,3 +128,26 @@ def test_burned_in_facts_are_the_artifacts_numbers():
     assert recovery["scenario"] in facts["recovery"][0]
     assert f"{precision['recovered_share']:.0%}" in facts["recovery"][1]
     assert facts["range_only"] == facts["fused"] == facts["end_card"] == []
+
+
+def test_the_manifest_labels_the_seed_group_and_the_footer_says_it():
+    mm = _load()
+    plan = mm.build_plan(_summary_manifest(), commit="abcdef123456789")
+    assert plan["seed_label"] == "development seeds 0-24"
+    assert mm.build_manifest(plan)["seed_label"] == "development seeds 0-24"
+
+
+def test_footer_and_captions_fit_inside_both_frames():
+    from PIL import Image, ImageDraw
+
+    mm = _load()
+    plan = mm.build_plan(_summary_manifest(), commit="abcdef123456789")
+    for size in mm.FORMATS.values():
+        draw = ImageDraw.Draw(Image.new("RGB", size))
+        for line in (
+            mm.LABEL.upper(),
+            plan["seed_label"],
+            f"artifact commit {plan['commit'][:12]}",
+        ):
+            font = mm._draw.font(mm.LABEL_PX, bold=True)
+            assert draw.textlength(line, font=font) <= size[0] - 80, (size, line)
