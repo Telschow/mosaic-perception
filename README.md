@@ -6,7 +6,7 @@ Mosaic is a deterministic synthetic workbench for investigating a narrow but imp
 
 It compares a **range-bearing-sensor-only baseline** (method identifier `range_only`, no vision at all) with a **fused** method that adds vision-like bearing observations, and a third method, **fused_bias_estimated**, that also estimates a constant vision bearing bias and removes it before gating and updating. All methods run on the same worlds and the same sensor random streams, so the comparisons are paired rather than comparisons of unrelated runs.
 
-**All results in this repository are synthetic and use development seeds (0–24) only.** The reserved held-out range 25–49 has not been run, and no held-out claim is made.
+**All results in this repository are synthetic.** The development benchmark uses seeds 0–24. The reserved seeds 25–49 were run once at `8baa778`. The numbers are in [the held-out report](artifacts/held-out/report.md), not repeated here.
 
 ### Status
 
@@ -138,10 +138,9 @@ Full definitions, matching rules and denominators are in
 ## Current development benchmark
 
 The checked-in benchmark is generated with `--scenario all --seeds 0-24
---duration 10.0`, i.e. **all 25 development seeds and no held-out seed**. The reserved held-out range
-25–49 has **not** been run, and no held-out claim is made. When it is run, it
-will only be as blind as the freeze discipline around it: the reserved seeds
-come from the same generator and code, so it is not a hidden test set.
+--duration 10.0`, i.e. **all 25 development seeds and no held-out seed**. Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. It is only as blind as
+the freeze discipline around it: the reserved seeds come from the same
+generator and code, so it is not a hidden test set.
 
 See [artifacts/benchmark/report.md](artifacts/benchmark/report.md) for the
 generated tables and [artifacts/benchmark/benchmark.json](artifacts/benchmark/benchmark.json)
@@ -268,7 +267,7 @@ been superseded; they are not preserved as a baseline for comparison.**
   ~speed × age), with an opt-in one-step-lag retrodiction mode; see
   [docs/limitations.md](docs/limitations.md).
 - Association is gated Hungarian within each measurement group, not MHT/JPDA.
-- Only development seeds have been run; no held-out evaluation is claimed.
+- Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. The generator and code are shared with the development seeds, so this is not a hidden test set.
 - Reported covariance and empirical coverage can disagree; calibration is
   measured, not assumed.
 

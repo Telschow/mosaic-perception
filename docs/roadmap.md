@@ -42,8 +42,7 @@
 
 ## Next (not done here)
 
-- [ ] Run the reserved held-out seeds 25–49 once, after freezing code and
-      protocol, and report them separately
+- [x] Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`.
 - [ ] Add out-of-sequence historical replay and measure stale-data fusion
 - [ ] Investigate why fused precision and false-track counts are worse
 - [ ] Improve calibration under reported-covariance miscalibration
