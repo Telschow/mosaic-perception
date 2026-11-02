@@ -17,3 +17,22 @@ updates:
     groups:
       minor-and-patch:
         update-types: ["minor", "patch"]
+  - package-ecosystem: "npm"
+    directory: "/docs-site"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      # Astro, Starlight and its plugins declare peer ranges on each other, so a lone bump fails `npm ci`.
+      astro:
+        patterns: ["astro", "@astrojs/*", "starlight-*"]
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]

@@ -43,8 +43,9 @@
   },
   {
    "id": "recovery",
+   "scenario": "sensor_disagreement_within_gate_high",
    "sources": [
-    "docs-site/src/assets/generated/measurement_bias_recovery.svg",
+    "docs-site/src/assets/generated/bias_recovery.svg",
     "artifacts/benchmark/benchmark.json"
    ],
    "frame_count": 1,

@@ -93,3 +93,10 @@ def test_render_is_byte_identical():
     msc = _load()
     beats = msc.build_beats()
     assert msc.render_gif(beats) == msc.render_gif(msc.build_beats())
+
+
+def test_recovery_beat_names_the_scenario_the_docs_and_alt_text_name():
+    manifest = json.loads((ROOT / "docs-site/src/assets/generated/summary_clip.json").read_text())
+    scenario = next(b for b in manifest["beats"] if b["id"] == "recovery")["scenario"]
+    assert scenario in (ROOT / "docs/demos.md").read_text()
+    assert scenario in (ROOT / "docs-site/src/content/docs/index.mdx").read_text()

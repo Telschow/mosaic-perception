@@ -47,5 +47,4 @@ uv run mosaic benchmark --scenario all --seeds 0-24 --duration 10.0
 ```
 
 In the Streamlit app, scenarios are selected from the sidebar. The checked-in
-benchmark covers all 16 presets with all development seeds 0–24; held-out seeds
-25–49 are reserved and were not run.
+benchmark covers all 16 presets with all development seeds 0–24; held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`.

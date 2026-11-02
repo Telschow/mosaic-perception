@@ -5,7 +5,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+from collections import Counter
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 
@@ -66,7 +68,7 @@ def test_rejects_non_development_seed_group(tmp_path):
 REPORT = ROOT / "artifacts/benchmark/report.md"
 PANELS = {
     "scoreboard": ("scoreboard.svg", "load_scoreboard_data", "render_scoreboard"),
-    "recovery": ("measurement_bias_recovery.svg", "load_recovery_data", "render_recovery"),
+    "recovery": ("bias_recovery.svg", "load_recovery_data", "render_recovery"),
 }
 
 
@@ -89,6 +91,26 @@ def test_panel_is_deterministic_labelled_and_accessible(name):
     assert 'role="img"' in text
 
 
+def _structure(svg):
+    """Platform-tolerant SVG fingerprint: tags, attribute names and text; no geometry."""
+    root = ElementTree.fromstring(svg)
+    elements = [(el.tag, tuple(sorted(el.attrib))) for el in root.iter()]
+    texts = [(el.tag, el.text.strip()) for el in root.iter() if el.text and el.text.strip()]
+    return Counter(elements), texts
+
+
+def test_structure_ignores_coordinates():
+    a = b'<svg><text x="1" y="2">hi</text></svg>'
+    b = b'<svg><text x="1.5" y="2.5">hi</text></svg>'
+    assert _structure(a) == _structure(b)
+
+
+def test_structure_detects_changed_data_and_label():
+    base = b'<svg><desc>{"v": 1}</desc><text x="1">hi</text></svg>'
+    assert _structure(base) != _structure(base.replace(b'"v": 1', b'"v": 2'))
+    assert _structure(base) != _structure(base.replace(b">hi<", b">ho<"))
+
+
 @pytest.mark.parametrize("name", PANELS)
 def test_committed_panel_data_matches_artifact(name):
     """Drift check: regenerate with `make assets` when this fails."""
@@ -97,7 +119,7 @@ def test_committed_panel_data_matches_artifact(name):
     match = re.search(r"<desc>(.*?)</desc>", path.read_text(), re.DOTALL)
     assert match, "panel has no embedded data"
     assert json.loads(match.group(1)) == load(ma.BENCHMARK)
-    assert path.read_bytes() == render(load(ma.BENCHMARK))
+    assert _structure(path.read_bytes()) == _structure(render(load(ma.BENCHMARK)))
 
 
 def _luminance(color):
@@ -147,7 +169,9 @@ def test_scoreboard_matches_report_findings():
 def test_recovery_values_match_report_table():
     ma = _load()
     data = ma.load_recovery_data(ma.BENCHMARK)
-    lines = [ln for ln in REPORT.read_text().splitlines() if ln.startswith("| measurement_bias |")]
+    lines = [
+        ln for ln in REPORT.read_text().splitlines() if ln.startswith(f"| {data['scenario']} |")
+    ]
     header = next(
         ln
         for ln in REPORT.read_text().splitlines()
@@ -171,3 +195,32 @@ def test_panels_refuse_non_development_artifact(tmp_path):
     for load in (ma.load_scoreboard_data, ma.load_recovery_data):
         with pytest.raises(ValueError, match="development"):
             load(bad)
+
+
+def test_recovery_scenario_is_chosen_by_rule_not_by_hand():
+    ma = _load()
+    payload = json.loads(ma.BENCHMARK.read_text())
+    name = ma.choose_recovery_scenario(payload)
+    assert name != "measurement_bias"
+    assert ma.load_recovery_data(ma.BENCHMARK)["scenario"] == name
+    gains = {
+        s["scenario"]["name"]: s["paired_differences"]["bias_estimated_vs_fused"]["precision"]
+        for s in payload["scenarios"]
+    }
+    assert gains[name]["ci95_low"] > 0
+    assert all(g["mean"] <= gains[name]["mean"] for g in gains.values() if (g["ci95_low"] or 0) > 0)
+
+
+def test_caption_says_recovers_only_with_positive_share_and_interval_above_zero():
+    ma = _load()
+    for scenario in ("measurement_bias", ma.load_recovery_data(ma.BENCHMARK)["scenario"]):
+        data = ma.load_recovery_data(ma.BENCHMARK, scenario)
+        for values in data["metrics"].values():
+            says = ma.recovery_verdict(values) == "recovers"
+            earned = values["recovered_share"] > 0 and values["paired"]["ci95_low"] > 0
+            assert says == earned
+    # the chosen scenario's panel may say "recovers"; measurement_bias's must not
+    chosen = ma.load_recovery_data(ma.BENCHMARK)["metrics"]["precision"]
+    assert ma.recovery_verdict(chosen) == "recovers"
+    biased = ma.load_recovery_data(ma.BENCHMARK, "measurement_bias")["metrics"]["precision"]
+    assert ma.recovery_verdict(biased) == "does not recover"

@@ -116,7 +116,7 @@ class accuracy, paired statistics across seeds.
 - Limitations: [docs/metrics.md](metrics.md) Reporting rules;
   [docs/limitations.md](limitations.md) — Evaluation; development seeds only
   unless an artifact states otherwise.
-- Planned: run the held-out evaluation once on frozen code → #7.
+- Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`.
 
 ### Reporting and CLI — **Implemented**
 
@@ -182,7 +182,13 @@ provenance and golden-benchmark checks. Least-privilege permissions, all
 actions pinned to commit SHAs. An advisory `pip-audit` job reports known
 vulnerabilities in the locked dependencies without failing the build
 (`continue-on-error: true`), and Dependabot (`.github/dependabot.yml`, `uv` and
-`github-actions`, weekly, grouped minor/patch) proposes updates.
+`github-actions`, `npm` for `/` and `/docs-site`, weekly, grouped minor/patch, Astro packages in one group)
+proposes updates. `docs.yml` runs an advisory `npm audit --omit=dev`
+(`continue-on-error: true`).
+
+**Docs-site advisories.** `npm audit --omit=dev` reported 0 vulnerabilities after
+the move to Astro 7 (2026-11-02). Dependabot groups `astro`, `@astrojs/*` and
+`starlight-*` into one PR, because their peer ranges must move together.
 
 - Evidence: `.github/workflows/ci.yml` (uv pinned to 0.13.6): jobs `test`, `secret-scan`,
   `artifact-checks`, `dependency-audit` (advisory, non-blocking). CI invokes the
@@ -200,7 +206,6 @@ vulnerabilities in the locked dependencies without failing the build
 
 | Issue | Subsystem | What it adds |
 |---|---|---|
-| #7 | Evaluation | The one held-out evaluation run on frozen code (blocked by the remaining evaluation work) |
 
 Open issues are not implemented work. The live list is the issue tracker
 (`gh issue list --state open`); the table above is the curated subset that

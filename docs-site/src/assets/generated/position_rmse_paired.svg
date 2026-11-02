@@ -15,7 +15,7 @@
    </cc:Work>
   </rdf:RDF>
  </metadata>
- <desc>{"commit": "d57356666b2ffbb5d510e4491b08c0490084e2ed", "methods": ["range_only", "fused", "fused_bias_estimated"], "metric": "position_rmse", "scenarios": [{"scenario": "crossing_targets", "values": {"fused": [0.1596444596321366, 0.0897063092395238, 0.3056220083990757], "fused_bias_estimated": [0.1636445707260242, 0.09192446649086115, 0.27523635746789693], "range_only": [0.15059974163108986, 0.11187035882422784, 0.23991294407688538]}}, {"scenario": "delivery_delay", "values": {"fused": [0.3286609778052251, 0.23523376712001842, 0.45356146922156826], "fused_bias_estimated": [0.33020264364495744, 0.22652025095957404, 0.4434238078020682], "range_only": [0.30839698170840885, 0.21812125954108325, 0.4283151897745294]}}, {"scenario": "delivery_delay_retrodiction", "values": {"fused": [0.3352585965555118, 0.19482832408046177, 0.4892862888894682], "fused_bias_estimated": [0.3456822939405344, 0.18569895604047754, 0.5199196667862154], "range_only": [0.28256454022290073, 0.18599158129115737, 0.3950387995760502]}}, {"scenario": "dense_clutter", "values": {"fused": [0.2852952028643771, 0.15041583530785174, 0.5014752285063243], "fused_bias_estimated": [0.27088663862830287, 0.15521726950707584, 0.4676835090579698], "range_only": [0.24197507308620547, 0.15311591790684986, 0.3221417151844846]}}, {"scenario": "false_observations", "values": {"fused": [0.24650029736961312, 0.14916382804261027, 0.3686714665586447], "fused_bias_estimated": [0.26032238291942605, 0.1528120364038916, 0.3993421149938306], "range_only": [0.22952912951986926, 0.1639639618720935, 0.35398750586837746]}}, {"scenario": "measurement_bias", "values": {"fused": [1.6198912331668407, 1.587575707180496, 1.6898554174357596], "fused_bias_estimated": [1.6220819708447154, 1.5678186563877161, 1.6903614042873163], "range_only": [1.640930647171726, 1.5894376250373172, 1.7046927707127748]}}, {"scenario": "moving_observer", "values": {"fused": [0.2615092958616807, 0.11235778735751598, 0.4769191253053728], "fused_bias_estimated": [0.25723617590071396, 0.15522268425702698, 0.49207409800061], "range_only": [0.24222674364289637, 0.1503518785263228, 0.4706343778081689]}}, {"scenario": "nominal", "values": {"fused": [0.2534963252193318, 0.11688895297179616, 0.4847872949357893], "fused_bias_estimated": [0.2492325502003815, 0.13499773484108832, 0.38298186664546163], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "range_dropout", "values": {"fused": [0.26771058633527733, 0.1807207909809743, 0.4934110310647191], "fused_bias_estimated": [0.2772984133236099, 0.18053343221892432, 0.5156065392715986], "range_only": [0.2526832658838518, 0.1728905924763831, 0.3500635719242311]}}, {"scenario": "sensor_disagreement_large_bias", "values": {"fused": [0.2393640610645891, 0.15156555820884296, 0.49644123856443845], "fused_bias_estimated": [0.24351049845416448, 0.15156555820884296, 0.4952104247929934], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "sensor_disagreement_within_gate", "values": {"fused": [0.3809909864199619, 0.21832007882854293, 0.6143548114463844], "fused_bias_estimated": [0.2682411489510646, 0.11693143571401686, 0.38870574639441674], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "sensor_disagreement_within_gate_high", "values": {"fused": [0.4669453292496774, 0.2994149328267307, 0.691936101487141], "fused_bias_estimated": [0.27468099887103414, 0.16654341062046105, 0.5003745092854713], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "sensor_disagreement_within_gate_low", "values": {"fused": [0.3348294660204165, 0.21301580961292138, 0.4776602295494877], "fused_bias_estimated": [0.26154991026978125, 0.13472972846625567, 0.44252485615968473], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "stale_rejection", "values": {"fused": null, "fused_bias_estimated": null, "range_only": null}}, {"scenario": "uncertainty_miscalibration", "values": {"fused": [0.5248072305506147, 0.38466337110700943, 0.6718252158035206], "fused_bias_estimated": [0.5406984879771776, 0.4217426915051215, 0.6494990414742079], "range_only": [0.4601860523911223, 0.3495705446857959, 0.5910162698812763]}}, {"scenario": "vision_dropout", "values": {"fused": [0.24136496952331515, 0.13948616796454233, 0.4624355682238434], "fused_bias_estimated": [0.2563548614847567, 0.14998658891726693, 0.4803549272151287], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}]}</desc>
+ <desc>{"commit": "2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d", "methods": ["range_only", "fused", "fused_bias_estimated"], "metric": "position_rmse", "scenarios": [{"scenario": "crossing_targets", "values": {"fused": [0.1596444596321366, 0.0897063092395238, 0.3056220083990757], "fused_bias_estimated": [0.1636445707260242, 0.09192446649086115, 0.27523635746789693], "range_only": [0.15059974163108986, 0.11187035882422784, 0.23991294407688538]}}, {"scenario": "delivery_delay", "values": {"fused": [0.3154970556965375, 0.21084016147287368, 0.4537094684943058], "fused_bias_estimated": [0.3232533877090738, 0.20995706316372534, 0.4321417917562251], "range_only": [0.3202078575043824, 0.2184964226921851, 0.4374444142291616]}}, {"scenario": "delivery_delay_retrodiction", "values": {"fused": [0.327589874020425, 0.19860705433503148, 0.4416518496122402], "fused_bias_estimated": [0.32179142217590667, 0.19650388987428774, 0.4583637945350751], "range_only": [0.27737311052768193, 0.20828598849360738, 0.3799048412122435]}}, {"scenario": "dense_clutter", "values": {"fused": [0.2852952028643771, 0.15041583530785174, 0.5014752285063243], "fused_bias_estimated": [0.27088663862830287, 0.15521726950707584, 0.4676835090579698], "range_only": [0.24197507308620547, 0.15311591790684986, 0.3221417151844846]}}, {"scenario": "false_observations", "values": {"fused": [0.24650029736961312, 0.14916382804261027, 0.3686714665586447], "fused_bias_estimated": [0.26032238291942605, 0.1528120364038916, 0.3993421149938306], "range_only": [0.22952912951986926, 0.1639639618720935, 0.35398750586837746]}}, {"scenario": "measurement_bias", "values": {"fused": [1.6198912331668407, 1.587575707180496, 1.6898554174357596], "fused_bias_estimated": [1.6220819708447154, 1.5678186563877161, 1.6903614042873163], "range_only": [1.640930647171726, 1.5894376250373172, 1.7046927707127748]}}, {"scenario": "moving_observer", "values": {"fused": [0.2615092958616807, 0.11235778735751598, 0.4769191253053728], "fused_bias_estimated": [0.25723617590071396, 0.15522268425702698, 0.49207409800061], "range_only": [0.24222674364289637, 0.1503518785263228, 0.4706343778081689]}}, {"scenario": "nominal", "values": {"fused": [0.2534963252193318, 0.11688895297179616, 0.4847872949357893], "fused_bias_estimated": [0.2492325502003815, 0.13499773484108832, 0.38298186664546163], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "range_dropout", "values": {"fused": [0.26771058633527733, 0.1807207909809743, 0.4934110310647191], "fused_bias_estimated": [0.2772984133236099, 0.18053343221892432, 0.5156065392715986], "range_only": [0.2526832658838518, 0.1728905924763831, 0.3500635719242311]}}, {"scenario": "sensor_disagreement_large_bias", "values": {"fused": [0.2393640610645891, 0.15156555820884296, 0.49644123856443845], "fused_bias_estimated": [0.24351049845416448, 0.15156555820884296, 0.4952104247929934], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "sensor_disagreement_within_gate", "values": {"fused": [0.3809909864199619, 0.21832007882854293, 0.6143548114463844], "fused_bias_estimated": [0.2682411489510646, 0.11693143571401686, 0.38870574639441674], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "sensor_disagreement_within_gate_high", "values": {"fused": [0.4669453292496774, 0.2994149328267307, 0.691936101487141], "fused_bias_estimated": [0.27468099887103414, 0.16654341062046105, 0.5003745092854713], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "sensor_disagreement_within_gate_low", "values": {"fused": [0.3348294660204165, 0.21301580961292138, 0.4776602295494877], "fused_bias_estimated": [0.26154991026978125, 0.13472972846625567, 0.44252485615968473], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}, {"scenario": "stale_rejection", "values": {"fused": null, "fused_bias_estimated": null, "range_only": null}}, {"scenario": "uncertainty_miscalibration", "values": {"fused": [0.5248072305506147, 0.38466337110700943, 0.6718252158035206], "fused_bias_estimated": [0.5406984879771776, 0.4217426915051215, 0.6494990414742079], "range_only": [0.4601860523911223, 0.3495705446857959, 0.5910162698812763]}}, {"scenario": "vision_dropout", "values": {"fused": [0.24136496952331515, 0.13948616796454233, 0.4624355682238434], "fused_bias_estimated": [0.2563548614847567, 0.14998658891726693, 0.4803549272151287], "range_only": [0.23346408934176086, 0.15256539012783737, 0.4436951227133243]}}]}</desc>
  <defs>
   <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
  </defs>
@@ -404,63 +404,63 @@ z
     </g>
    </g>
    <g id="line2d_39">
-    <path d="M 223.112708 92.603765 
-L 268.990151 92.603765 
+    <path d="M 223.194592 92.603765 
+L 270.982718 92.603765 
 " clip-path="url(#p1907c3d98f)" style="fill: none; stroke: #4d4d4d; stroke-opacity: 0.35; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="line2d_40">
     <g clip-path="url(#p1907c3d98f)">
-     <use xlink:href="#m2cdf486e19" x="242.816508" y="92.603765" style="fill: #4d4d4d; stroke: #4d4d4d"/>
+     <use xlink:href="#m2cdf486e19" x="245.394379" y="92.603765" style="fill: #4d4d4d; stroke: #4d4d4d"/>
     </g>
    </g>
    <g id="line2d_41">
-    <path d="M 226.847726 99.377393 
-L 274.500466 99.377393 
+    <path d="M 221.523517 99.377393 
+L 274.532768 99.377393 
 " clip-path="url(#p1907c3d98f)" style="fill: none; stroke: #1b6ca8; stroke-opacity: 0.35; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="line2d_42">
     <g clip-path="url(#p1907c3d98f)">
-     <use xlink:href="#m30791d785b" x="247.239378" y="99.377393" style="fill: #1b6ca8; stroke: #1b6ca8"/>
+     <use xlink:href="#m30791d785b" x="244.366188" y="99.377393" style="fill: #1b6ca8; stroke: #1b6ca8"/>
     </g>
    </g>
    <g id="line2d_43">
-    <path d="M 224.945892 106.15102 
-L 272.287795 106.15102 
+    <path d="M 221.33077 106.15102 
+L 269.825354 106.15102 
 " clip-path="url(#p1907c3d98f)" style="fill: none; stroke: #d9822b; stroke-opacity: 0.35; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="line2d_44">
     <g clip-path="url(#p1907c3d98f)">
-     <use xlink:href="#m42a93da4f9" x="247.575866" y="106.15102" style="fill: #d9822b; stroke: #d9822b"/>
+     <use xlink:href="#m42a93da4f9" x="246.059104" y="106.15102" style="fill: #d9822b; stroke: #d9822b"/>
     </g>
    </g>
    <g id="line2d_45">
-    <path d="M 216.100005 123.392981 
-L 261.727164 123.392981 
+    <path d="M 220.966037 123.392981 
+L 258.423989 123.392981 
 " clip-path="url(#p1907c3d98f)" style="fill: none; stroke: #4d4d4d; stroke-opacity: 0.35; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="line2d_46">
     <g clip-path="url(#p1907c3d98f)">
-     <use xlink:href="#m2cdf486e19" x="237.178256" y="123.392981" style="fill: #4d4d4d; stroke: #4d4d4d"/>
+     <use xlink:href="#m2cdf486e19" x="236.045162" y="123.392981" style="fill: #4d4d4d; stroke: #4d4d4d"/>
     </g>
    </g>
    <g id="line2d_47">
-    <path d="M 218.028734 130.166609 
-L 282.297853 130.166609 
+    <path d="M 218.853489 130.166609 
+L 271.901043 130.166609 
 " clip-path="url(#p1907c3d98f)" style="fill: none; stroke: #1b6ca8; stroke-opacity: 0.35; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="line2d_48">
     <g clip-path="url(#p1907c3d98f)">
-     <use xlink:href="#m30791d785b" x="248.67939" y="130.166609" style="fill: #1b6ca8; stroke: #1b6ca8"/>
+     <use xlink:href="#m30791d785b" x="247.005596" y="130.166609" style="fill: #1b6ca8; stroke: #1b6ca8"/>
     </g>
    </g>
    <g id="line2d_49">
-    <path d="M 216.036136 136.940237 
-L 288.983969 136.940237 
+    <path d="M 218.394448 136.940237 
+L 275.548633 136.940237 
 " clip-path="url(#p1907c3d98f)" style="fill: none; stroke: #d9822b; stroke-opacity: 0.35; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="line2d_50">
     <g clip-path="url(#p1907c3d98f)">
-     <use xlink:href="#m42a93da4f9" x="250.954492" y="136.940237" style="fill: #d9822b; stroke: #d9822b"/>
+     <use xlink:href="#m42a93da4f9" x="245.740012" y="136.940237" style="fill: #d9822b; stroke: #d9822b"/>
     </g>
    </g>
    <g id="line2d_51">
@@ -933,7 +933,7 @@ z
    </g>
   </g>
   <g id="text_31">
-   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="610.3728" transform="rotate(-0 570.24 610.3728)">artifact commit d57356666b2f</text>
+   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="610.3728" transform="rotate(-0 570.24 610.3728)">artifact commit 2d560be933f2</text>
   </g>
  </g>
  <defs>

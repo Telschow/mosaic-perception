@@ -69,13 +69,13 @@
 
 ## Timing and delivery
 
-- Observations older than one tracker epoch (`dt + 1e-6`) are explicitly
-  rejected and counted; they are not replayed against historical state, in
-  either update mode. Fusion of observations older than one epoch is therefore
-  not measured.
+- Observations whose latency (delivery time minus capture time) exceeds one
+  tracker epoch (`dt + 1e-6`) are explicitly rejected and counted; they are not
+  replayed against historical state, in either update mode. Fusion of
+  observations older than one epoch is therefore not measured.
 - **Delayed-observation state alignment (bounded-staleness approximation):**
-  Observations whose capture time is at most one epoch in the past are admitted
-  to the tracker. When an observation is processed, the tracker has already
+  Observations whose latency is at most one epoch are admitted to the tracker.
+  When an observation is processed, the tracker has already
   predicted all tracks forward to the current processing time (the delivery
   epoch). The measurement geometry and observer pose refer to the observation's
   **capture time**, but the target state has been propagated to **delivery time**.
@@ -125,9 +125,7 @@
 
 ## Evaluation
 
-- The checked-in benchmark uses **development seeds 0–24 only**. Seeds 25–49 are
-  reserved and have not been run, so no held-out or generalization claim is
-  made.
+- The checked-in benchmark uses **development seeds 0–24 only**. Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. No generalization claim is made.
 - Position RMSE also depends on the matcher: the continuity preference can keep an
   object paired with a farther duplicate track, which raises RMSE, while a
   distance-only matcher picks the nearest track and flatters accuracy when

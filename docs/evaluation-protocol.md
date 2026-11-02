@@ -21,8 +21,8 @@ quality or uncertainty calibration, and when it does not.
 ## Seeds
 
 - **Development seeds**: 0–24. The checked-in benchmark uses **all 25** (0–24).
-- **Reserved held-out seeds**: 25–49. They have **not** been run for this
-  repair. No held-out result or generalization claim is made.
+- **Reserved held-out seeds**: 25–49. Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`.
+  No generalization claim is made.
 - The benchmark artifact records its seed group and the exact seed list.
 - The reserved seeds come from the same generator, scenarios and code as the
   development seeds. A held-out run is therefore only as blind as the freeze

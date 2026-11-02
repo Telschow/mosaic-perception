@@ -2,8 +2,8 @@ name: Docs site
 
 on:
   pull_request:
+    # No path filter: `build` is a required check, so it must report on every pull request.
     branches: [main]
-    paths: ["docs/**", "docs-site/**", "scripts/sync_docs_site.py", "CITATION.cff", ".github/workflows/docs.yml"]
   push:
     branches: [main]
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
@@ -28,6 +28,10 @@ jobs:
       - name: Install dependencies
         working-directory: docs-site
         run: npm ci
+      - name: npm audit (advisory, does not fail the build)
+        working-directory: docs-site
+        continue-on-error: true
+        run: npm audit --omit=dev
       - name: Build site (fails on any broken internal link)
         working-directory: docs-site
         run: npm run build

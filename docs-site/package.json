@@ -10,12 +10,12 @@
     "a11y": "pa11y-ci --config .pa11yci.json"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.34.0",
-    "astro": "^5.7.0",
-    "starlight-links-validator": "^0.16.0"
+    "@astrojs/starlight": "^0.42.8",
+    "astro": "^7.4.4",
+    "starlight-links-validator": "^0.27.0"
   },
   "devDependencies": {
-    "pa11y-ci": "^3.1.0",
+    "pa11y-ci": "^5.0.0",
     "wait-on": "^9.5.1"
   }
 }
