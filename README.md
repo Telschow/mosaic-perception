@@ -6,7 +6,7 @@ Mosaic is a deterministic synthetic workbench for investigating a narrow but imp
 
 It compares a **range-bearing-sensor-only baseline** (method identifier `range_only`, no vision at all) with a **fused** method that adds vision-like bearing observations, and a third method, **fused_bias_estimated**, that also estimates a constant vision bearing bias and removes it before gating and updating. All methods run on the same worlds and the same sensor random streams, so the comparisons are paired rather than comparisons of unrelated runs.
 
-**All results in this repository are synthetic.** The development benchmark uses seeds 0–24. Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. In that run, fusion had lower MOTA, higher GOSPA and lower precision than range-only in all 15 scenarios; see [the held-out report](artifacts/held-out/report.md).
+**All results in this repository are synthetic.** The development benchmark uses seeds 0–24. The reserved seeds 25–49 were run once at `8baa778`. The numbers are in [the held-out report](artifacts/held-out/report.md), not repeated here.
 
 ### Status
 
