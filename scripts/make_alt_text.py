@@ -44,6 +44,8 @@ def build_alt_text() -> dict[str, str]:
     share = recovery["metrics"]["precision"]["recovered_share"]
     clip = _manifest("scenario_clip")
     hero = _manifest("hero")
+    video = _manifest("hook_video")
+    shown = next(b for b in video["beats"] if b["id"] == "numbers")["real_of_100"]
     return {
         "position_rmse_paired": (
             f"Dot-and-interval chart of the paired change in position error, fused against "
@@ -72,6 +74,13 @@ def build_alt_text() -> dict[str, str]:
             f"MOTA in most scenarios. Four: in the {recovery['scenario']} scenario, where the camera "
             f"has a small bearing bias, estimating the bias {verdict} part of fusion's loss. Five: "
             "an end card reading Synthetic world, full results and limits, with this site's address."
+        ),
+        "hook_video_poster": (
+            f"Frame from a {video['total_s']:.0f}-second explainer video of a synthetic world "
+            f"({video['scenario']}, {video['seed_label']}): one real object follows a dashed path, "
+            "and with a camera added the tracker draws many extra ghost lines away from it. Of "
+            f"every 100 tracks reported, {shown['range_only']} were the real object with one sensor "
+            f"and {shown['fused']} with the camera added."
         ),
         **{f"hero_{key}": still["alt"] for key, still in hero["stills"].items()},
     }

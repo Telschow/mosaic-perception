@@ -4,6 +4,8 @@ description: A reproducible synthetic workbench for multi-sensor perception, tra
 ---
 
 import summaryClip from '../../assets/generated/summary_clip.gif';
+import hookPoster from '../../assets/generated/hook_video_poster.png';
+import hookVideo from '../../assets/generated/hook_video_4x5.mp4?url';
 
 Mosaic is a reproducible synthetic workbench for investigating when combining
 noisy, asynchronous sensor observations improves object state estimates, and
@@ -13,6 +15,25 @@ This site is built from the Markdown in the repository's `docs/` directory.
 It makes no claim beyond [Implementation status](/mosaic-perception/implementation-status/) and
 [Limitations](/mosaic-perception/limitations/). Benchmark numbers live only in the committed
 [benchmark report](https://github.com/Telschow/mosaic-perception/blob/main/artifacts/benchmark/report.md).
+
+## Watch the explainer
+
+<video
+  controls
+  preload="metadata"
+  playsinline
+  poster={hookPoster.src}
+  width="360"
+  aria-label="Frame from a 44-second explainer video of a synthetic world (dense_clutter, development seeds 0-24): one real object follows a dashed path, and with a camera added the tracker draws many extra ghost lines away from it. Of every 100 tracks reported, 82 were the real object with one sensor and 34 with the camera added."
+>
+  <source src={hookVideo} type="video/mp4" />
+  Your browser cannot play this video.
+</video>
+
+A computer simulation, not real sensors: one object, followed by one sensor and then with a camera
+added. The lines are the tracker's real tracks from one development run; the two figures are the
+benchmark means over 25 seeds. In this simulated tracker the extra camera added ghost tracks. See
+[Limitations](/mosaic-perception/limitations/) for what this does not show.
 
 ## Sixty-second summary
 
