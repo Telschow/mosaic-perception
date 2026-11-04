@@ -240,7 +240,7 @@ def test_report_states_the_counting_rules():
     assert "## Counting rules" in text
     assert "Scored in 1 of 2 scenario(s) for position RMSE" in text
     assert "`n == 0`" in text
-    assert "No multiplicity correction" in text
+    assert "unadjusted" in text
 
 
 def test_report_names_scenarios_sharing_a_range_only_baseline():
@@ -256,3 +256,46 @@ def test_degenerate_interval_is_flagged_and_not_counted_as_a_finding():
     assert "in favour of fusion in 0 scenario(s)" in text
     assert "| toy | position_rmse | 25 | -0.050 | [-0.050, -0.050] (degenerate) |" in text
     assert "1 zero-width interval(s) are not counted as findings" in text
+
+
+def _many(count, precision_row, rmse_row=None):
+    import copy
+
+    base = _with_paired(rmse_row or _interval(-0.05, -0.08, -0.02), precision_row)
+    scenarios = []
+    for index in range(count):
+        scenario = copy.deepcopy(base["scenarios"][0])
+        scenario["scenario"] = {"name": f"s{index}"}
+        scenario["runs"][0]["range_only"] = {"position_rmse": 0.3 + index}
+        scenarios.append(scenario)
+    base["scenarios"] = scenarios
+    return base
+
+
+def test_bonferroni_tally_drops_a_finding_that_only_one_unadjusted_interval_supports():
+    row = _interval(-0.04, -0.07, -0.01)
+    alone = render_report(_many(1, row))
+    assert "precision better in 0, worse in 1" in alone.split("Bonferroni")[1]
+    many = render_report(_many(20, row))
+    assert "precision better in 0, worse in 0" in many.split("Bonferroni")[1]
+
+
+def test_report_counts_distinct_range_only_baselines():
+    text = render_report(_many(3, _interval(-0.05, -0.08, -0.02)))
+    assert "3 distinct `range_only` baseline(s) across 3 scenario(s)" in text
+    twin = _many(1, _interval(-0.05, -0.08, -0.02))
+    twin["scenarios"].append({**twin["scenarios"][0], "scenario": {"name": "twin"}})
+    assert "1 distinct `range_only` baseline(s) across 2 scenario(s)" in render_report(twin)
+
+
+def test_report_says_when_the_rmse_direction_depends_on_the_matcher():
+    payload = _with_paired(_interval(-0.05, -0.08, -0.02))
+    paired = payload["scenarios"][0]["paired_differences"]["fused_vs_range_only"]
+    paired["position_rmse_distance_only"] = _interval(0.05, 0.02, 0.08)
+    text = render_report(payload)
+    assert "the direction depends on the matcher" in text
+    agree = _with_paired(_interval(-0.05, -0.08, -0.02))
+    agree["scenarios"][0]["paired_differences"]["fused_vs_range_only"][
+        "position_rmse_distance_only"
+    ] = _interval(-0.05, -0.08, -0.02)
+    assert "the direction depends on the matcher" not in render_report(agree)

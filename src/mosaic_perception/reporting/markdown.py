@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from scipy import stats
+
 from .tables import TABLES, TableSpec, format_number, render_table
 
 _PRIMARY_COMPARISON = "fused_vs_range_only"
@@ -32,15 +34,52 @@ def _scored(payload: dict[str, Any], metric: str, comparison: str) -> int:
     return count
 
 
-def _shared_baselines(payload: dict[str, Any]) -> list[str]:
-    """Names of scenarios whose ``range_only`` runs are identical to another scenario's."""
+def _baseline_groups(payload: dict[str, Any]) -> list[list[str]]:
+    """Scenario names grouped by bit-identical ``range_only`` runs."""
     groups: dict[str, list[str]] = {}
     for scenario_report in payload["scenarios"]:
         runs = scenario_report.get("runs") or []
         if runs:
             key = repr([(run["seed"], run["range_only"]) for run in runs])
             groups.setdefault(key, []).append(scenario_report["scenario"]["name"])
-    return [name for names in groups.values() if len(names) > 1 for name in names]
+    return list(groups.values())
+
+
+def _shared_baselines(payload: dict[str, Any]) -> list[str]:
+    """Names of scenarios whose ``range_only`` runs are identical to another scenario's."""
+    return [name for names in _baseline_groups(payload) if len(names) > 1 for name in names]
+
+
+def _bonferroni_tally(
+    payload: dict[str, Any],
+    metric: str,
+    lower_is_better: bool,
+    comparison: str = _PRIMARY_COMPARISON,
+) -> tuple[int, int]:
+    """Better and worse counts after a Bonferroni correction across the scored scenarios.
+
+    The standard error is recovered from the stored 95% t interval and the interval is
+    rebuilt at level ``1 - 0.05 / m``, ``m`` being the scenarios scored for the metric.
+    """
+    rows = [
+        row
+        for scenario_report in payload["scenarios"]
+        if (row := scenario_report.get("paired_differences", {}).get(comparison, {}).get(metric))
+        and row["n"] > 1
+        and row["ci95_low"] is not None
+        and not _is_degenerate(row)
+    ]
+    scored = _scored(payload, metric, comparison)
+    better = worse = 0
+    for row in rows:
+        standard_error = (row["ci95_high"] - row["ci95_low"]) / 2 / stats.t.ppf(0.975, row["n"] - 1)
+        half = stats.t.ppf(1 - 0.025 / max(scored, 1), row["n"] - 1) * standard_error
+        low, high = row["mean"] - half, row["mean"] + half
+        if high < 0:
+            better, worse = (better + 1, worse) if lower_is_better else (better, worse + 1)
+        elif low > 0:
+            better, worse = (better, worse + 1) if lower_is_better else (better + 1, worse)
+    return better, worse
 
 
 def _tally(
@@ -196,6 +235,15 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
     mota_better, mota_worse, _ = _tally(payload, "mota", False)
     idf1_better, idf1_worse, _ = _tally(payload, "idf1", False)
     gospa_better, gospa_worse, _ = _tally(payload, "gospa_p1", True)
+    bonf_parts = []
+    for label, metric, lower in (
+        ("precision", "precision", False),
+        ("MOTA", "mota", False),
+        ("GOSPA", "gospa_p1", True),
+    ):
+        b, w = _bonferroni_tally(payload, metric, lower)
+        bonf_parts.append(f"{label} better in {b}, worse in {w}")
+    bonf_line = "; ".join(bonf_parts)
     extra_comparison_lines: list[str] = []
     for comparison in comparisons[1:]:
         name = comparison["name"]
@@ -251,9 +299,15 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
         "  `n == 0` for a metric is skipped in that metric's tally, so better, worse and",
         "  inconclusive counts can sum to fewer than the number of scenarios. Scored in "
         f"{_scored(payload, 'position_rmse', primary)} of {total} scenario(s) for position RMSE.",
-        "- No multiplicity correction is applied across scenarios, metrics or comparisons;",
-        "  with this many 95% intervals some will exclude zero by chance.",
+        "- The intervals in the tables are unadjusted 95% intervals; across this many",
+        "  scenarios, metrics and comparisons some will exclude zero by chance. The",
+        "  Findings give a Bonferroni-adjusted tally for the primary metrics.",
     ]
+    groups = _baseline_groups(payload)
+    counting_rules.append(
+        f"- {len(groups)} distinct `range_only` baseline(s) across "
+        f"{sum(len(g) for g in groups)} scenario(s) with runs."
+    )
     if shared:
         counting_rules.append(
             f"- {len(shared)} scenarios share a bit-identical `range_only` baseline: "
@@ -275,7 +329,13 @@ def render_report(payload: dict[str, Any], tables: tuple[TableSpec, ...] = TABLE
             "## Findings",
             "",
             f"- Position RMSE: the paired interval excludes zero in favour of fusion in {rmse_better} scenario(s) and against fusion in {rmse_worse} scenario(s); it includes zero (or has fewer than two seeds) in {rmse_inconclusive} scenario(s).",
-            f"- The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in {plain_better} scenario(s), against fusion in {plain_worse}, and includes zero in {plain_inconclusive}.",
+            f"- The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in {plain_better} scenario(s), against fusion in {plain_worse}, and includes zero in {plain_inconclusive}."
+            + (
+                " The sign of the net tally differs between the two matchers, so the direction depends on the matcher and position accuracy is not established either way."
+                if (rmse_better - rmse_worse) * (plain_better - plain_worse) < 0
+                else ""
+            ),
+            f"- Bonferroni-adjusted over the scenarios scored for each metric (family-wise 95%), fusion against range-only: {bonf_line}.",
             f"- MOTA, IDF1 and GOSPA (interval excludes zero): fusion better in {mota_better}, {idf1_better} and {gospa_better} scenario(s) and worse in {mota_worse}, {idf1_worse} and {gospa_worse}, respectively.",
             *extra_comparison_lines,
             f"- Fused precision is lower (interval excludes zero) in {precision_worse} scenario(s) and higher in {precision_better}; fused 95% coverage is lower in {coverage_worse} and higher in {coverage_better}. Accuracy alone does not establish that fusion improved association or calibration.",

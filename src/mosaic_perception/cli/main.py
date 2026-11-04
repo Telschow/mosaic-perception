@@ -35,7 +35,7 @@ from ..evaluation.registry import (
     metric_names,
     metric_value,
 )
-from ..evaluation.statistics import paired_difference
+from ..evaluation.statistics import mean_interval, paired_difference
 from ..experiment import (
     METHODS,
     PAIRED_COMPARISONS,
@@ -135,6 +135,23 @@ def _print_pair(pair: PairedRun) -> None:
     console.print(table)
 
 
+DEVELOPMENT_SEEDS = frozenset(range(0, 25))
+HELD_OUT_SEEDS = frozenset(range(25, 50))
+
+
+def seed_group(seeds: Sequence[int]) -> str:
+    """Label a seed list by set membership of the reserved ranges, not by its maximum."""
+    chosen = set(seeds)
+    if chosen <= DEVELOPMENT_SEEDS:
+        return "development"
+    if chosen <= HELD_OUT_SEEDS:
+        return "held_out"
+    return "custom"
+
+
+_SEED_INTERVAL_METRICS = ("anees_position", "anees_velocity")
+
+
 def _aggregate(
     results: list[EvaluationResult],
     metrics: Sequence[MetricSpec] = RESULT_METRICS,
@@ -153,6 +170,15 @@ def _aggregate(
             continue
         aggregate[spec.name] = float(np.mean(values))
         aggregate[f"{spec.name}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+    for name in _SEED_INTERVAL_METRICS:
+        # Seed-level interval: seeds are the independent units, unlike the pooled per-sample
+        # chi-square bounds below, which treat correlated samples as independent.
+        seed_values = [
+            value for result in results if (value := metric_value(result, name)) is not None
+        ]
+        _, low, high = mean_interval(seed_values)
+        aggregate[f"{name}_seed_ci95_low"] = low
+        aggregate[f"{name}_seed_ci95_high"] = high
     for ratio in pooled:
         # Pooled over seeds so a seed with very few samples cannot dominate.
         numerator = sum(metric_value(result, ratio.numerator) or 0.0 for result in results)
@@ -299,7 +325,7 @@ def _run_experiment(
             "matching_gate_m": matching_gate_m,
             "matching_continuity": matching_continuity,
             "position_coverage_95_threshold": 5.991,
-            "seed_group": ("development" if max(seeds) <= 24 else "custom_or_held_out"),
+            "seed_group": seed_group(seeds),
             "seeds": seeds,
             "duration_s": duration,
             "dt_s": dt,

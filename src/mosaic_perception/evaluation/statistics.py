@@ -47,3 +47,20 @@ def paired_difference(
         return PairedDifference(n, mean, None, None)
     half = float(stats.t.ppf(0.5 + CONFIDENCE / 2, n - 1) * differences.std(ddof=1) / np.sqrt(n))
     return PairedDifference(n, mean, mean - half, mean + half)
+
+
+def mean_interval(values: Sequence[float]) -> tuple[float | None, float | None, float | None]:
+    """Mean of per-seed values with a two-sided 95% t interval (seeds as the unit).
+
+    Returns ``(mean, None, None)`` for a single value and all ``None`` for none.
+    """
+    array = np.array([v for v in values if np.isfinite(v)], dtype=float)
+    if array.size == 0:
+        return None, None, None
+    mean = float(array.mean())
+    if array.size < 2:
+        return mean, None, None
+    half = float(
+        stats.t.ppf(0.5 + CONFIDENCE / 2, array.size - 1) * array.std(ddof=1) / np.sqrt(array.size)
+    )
+    return mean, mean - half, mean + half

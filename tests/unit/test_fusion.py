@@ -643,3 +643,42 @@ def test_previous_posteriors_are_evicted_when_a_track_is_deleted():
         tracker.process_observations([], 0.1 * step)
     assert "gone" not in tracker.tracks
     assert "gone" not in tracker._prev_posterior
+
+
+def test_vision_refreshes_a_track_range_missed_by_default():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True)
+    track = make_track()
+    tracker.tracks[track.track_id] = track
+    vision_obs = vision_observation()
+
+    tracker.process_observations([vision_obs], 0.0)
+
+    assert vision_obs.associated_track_id == track.track_id
+
+
+def test_range_supported_policy_keeps_vision_from_refreshing_a_range_missed_track():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True, vision_updates="range_supported")
+    track = make_track()
+    tracker.tracks[track.track_id] = track
+    vision_obs = vision_observation()
+
+    tracker.process_observations([vision_obs], 0.0)
+
+    assert vision_obs.associated_track_id is None
+    assert track.hits == 0
+
+
+def test_range_supported_policy_still_fuses_when_range_also_updated_the_track():
+    tracker = MultiSensorTracker(dt=0.1, use_vision=True, vision_updates="range_supported")
+    track = make_track()
+    tracker.tracks[track.track_id] = track
+    range_obs, vision_obs = range_observation(), vision_observation()
+
+    tracker.process_observations([range_obs, vision_obs], 0.0)
+
+    assert vision_obs.associated_track_id == track.track_id
+
+
+def test_unknown_vision_update_policy_is_rejected():
+    with pytest.raises(ValueError):
+        MultiSensorTracker(vision_updates="sometimes")
