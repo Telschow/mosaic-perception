@@ -1,6 +1,6 @@
 {
   "code": {
-    "git_commit": "a126a7066bb1d6df932caf8c83b4959768092de7",
+    "git_commit": "40fee7915f588360db05e83fcc2716460e3ccc21",
     "numpy_version": "2.5.4",
     "package_version": "0.1.0",
     "scipy_version": "1.18.1"
