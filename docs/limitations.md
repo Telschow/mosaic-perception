@@ -213,7 +213,7 @@ In particular, this project does **not** claim:
 - that fusion is universally better or worse;
 - that the tracker is calibrated;
 - that results transfer to real sensors;
-- that held-out performance has been measured.
+- anything about held-out performance beyond `artifacts/held-out/report.md` (one run at `8baa778`, an earlier tracker version than the development benchmark).
 
 ## Type checking and CI
 

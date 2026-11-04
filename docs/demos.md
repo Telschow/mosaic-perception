@@ -34,7 +34,7 @@ The headline claims only what [artifacts/benchmark/report.md](../artifacts/bench
 
 | | |
 |---|---|
-| Audience | Non-experts: hiring managers, collaborators, a general technical audience |
+| Audience | Non-experts: collaborators and a general technical audience |
 | The one question | Does adding a second sensor make tracking better? |
 | Medium | Recorded clip (GIF or short video), captions on screen, no voice needed |
 | Limitation shown | The surprise: the fused tracker scores worse on most measures, and there is one scenario where it helps |

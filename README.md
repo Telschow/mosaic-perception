@@ -31,7 +31,7 @@ CI runs the locked sync and test suite on every push to `main` and every pull re
 ### What the evidence shows, and what it does not
 
 - **Shows, on these synthetic worlds only:** in the paired 25-seed comparison, fusion improves position RMSE under the headline matcher in 1 of the 15 scenarios with defined accuracy and worsens it in 6; fused precision is worse in 14 of 15 and MOTA and GOSPA in 14 of 16; position NEES is above its 95% interval in all 15 scenarios for both methods (overconfident). The bias-estimated method recovers part of fusion's loss in the within-gate bias scenarios but stays below range-only on precision and MOTA. Every figure is in [artifacts/benchmark/report.md](artifacts/benchmark/report.md), including all headline observations quoted below.
-- **Does not show:** real-world or hardware performance or held-out-seed results.
+- **Does not show:** real-world or hardware performance. A held-out run exists (seeds 25-49, run once at `8baa778`); no claim is made beyond its [report](artifacts/held-out/report.md), and it was produced by an earlier tracker version than the development benchmark.
 
 ## What is implemented
 
@@ -295,6 +295,10 @@ A static site is built from `docs/` with Astro Starlight (`docs-site/`). Preview
 - [Technical walkthrough](docs/technical-walkthrough.md)
 - [Technical FAQ](docs/technical-faq.md)
 - [Core validity audit](docs/core-validity-audit.md)
+
+## How this was built
+
+This project was built with AI coding assistants (Claude Code, plus a Docker-based agent loop, `.sandcastle/`). Commits made with an assistant carry a `Co-Authored-By` trailer, and the full history is public. The maintainer chose the research question, the scenarios, the evaluation protocol (including the single frozen held-out run) and the wording of every claim; the assistants implemented and reviewed changes against tickets in the issue tracker. Nothing here rests on trust in either: results are regenerated from seeds, checked against committed manifests (`make check`), and the held-out run is documented in `artifacts/held-out/`.
 
 ## License
 
