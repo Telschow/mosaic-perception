@@ -299,3 +299,15 @@ def test_report_says_when_the_rmse_direction_depends_on_the_matcher():
         "position_rmse_distance_only"
     ] = _interval(-0.05, -0.08, -0.02)
     assert "the direction depends on the matcher" not in render_report(agree)
+
+
+def test_baselines_are_shared_even_when_run_records_differ_only_in_scenario_name():
+    payload = _many(1, _interval(-0.05, -0.08, -0.02))
+    first = payload["scenarios"][0]
+    first["runs"][0]["range_only"]["scenario_name"] = "toy"
+    twin = {**first, "scenario": {"name": "twin"}, "runs": [dict(first["runs"][0])]}
+    twin["runs"][0]["range_only"] = {**first["runs"][0]["range_only"], "scenario_name": "twin"}
+    payload["scenarios"].append(twin)
+    text = render_report(payload)
+    assert "share a bit-identical `range_only` baseline: s0, twin" in text
+    assert "1 distinct `range_only` baseline(s) across 2 scenario(s)" in text

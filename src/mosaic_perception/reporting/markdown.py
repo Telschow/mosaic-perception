@@ -40,7 +40,16 @@ def _baseline_groups(payload: dict[str, Any]) -> list[list[str]]:
     for scenario_report in payload["scenarios"]:
         runs = scenario_report.get("runs") or []
         if runs:
-            key = repr([(run["seed"], run["range_only"]) for run in runs])
+            # The scenario's own name is the only field that may differ between identical runs.
+            key = repr(
+                [
+                    (
+                        run["seed"],
+                        {k: v for k, v in run["range_only"].items() if k != "scenario_name"},
+                    )
+                    for run in runs
+                ]
+            )
             groups.setdefault(key, []).append(scenario_report["scenario"]["name"])
     return list(groups.values())
 

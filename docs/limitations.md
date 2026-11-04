@@ -10,6 +10,21 @@
 - The workbench studies estimation and association behavior, not operational
   perception performance.
 
+## Reading the headline correctly
+
+- The fusion losses are results for this tracker. With vision barred from refreshing tracks
+  the range sensor missed (`make ablation`, `artifacts/ablation/vision_refresh.md`), most of
+  the precision, MOTA and GOSPA loss disappears in `nominal`, `dense_clutter` and
+  `vision_dropout`. Gates, process noise and the confirm/delete rule are fixed, not swept.
+- The RMSE tally depends on the matcher (see the report's Findings); precision, MOTA and GOSPA
+  are the supported measures, and even those are conditional on the point above.
+- Scenario tallies are not independent trials: several scenarios share one `range_only`
+  baseline (the report counts distinct baselines and gives a Bonferroni-adjusted tally).
+- Pooled NEES/NIS chi-square intervals treat correlated per-track samples as independent and
+  are optimistic; the seed-level ANEES interval in `benchmark.json` is the honest one.
+- "Precision" is track-sample purity, not detection precision.
+- RMSE is computed over matched samples, and the matched sets differ between methods.
+
 ## Estimation and association
 
 - Constant-velocity motion model. Turning objects are approximated and can
