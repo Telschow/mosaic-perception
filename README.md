@@ -30,7 +30,7 @@ CI runs the locked sync and test suite on every push to `main` and every pull re
 
 ### What the evidence shows, and what it does not
 
-- **Shows, on these synthetic worlds only:** in the paired 25-seed comparison, fusion improves position RMSE under the headline matcher in 1 of the 15 scenarios with defined accuracy and worsens it in 6; fused precision is worse in 14 of 15 and MOTA and GOSPA in 14 of 16; position NEES is above its 95% interval in all 15 scenarios for both methods (overconfident). The bias-estimated method recovers part of fusion's loss in the within-gate bias scenarios but stays below range-only on precision and MOTA. Every figure is in [artifacts/benchmark/report.md](artifacts/benchmark/report.md), including all headline observations quoted below.
+- **Shows, on these synthetic worlds only, for this tracker:** fused precision, MOTA and GOSPA are worse than range-only in 14 of 16 scenarios in the paired 25-seed comparison (also after a Bonferroni correction; the 16 scenarios contain only 11 distinct range-only baselines, so they are not 16 independent results). Position RMSE is inconclusive: under the headline matcher fusion helps in 1 of 15 scenarios and hurts in 6, under a distance-only matcher it helps in 7 and hurts in 3. Position NEES is above its expected value in 28 of 30 scenario-method pairs (seed-level 95% interval excludes the expected 2; overconfident). The bias-estimated method recovers part of fusion's loss in the within-gate bias scenarios but stays below range-only on precision and MOTA. The precision, MOTA and GOSPA losses largely vanish when vision is barred from refreshing tracks the range sensor missed (see [the ablation](artifacts/ablation/vision_refresh.md)): they are a property of this tracker design, not of fusion in general. Every figure is in [artifacts/benchmark/report.md](artifacts/benchmark/report.md).
 - **Does not show:** real-world or hardware performance. A held-out run exists (seeds 25-49, run once at `8baa778`); no claim is made beyond its [report](artifacts/held-out/report.md), and it was produced by an earlier tracker version than the development benchmark.
 
 ## What is implemented
@@ -59,7 +59,7 @@ uv sync --all-extras
 ```
 
 With `uv`, every command below can be run as `uv run mosaic ...`. A plain
-`pip install -e ".[dev]"` also works.
+`pip install -e ".[dev]"` also works but resolves unpinned dependencies; the committed artifacts and golden checks are only guaranteed for the locked environment (`uv sync --locked`, Linux CI).
 
 ### Run one scenario
 
@@ -145,7 +145,7 @@ Full definitions, matching rules and denominators are in
 ## Current development benchmark
 
 The checked-in benchmark is generated with `--scenario all --seeds 0-24
---duration 10.0`, i.e. **all 25 development seeds and no held-out seed**. Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. It is only as blind as
+--duration 10.0`, i.e. **all 25 development seeds and no held-out seed**. Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md` (its `benchmark.json` hash is pinned in `artifacts/held-out/FROZEN`). It used an earlier tracker version than the development benchmark below, so the two are not directly comparable. It is only as blind as
 the freeze discipline around it: the reserved seeds come from the same
 generator and code, so it is not a hidden test set.
 
@@ -168,8 +168,8 @@ Headline observations from the current development benchmark:
   precision is worse (interval excludes zero) in 14 of the 15 scenarios with
   defined precision and inconclusive in the other; MOTA and GOSPA are worse in
   14 of 16 and inconclusive in 2. Recall is better for fusion in 12 of 16 and
-  inconclusive in 4. IDF1 favours fusion in 2, goes against it in 5 and is
-  inconclusive in 9. Precision is sample-based (matched samples / all
+  inconclusive in 4. IDF1 favours fusion in 3, goes against it in 5 and is
+  inconclusive in 8. Precision is sample-based (matched samples / all
   confirmed-or-coasting track samples), and the extra "unmatched confirmed
   tracks" are confirmed tracks never matched to a true object. The report's
   `Duplicate tracks` column counts those that were left unmatched while a true
@@ -184,13 +184,13 @@ Headline observations from the current development benchmark:
   changes the fused-versus-range ordering in
   some scenarios (for example `nominal`: 6.1 for range-only and 4.7 for fused
   with continuity, 8.9 and 10.6 distance-only).
-- **Consistency.** Position NEES per degree of freedom is above its 95% interval
-  in all 15 scenarios with defined values for both methods (overconfident; for
-  example 1.85 range-only and 2.48 fused in `nominal`, 72.99 fused in
-  `measurement_bias`); velocity NEES is above in 14. NIS per degree of freedom
-  is below its interval in 13 (fused) and 14 (range-only) scenarios, as expected
-  for gated updates (0.81 and 0.77 in `nominal`). Intervals assume independent
-  samples and are optimistic.
+- **Consistency.** Position NEES is above its expected value (2 for two degrees of
+  freedom) in 28 of 30 scenario-method pairs by the seed-level 95% interval (the two
+  exceptions are `crossing_targets`); for example nominal ANEES 3.71 [3.10, 4.31]
+  range-only and 4.96 [4.06, 5.86] fused. NIS per degree of freedom is below its
+  interval in 13 (fused) and 14 (range-only) scenarios, as expected for gated updates
+  (0.81 and 0.77 in `nominal`). The pooled chi-square intervals in the report assume
+  independent samples and are optimistic; the seed-level intervals do not.
 - The sensor-disagreement scenarios test different things.
   `sensor_disagreement_large_bias` (0.12 rad) is a **gate-rejection**
   experiment: about 96% of delivered vision observations were rejected by the
@@ -274,6 +274,19 @@ been superseded; they are not preserved as a baseline for comparison.**
   ~speed × (processing_time - capture_time)), with an opt-in one-step-lag retrodiction mode; see
   [docs/limitations.md](docs/limitations.md).
 - Association is gated Hungarian within each measurement group, not MHT/JPDA.
+- The headline losses are a property of this tracker, not of fusion in general. An ablation
+  ([artifacts/ablation/vision_refresh.md](artifacts/ablation/vision_refresh.md), `make ablation`)
+  that stops vision from refreshing tracks the range sensor missed removes most of the
+  precision, MOTA and GOSPA loss in `nominal`, `dense_clutter` and `vision_dropout`, and
+  leaves a smaller loss in `sensor_disagreement_within_gate`. Gates, process noise and the
+  confirm/delete rule are fixed and not swept.
+- "Precision" is track-sample purity (matched samples over all confirmed or coasting track
+  samples), so duplicate tracks and coasting tracks lower it; it is not detection precision.
+- "Partly recovers" for bias estimation is scenario-specific: the estimator's prior (0.05 rad)
+  and the gate (a 0.12 rad bias is rejected, so it cannot be learned) bound where it can help,
+  and the scenarios were designed on development seeds.
+- Sensor random streams use `RandomState(seed + 1000 + index)`: deterministic, but seeds are
+  coupled by an additive offset and independence is only assumed for the 0-49 range used here.
 - Held-out: Run once at `8baa778` on seeds 25-49; see `artifacts/held-out/report.md`. The generator and code are shared with the development seeds, so this is not a hidden test set.
 - Reported covariance and empirical coverage can disagree; calibration is
   measured, not assumed.
