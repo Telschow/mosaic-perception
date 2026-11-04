@@ -2,7 +2,7 @@
 """Check that the committed benchmark artifact was produced from this source tree.
 
 Checks every ``artifacts/*/benchmark.json``. A directory containing a ``FROZEN``
-file (one line: the commit) is a deliberately frozen run, such as the held-out
+file (line 1: the commit; optional line 2: ``sha256 <hex>`` of ``benchmark.json``) is a deliberately frozen run, such as the held-out
 evaluation: instead of failing on later ``src/`` changes it reports the delta
 since the frozen commit, and skips the version and re-render checks (the
 renderer may legitimately have moved on). The frozen commit must equal the one
@@ -28,6 +28,7 @@ pull request; see docs/evaluation-protocol.md.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -74,8 +75,33 @@ def check_report_render(report: str, payload: dict[str, Any]) -> list[str]:
 
 
 def read_frozen(directory: Path) -> str | None:
+    """The frozen commit: the first line of ``FROZEN``."""
     path = directory / FROZEN_FILE
-    return path.read_text().strip() if path.exists() else None
+    if not path.exists():
+        return None
+    lines = path.read_text().strip().splitlines()
+    return lines[0].strip() if lines else ""
+
+
+def read_frozen_sha256(directory: Path) -> str | None:
+    """The optional ``sha256 <hex>`` line of ``FROZEN``: the hash of ``benchmark.json``."""
+    path = directory / FROZEN_FILE
+    if not path.exists():
+        return None
+    for line in path.read_text().splitlines():
+        match = re.fullmatch(r"sha256\s+([0-9a-f]{64})", line.strip())
+        if match:
+            return match.group(1)
+    return None
+
+
+def check_frozen_hash(declared: str, artifact_path: Path) -> list[str]:
+    actual = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
+    if declared != actual:
+        return [
+            f"{FROZEN_FILE} declares benchmark.json sha256 {declared[:12]} but it is {actual[:12]}"
+        ]
+    return []
 
 
 def check_frozen_declaration(declared: str, commit: str) -> list[str]:
@@ -105,6 +131,9 @@ def check_directory(directory: Path) -> DirectoryResult:
     if declared is not None:
         failures += check_frozen_declaration(declared, commit)
         result.frozen_at = declared
+        declared_hash = read_frozen_sha256(directory)
+        if declared_hash is not None:
+            failures += check_frozen_hash(declared_hash, artifact_path)
 
     if _git("cat-file", "-e", f"{commit}^{{commit}}").returncode != 0:
         failures.append(f"recorded commit {commit[:12]} does not exist in this repository")

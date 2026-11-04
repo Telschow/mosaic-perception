@@ -120,6 +120,7 @@ def run_method(
     *,
     git_commit: str | None = None,
     evaluator: TrackingEvaluator | None = None,
+    vision_updates: str = "all",
 ) -> RunRecord:
     """Run one method on a scenario, optionally reusing shared world states."""
     if method not in METHODS:
@@ -140,6 +141,7 @@ def run_method(
         use_vision=method in _VISION_METHODS,
         delayed_update=scenario.delayed_update,
         bias_estimation=method == "fused_bias_estimated",
+        vision_updates=vision_updates,
     )
 
     for world_state in states:

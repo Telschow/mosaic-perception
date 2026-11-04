@@ -1,0 +1,280 @@
+{
+ "code": {
+  "git_commit": "3ecb3913821a91ee31d83774d677ea731d647d91"
+ },
+ "protocol": {
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24
+  ],
+  "seed_group": "development",
+  "duration_s": 10.0,
+  "num_objects": 3,
+  "comparison": "fused (policy) minus range_only, paired per seed"
+ },
+ "rows": [
+  {
+   "scenario": "nominal",
+   "policy": "all",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.13026328059380896,
+   "ci95_low": -0.16162658386882045,
+   "ci95_high": -0.09889997731879745
+  },
+  {
+   "scenario": "nominal",
+   "policy": "all",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.22613861386138617,
+   "ci95_low": -0.2856336408482619,
+   "ci95_high": -0.16664358687451042
+  },
+  {
+   "scenario": "nominal",
+   "policy": "all",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": 0.6345091145387892,
+   "ci95_low": 0.4471510746338524,
+   "ci95_high": 0.821867154443726
+  },
+  {
+   "scenario": "nominal",
+   "policy": "range_supported",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.0050842238452697905,
+   "ci95_low": -0.03421991998118154,
+   "ci95_high": 0.024051472290641963
+  },
+  {
+   "scenario": "nominal",
+   "policy": "range_supported",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.008976897689768996,
+   "ci95_low": -0.05158132816079155,
+   "ci95_high": 0.03362753278125356
+  },
+  {
+   "scenario": "nominal",
+   "policy": "range_supported",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": -0.03703309189720947,
+   "ci95_low": -0.18954006936417445,
+   "ci95_high": 0.11547388556975552
+  },
+  {
+   "scenario": "dense_clutter",
+   "policy": "all",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.4782215438533404,
+   "ci95_low": -0.49945467406532734,
+   "ci95_high": -0.4569884136413535
+  },
+  {
+   "scenario": "dense_clutter",
+   "policy": "all",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -1.7093069306930693,
+   "ci95_low": -1.8168329819483249,
+   "ci95_high": -1.6017808794378137
+  },
+  {
+   "scenario": "dense_clutter",
+   "policy": "all",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": 5.1154900338505085,
+   "ci95_low": 4.779420384052756,
+   "ci95_high": 5.451559683648261
+  },
+  {
+   "scenario": "dense_clutter",
+   "policy": "range_supported",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": 0.01561615841071735,
+   "ci95_low": -0.006896389203318084,
+   "ci95_high": 0.03812870602475278
+  },
+  {
+   "scenario": "dense_clutter",
+   "policy": "range_supported",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": 0.024818481848184817,
+   "ci95_low": -0.009789090025801792,
+   "ci95_high": 0.059426053722171426
+  },
+  {
+   "scenario": "dense_clutter",
+   "policy": "range_supported",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": -0.15159324928198425,
+   "ci95_low": -0.26885290139739176,
+   "ci95_high": -0.03433359716657673
+  },
+  {
+   "scenario": "vision_dropout",
+   "policy": "all",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.09956171661147785,
+   "ci95_low": -0.12402410418316492,
+   "ci95_high": -0.07509932903979077
+  },
+  {
+   "scenario": "vision_dropout",
+   "policy": "all",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.1634323432343234,
+   "ci95_low": -0.2081005790202483,
+   "ci95_high": -0.11876410744839848
+  },
+  {
+   "scenario": "vision_dropout",
+   "policy": "all",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": 0.48242728743262403,
+   "ci95_low": 0.3237187153657871,
+   "ci95_high": 0.641135859499461
+  },
+  {
+   "scenario": "vision_dropout",
+   "policy": "range_supported",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.00146615313001623,
+   "ci95_low": -0.019439411176662952,
+   "ci95_high": 0.01650710491663049
+  },
+  {
+   "scenario": "vision_dropout",
+   "policy": "range_supported",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": 0.0006600660066006548,
+   "ci95_low": -0.02654351414882874,
+   "ci95_high": 0.02786364616203005
+  },
+  {
+   "scenario": "vision_dropout",
+   "policy": "range_supported",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": -0.036787693881542995,
+   "ci95_low": -0.13761459645467913,
+   "ci95_high": 0.06403920869159313
+  },
+  {
+   "scenario": "sensor_disagreement_within_gate",
+   "policy": "all",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.2654895555157718,
+   "ci95_low": -0.29209803078806695,
+   "ci95_high": -0.23888108024347662
+  },
+  {
+   "scenario": "sensor_disagreement_within_gate",
+   "policy": "all",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.5765016501650164,
+   "ci95_low": -0.641092591673784,
+   "ci95_high": -0.5119107086562489
+  },
+  {
+   "scenario": "sensor_disagreement_within_gate",
+   "policy": "all",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": 1.8935711940485362,
+   "ci95_low": 1.681280422049217,
+   "ci95_high": 2.1058619660478555
+  },
+  {
+   "scenario": "sensor_disagreement_within_gate",
+   "policy": "range_supported",
+   "metric": "precision",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.07411502696185154,
+   "ci95_low": -0.1070279423580122,
+   "ci95_high": -0.04120211156569088
+  },
+  {
+   "scenario": "sensor_disagreement_within_gate",
+   "policy": "range_supported",
+   "metric": "mota",
+   "lower_is_better": false,
+   "n": 25,
+   "mean": -0.14165016501650166,
+   "ci95_low": -0.19728694946301217,
+   "ci95_high": -0.08601338056999114
+  },
+  {
+   "scenario": "sensor_disagreement_within_gate",
+   "policy": "range_supported",
+   "metric": "gospa_p1",
+   "lower_is_better": true,
+   "n": 25,
+   "mean": 0.6452083761600272,
+   "ci95_low": 0.43686113933362614,
+   "ci95_high": 0.8535556129864283
+  }
+ ]
+}

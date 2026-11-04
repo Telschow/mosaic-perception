@@ -79,3 +79,25 @@ def test_frozen_directory_with_disagreeing_report_fails(tmp_path: Path) -> None:
     (tmp_path / "FROZEN").write_text(COMMIT)
     result = provenance.check_directory(tmp_path)
     assert any("report.md" in f for f in result.failures)
+
+
+def test_frozen_file_may_carry_a_benchmark_hash(tmp_path: Path) -> None:
+    (tmp_path / "FROZEN").write_text(f"{COMMIT}\nsha256 {'c' * 64}\n")
+    assert provenance.read_frozen(tmp_path) == COMMIT
+    assert provenance.read_frozen_sha256(tmp_path) == "c" * 64
+
+
+def test_benchmark_hash_mismatch_fails(tmp_path: Path) -> None:
+    (tmp_path / "benchmark.json").write_text("{}")
+    assert provenance.check_frozen_hash("c" * 64, tmp_path / "benchmark.json") != []
+    import hashlib
+
+    good = hashlib.sha256(b"{}").hexdigest()
+    assert provenance.check_frozen_hash(good, tmp_path / "benchmark.json") == []
+
+
+def test_held_out_benchmark_hash_is_declared_and_matches() -> None:
+    directory = _ROOT / "artifacts" / "held-out"
+    declared = provenance.read_frozen_sha256(directory)
+    assert declared is not None
+    assert provenance.check_frozen_hash(declared, directory / "benchmark.json") == []

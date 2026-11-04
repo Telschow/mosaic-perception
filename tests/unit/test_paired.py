@@ -60,3 +60,19 @@ def test_non_finite_values_are_treated_as_undefined():
     assert result.n == 2
     assert result.mean == pytest.approx((-0.1 + -0.3) / 2)
     assert np.isfinite(result.low) and np.isfinite(result.high)
+
+
+def test_mean_interval_is_the_t_interval_of_the_values():
+    from mosaic_perception.evaluation.statistics import mean_interval
+
+    mean, low, high = mean_interval([1.0, 2.0, 3.0, 4.0, 5.0])
+    assert mean == 3.0
+    # t(0.975, 4) = 2.7764; sd = 1.5811; half = 2.7764 * 1.5811 / sqrt(5) = 1.9632
+    assert abs(low - (3.0 - 1.9632)) < 1e-3 and abs(high - (3.0 + 1.9632)) < 1e-3
+
+
+def test_mean_interval_needs_two_values():
+    from mosaic_perception.evaluation.statistics import mean_interval
+
+    assert mean_interval([2.0]) == (2.0, None, None)
+    assert mean_interval([]) == (None, None, None)

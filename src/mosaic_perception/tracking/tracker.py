@@ -34,6 +34,7 @@ from .association import GatedHungarianAssociator, GroupAssociation
 from .ekf import ExtendedKalmanFilter
 
 _GROUP_ORDER = ("range_bearing", "vision_bearing")
+_VISION_UPDATE_POLICIES = ("all", "range_supported")
 _DELAYED_UPDATE_MODES = ("delivery_time", "retrodiction")
 
 # Vision bearing-bias estimator (issue #20). A single global scalar per vision sensor,
@@ -82,17 +83,24 @@ class MultiSensorTracker:
         max_misses_delete: int = 5,
         delayed_update: str = "delivery_time",
         bias_estimation: bool = False,
+        vision_updates: str = "all",
     ):
         if dt <= 0:
             raise ValueError("dt must be positive")
         if delayed_update not in _DELAYED_UPDATE_MODES:
             raise ValueError(f"delayed_update must be one of {_DELAYED_UPDATE_MODES}")
+        if vision_updates not in _VISION_UPDATE_POLICIES:
+            raise ValueError(f"vision_updates must be one of {_VISION_UPDATE_POLICIES}")
         if min_hits_confirm < 1:
             raise ValueError("min_hits_confirm must be at least 1")
         if max_misses_coast < 1 or max_misses_delete <= max_misses_coast:
             raise ValueError("miss thresholds must satisfy 1 <= coast < delete")
 
         self.dt = float(dt)
+        # "all": a vision observation may refresh any active track (the benchmark default).
+        # "range_supported": only tracks that a range observation updated this epoch (an
+        # ablation: vision cannot keep a track the range sensor missed alive).
+        self.vision_updates = vision_updates
         # How an admitted delayed observation is applied: to the delivery-time state
         # (default, an approximation) or by replaying the epoch from the stored previous
         # posterior (one-step-lag retrodiction).
@@ -224,8 +232,11 @@ class MultiSensorTracker:
                 continue
             # Frozen for the whole group so gating and updating use the same correction.
             group_correction = self._bearing_correction() if group == "vision_bearing" else 0.0
+            candidates = active_tracks + [self.tracks[tid] for tid in sorted(initiated_track_ids)]
+            if group == "vision_bearing" and self.vision_updates == "range_supported":
+                candidates = [t for t in candidates if t.track_id in updated_track_ids]
             association = self.associator.associate(
-                active_tracks + [self.tracks[tid] for tid in sorted(initiated_track_ids)],
+                candidates,
                 group_observations,
                 self.ekf,
                 bearing_correction=group_correction,

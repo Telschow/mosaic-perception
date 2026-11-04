@@ -1,4 +1,4 @@
-.PHONY: install check test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets mp4 docs-preview
+.PHONY: install check test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets mp4 ablation docs-preview
 
 install:
 	uv sync --locked --all-extras
@@ -49,6 +49,9 @@ benchmark-golden:
 
 benchmark-golden-check:
 	uv run python scripts/check_benchmark_golden.py
+
+ablation:
+	uv run python scripts/ablate_vision_refresh.py
 
 provenance-check:
 	uv run python scripts/check_artifact_provenance.py
