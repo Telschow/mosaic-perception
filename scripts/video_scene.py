@@ -1,8 +1,8 @@
 """Manim scene for the 4:5 Hook video. Rendered by ``make_video.py``; draws ``build_plan``.
 
-Run only through Manim (``uv run --with manim``). Every printed number comes from the plan,
-which reads ``artifacts/benchmark/benchmark.json``; the opener is an illustration and prints
-none.
+Run only through Manim (``uv run --with manim``). The lines are the tracker's real tracks from
+one development run; the two figures come from the plan, which reads
+``artifacts/benchmark/benchmark.json``.
 """
 
 from __future__ import annotations
@@ -16,18 +16,16 @@ from manim import (
     BOLD,
     DOWN,
     NORMAL,
-    RIGHT,
     UP,
-    Create,
     DashedVMobject,
     Dot,
     FadeIn,
     FadeOut,
-    Line,
-    Rectangle,
+    LaggedStartMap,
     Scene,
     Text,
     ValueTracker,
+    VGroup,
     VMobject,
     always_redraw,
     config,
@@ -39,81 +37,87 @@ import make_assets  # noqa: E402
 import make_hero  # noqa: E402
 import make_video  # noqa: E402
 
+from mosaic_perception.domain.models import TrackStatus  # noqa: E402
+from mosaic_perception.experiment import run_pair  # noqa: E402
+from mosaic_perception.scenarios import resolve_scenario  # noqa: E402
+
 config.pixel_width, config.pixel_height = make_video.SIZE
 config.frame_height, config.frame_width = 12.5, 10.0
 config.background_color = "#0E1116"
 config.frame_rate = 30
 
 FONT = "Helvetica Neue"
-INK, MUTED, RED, AMBER = "#F2F4F7", "#8B94A3", "#FF6B6B", "#F0A24D"
-COL = {"range_only": "#B7BDC8", "fused": "#4DA3F0", "fused_bias_estimated": AMBER}
+INK, MUTED, RED, BLUE, GREY = "#F2F4F7", "#9AA3B2", "#FF6B6B", "#4DA3F0", "#B7BDC8"
+LIVE = {TrackStatus.CONFIRMED, TrackStatus.COASTING}
 PAYLOAD = json.loads(make_assets.BENCHMARK.read_text())
 PLAN = make_video.build_plan(PAYLOAD)
 BEATS = {b["id"]: b for b in PLAN["beats"]}
+PLOT = (8.6, 6.2, 0.0, -0.4)  # width, height, centre x, centre y
 
 
 def label(s, size=40, color=INK, weight=NORMAL, **kw):
     return Text(s, font=FONT, font_size=size, color=color, weight=weight, **kw)
 
 
-def _fill(track):
-    out, last = [], None
-    for t in track:
-        last = t if t else last
-        out.append(last)
-    first = next(t for t in out if t)
-    return [t or first for t in out]
+def simulate_tracks():
+    """The true path and every live track (id -> [(frame index, x, y)]) for both methods."""
+    config_ = resolve_scenario(
+        PLAN["scenario"],
+        seed=PLAN["seed"],
+        duration=make_hero.DURATION,
+        num_objects=make_hero.NUM_OBJECTS,
+    )
+    pair = run_pair(config_)
+    index = {state.time: i for i, state in enumerate(pair.states)}
+    object_id = next(iter(pair.states[0].objects))
+    truth = [
+        (s.objects[object_id].position.x, s.objects[object_id].position.y) for s in pair.states
+    ]
+    tracks = {}
+    for method in ("range_only", "fused"):
+        by_id: dict[str, list[tuple[int, float, float]]] = {}
+        for snap in pair.record(method).snapshots:
+            if snap.status in LIVE and snap.time in index:
+                by_id.setdefault(snap.track_id, []).append(
+                    (index[snap.time], snap.state[0], snap.state[1])
+                )
+        tracks[method] = by_id
+    return truth, tracks
 
 
-class _Panel:
-    """Truth dashed, live track, and the 95% ring that follows the head."""
+TRUTH, TRACKS = simulate_tracks()
 
-    def __init__(self, data, method, cx, cy, w, h, pts, u):
-        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
-        mx, my = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
-        self.s = min(w / ((max(xs) - min(xs)) or 1), h / ((max(ys) - min(ys)) or 1))
-        self.to = lambda q: np.array([cx + (q[0] - mx) * self.s, cy + (q[1] - my) * self.s, 0.0])
-        track = _fill(data[method])
-        self.pos = [self.to(t[0]) for t in track]
-        self.cov = [t[1] for t in track]
-        n, color = len(self.pos), COL[method]
-        truth = VMobject().set_points_as_corners([self.to(q) for q in data["ground_truth"]])
-        self.truth = DashedVMobject(truth, num_dashes=60).set_stroke("#566070", 2)
 
-        def head():
-            k = u.get_value() * (n - 1)
-            i, f = int(k), k - int(k)
-            return i, f, min(i + 1, n - 1)
+def _mapper():
+    """Scale from the true path, padded so nearby ghosts fit; farther points are clipped."""
+    xs, ys = [q[0] for q in TRUTH], [q[1] for q in TRUTH]
+    pad_x, pad_y = 1.0 * (max(xs) - min(xs)), 0.45 * (max(ys) - min(ys))
+    lo_x, hi_x, lo_y, hi_y = min(xs) - pad_x, max(xs) + pad_x, min(ys) - pad_y, max(ys) + pad_y
+    w, h, cx, cy = PLOT
+    scale = min(w / ((hi_x - lo_x) or 1), h / ((hi_y - lo_y) or 1))
+    mx, my = (hi_x + lo_x) / 2, (hi_y + lo_y) / 2
+    return lambda x, y: np.array([cx + (x - mx) * scale, cy + (y - my) * scale, 0.0])
 
-        def line():
-            i, f, j = head()
-            pts_ = self.pos[: i + 1] + [self.pos[i] * (1 - f) + self.pos[j] * f]
-            return VMobject().set_points_as_corners(pts_).set_stroke(color, 8)
 
-        def ring():
-            i, f, j = head()
-            c = self.pos[i] * (1 - f) + self.pos[j] * f
-            ring_pts = make_hero.ellipse((0.0, 0.0), self.cov[i], self.s)
-            corners = [c + np.array([x, -y, 0]) for x, y in ring_pts]
-            return (
-                VMobject()
-                .set_points_as_corners([*corners, corners[0]])
-                .set_stroke(color, 5)
-                .set_fill(color, 0.2)
-            )
+TO = _mapper()
 
-        def dot():
-            i, f, j = head()
-            return Dot(self.pos[i] * (1 - f) + self.pos[j] * f, radius=0.09, color=color)
 
-        self.line, self.ring, self.dot = (
-            always_redraw(line),
-            always_redraw(ring),
-            always_redraw(dot),
-        )
+def _inside(point) -> bool:
+    w, h, cx, cy = PLOT
+    return abs(point[0] - cx) <= w / 2 and abs(point[1] - cy) <= h / 2
 
-    def mobs(self):
-        return [self.truth, self.ring, self.line, self.dot]
+
+def _runs(points):
+    """Split a polyline into the runs that stay inside the frame."""
+    run, runs = [], []
+    for point in points:
+        if _inside(point):
+            run.append(point)
+        else:
+            runs.append(run)
+            run = []
+    runs.append(run)
+    return [r for r in runs if len(r) > 1]
 
 
 class Hook(Scene):
@@ -125,92 +129,108 @@ class Hook(Scene):
                 MUTED,
             ).to_edge(DOWN, buff=0.35)
         )
-        self._opener(BEATS["opener"])
-        self._bridge(BEATS["bridge"])
-        self._real_run(
-            BEATS["hurts"], ("range_only", "fused"), ("range sensor only", "plus camera"), RED
+        self._question(BEATS["question"])
+        self._world(BEATS["one_sensor"], "range_only", GREY)
+        self._world(BEATS["two_sensors"], "fused", BLUE)
+        self._numbers(BEATS["numbers"])
+        self._close(BEATS["close"])
+
+    def _clear(self, *mobs, run_time=0.6):
+        self.play(*[FadeOut(m) for m in mobs], run_time=run_time)
+
+    def _question(self, beat):
+        title = (
+            label("\n".join(beat["text"]), 54, INK, BOLD, line_spacing=1.2)
+            .scale_to_fit_width(8.8)
+            .move_to([0, 1.2, 0])
         )
-        self._real_run(
-            BEATS["recovers"],
-            ("fused", "fused_bias_estimated"),
-            ("camera, bias ignored", "bias estimated"),
-            AMBER,
-        )
+        note = label(beat["note"], 28, MUTED).move_to([0, -1.2, 0]).scale_to_fit_width(8.6)
+        self.play(FadeIn(title, shift=UP * 0.3), run_time=1.0)
+        self.play(FadeIn(note), run_time=0.8)
+        self.wait(beat["duration_s"] - 2.8)
+        self._clear(title, note)
 
-    def _opener(self, beat):
-        tag = label(beat["label"], 22, AMBER, BOLD).to_corner(UP + RIGHT, buff=0.4)
-        room = Rectangle(width=3.6, height=3.0, color="#566070").move_to([-2.9, 1.2, 0])
-        door = Line([-1.1, 0.5, 0], [-1.1, 1.9, 0], color="#0E1116", stroke_width=10)
-        person = Dot([-3.1, 1.2, 0], radius=0.22, color=INK)
-        names = ("range sensor", "camera")
-        w1 = label(names[0], 24, COL["range_only"]).move_to([1.6, 3.4, 0])
-        w2 = label(names[1], 24, COL["fused"]).move_to([3.7, 3.4, 0])
-        listing = label("track list", 24, MUTED).move_to([2.7, 1.9, 0])
-        entry = label("person", 34, INK).move_to([2.7, 1.1, 0])
-        self.play(FadeIn(tag), Create(room), Create(door), FadeIn(person), run_time=0.8)
-        self.play(FadeIn(w1), FadeIn(w2), FadeIn(listing), FadeIn(entry), run_time=0.6)
-        line1 = label(beat["text"][0], 36, INK, BOLD).move_to([0, -1.6, 0])
-        self.play(FadeIn(line1), person.animate.move_to([-0.2, 1.2, 0]), run_time=1.2)
-        self.play(FadeOut(person), run_time=0.4)
-        line2 = label(beat["text"][1], 30, COL["range_only"], BOLD).move_to([0, -2.6, 0])
-        strike = Line([2.0, 1.1, 0], [3.4, 1.1, 0], color=COL["range_only"], stroke_width=6)
-        self.play(FadeIn(line2), Create(strike), run_time=1.0)
-        line3 = label(beat["text"][2], 30, COL["fused"], BOLD).move_to([0, -3.6, 0])
-        ghost = label("person", 34, RED).move_to([2.7, 1.1, 0])
-        self.play(FadeIn(line3), strike.animate.set_opacity(0), FadeIn(ghost), run_time=1.0)
-        self.wait(max(beat["duration_s"] - 5.4, 0.3))
-        self.play(*[FadeOut(m) for m in self.mobjects if m is not self.mobjects[0]], run_time=0.4)
-
-    def _bridge(self, beat):
-        head, tail = beat["text"][0].split(", ", 1)
-        text = label(f"{head},\n{tail}", 46, INK, BOLD, line_spacing=1.2).scale_to_fit_width(8.8)
-        self.play(FadeIn(text, shift=UP * 0.3), run_time=0.6)
-        self.wait(beat["duration_s"] - 1.2)
-        self.play(FadeOut(text), run_time=0.6)
-
-    def _real_run(self, beat, methods, names, accent):
-        n = PLAN["n_seeds"]
-        p = beat["precision"]
-        data = make_hero.simulate(beat["scenario"], beat["seed"])
+    def _world(self, beat, method, color):
+        head = label(beat["text"][0], 46, INK, BOLD).move_to([0, 5.1, 0])
+        sub = label(beat["text"][1], 30, MUTED).move_to([0, 4.3, 0]).scale_to_fit_width(9.0)
+        note = label(beat["note"], 32, INK, BOLD).move_to([0, -4.3, 0]).scale_to_fit_width(9.0)
         u = ValueTracker(0)
-        pts = list(data["ground_truth"]) + [t[0] for m in methods for t in data[m] if t]
-        xs = (-2.45, 2.45)
-        panels = [
-            _Panel(data, m, x, -1.0, 4.4, 6.4, pts, u) for m, x in zip(methods, xs, strict=True)
-        ]
-        l1 = label(beat["text"][0], 50, INK, BOLD).move_to([0, 5.0, 0])
-        l2 = label(beat["text"][1], 50, accent, BOLD).move_to([0, 4.2, 0]).scale_to_fit_width(9.0)
-        caps = [
-            label(name, 28, COL[m]).move_to([x, 2.75, 0])
-            for name, m, x in zip(names, methods, xs, strict=True)
-        ]
-        run_s = beat["duration_s"] - 4.9
-        self.play(
-            FadeIn(l1, shift=UP * 0.3), FadeIn(l2, shift=UP * 0.3), *map(FadeIn, caps), run_time=0.7
+        n = len(TRUTH)
+        truth_path = VMobject().set_points_as_corners([TO(*q) for q in TRUTH])
+        truth_dash = DashedVMobject(truth_path, num_dashes=70).set_stroke("#E6E9EF", 3)
+
+        def frame():
+            return int(u.get_value() * (n - 1))
+
+        def lines():
+            k = frame()
+            group = VGroup()
+            for pts_ in TRACKS[method].values():
+                seen = [TO(x, y) for i, x, y in pts_ if i <= k]
+                for run in _runs(seen):
+                    group.add(VMobject().set_points_as_corners(run).set_stroke(color, 4, 0.85))
+            return group
+
+        mover = always_redraw(lambda: Dot(TO(*TRUTH[frame()]), radius=0.13, color=INK))
+        live = always_redraw(lines)
+        self.play(FadeIn(head), FadeIn(sub), FadeIn(truth_dash), run_time=0.8)
+        self.add(live, mover)
+        self.play(u.animate.set_value(1), run_time=beat["duration_s"] * 0.5, rate_func=linear)
+        self.play(FadeIn(note), run_time=0.6)
+        self.wait(beat["duration_s"] - 0.8 - beat["duration_s"] * 0.5 - 0.6 - 0.6)
+        self._clear(head, sub, note, truth_dash, live, mover)
+
+    def _numbers(self, beat):
+        shown = beat["real_of_100"]
+        head = label(beat["text"][0], 40, INK, BOLD).move_to([0, 5.2, 0])
+        sub = label(beat["text"][1], 40, INK, BOLD).move_to([0, 4.5, 0])
+        self.play(FadeIn(head), FadeIn(sub), run_time=0.8)
+        groups, texts = [], []
+        for x, method, name in zip(
+            (-2.45, 2.45), ("range_only", "fused"), beat["columns"], strict=True
+        ):
+            real = shown[method]
+            dots = VGroup(
+                *[
+                    Dot(
+                        [x + (c - 4.5) * 0.34, 2.5 - r * 0.34 - 0.2, 0],
+                        radius=0.12,
+                        color=INK if r * 10 + c < real else RED,
+                    )
+                    for r in range(10)
+                    for c in range(10)
+                ]
+            )
+            groups.append(dots)
+            texts.append(
+                label(name, 28, GREY if method == "range_only" else BLUE, BOLD).move_to([x, 3.5, 0])
+            )
+            texts.append(
+                label(str(real), 96, INK if method == "range_only" else RED, BOLD).move_to(
+                    [x, -1.7, 0]
+                )
+            )
+            texts.append(label("of 100 were real", 24, MUTED).move_to([x, -2.7, 0]))
+        self.play(*[FadeIn(t) for t in texts[0::3]], run_time=0.5)
+        self.play(*[LaggedStartMap(FadeIn, g, lag_ratio=0.02, run_time=2.2) for g in groups])
+        self.play(*[FadeIn(t) for i, t in enumerate(texts) if i % 3], run_time=0.8)
+        avg = (
+            label(
+                f"white: the real object   red: a ghost   ·   average over {PLAN['n_seeds']} runs",
+                20,
+                MUTED,
+            )
+            .move_to([0, -3.6, 0])
+            .scale_to_fit_width(9.0)
         )
-        self.add(*[m for panel in panels for m in panel.mobs()])
-        self.play(*[FadeIn(panel.truth) for panel in panels], run_time=0.3)
-        self.play(u.animate.set_value(1), run_time=run_s, rate_func=linear)
-        sentence = (
-            "precision vs range-only"
-            if beat["id"] == "hurts"
-            else "precision vs camera, bias ignored"
-        )
-        cap = label(f"{beat['scenario']}, seed {beat['seed']}, one drawn run", 20, MUTED).move_to(
-            [0, 1.3, 0]
-        )
-        k = ValueTracker(0)
-        big = always_redraw(
-            lambda: label(f"{k.get_value():+.3f}", 96, accent, BOLD).move_to([0, -0.2, 0])
-        )
-        sub = label(
-            f"{sentence}, paired over {n} seeds   95% CI [{p['ci95_low']:+.3f}, {p['ci95_high']:+.3f}]",
-            20,
-            MUTED,
-        ).move_to([0, -1.1, 0])
-        gone = [m for panel in panels for m in panel.mobs()] + caps
-        self.play(*map(FadeOut, gone), FadeIn(cap), run_time=0.5)
-        self.add(big)
-        self.play(k.animate.set_value(p["mean"]), FadeIn(sub), run_time=1.4)
-        self.wait(1.5)
-        self.play(*map(FadeOut, [big, sub, cap, l1, l2]), run_time=0.5)
+        self.play(FadeIn(avg), run_time=0.5)
+        self.wait(beat["duration_s"] - 0.8 - 0.5 - 2.2 - 0.8 - 0.5 - 0.6)
+        self._clear(head, sub, avg, *groups, *texts)
+
+    def _close(self, beat):
+        text = label("\n".join(beat["text"]), 46, INK, BOLD, line_spacing=1.2).move_to([0, 1.0, 0])
+        text.scale_to_fit_width(8.8)
+        note = label(beat["note"], 26, MUTED).move_to([0, -1.6, 0]).scale_to_fit_width(8.8)
+        self.play(FadeIn(text, shift=UP * 0.3), run_time=1.0)
+        self.play(FadeIn(note), run_time=0.8)
+        self.wait(beat["duration_s"] - 1.8)

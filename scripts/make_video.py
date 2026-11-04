@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Plan and render the 4:5 Hook video (``make video``).
 
-Beats: an illustrated ghost-witness opener (no numbers, tagged as an illustration), a bridge
-line, then two real runs drawn from one development seed each, with the paired benchmark
-values printed. The framing is about this simulated tracker, not fusion in general: the
+One idea for a non-expert: one real object followed with one sensor, then with a camera added.
+Both are drawn from one real development run (the lines are the tracker's actual tracks), then
+a 100-dot pictogram of the share of reported tracks that were the real object, read from the
+benchmark artifact. The framing is about this simulated tracker, not fusion in general: the
 vision-refresh ablation (``artifacts/ablation/``) shows most of the loss goes away when vision
 cannot refresh tracks the range sensor missed. ``build_plan`` is pure and tested; the Manim
 scene (``video_scene.py``) only draws it. Manim is optional (``uv run --with manim``): without
@@ -32,7 +33,6 @@ VIDEO = OUTPUT_DIR / "hook_video_4x5.mp4"
 SCENE = Path(__file__).resolve().parent / "video_scene.py"
 SIZE = (1080, 1350)
 LABEL = make_hero.LABEL
-ILLUSTRATION_LABEL = "ILLUSTRATION, NOT DATA"
 SOURCES = [
     "artifacts/benchmark/benchmark.json",
     "artifacts/ablation/vision_refresh.md",
@@ -47,51 +47,62 @@ MISSING_MANIM = (
 )
 
 
+def _real_share(payload: dict[str, Any], scenario: str) -> dict[str, int]:
+    """Share of reported tracks that were the real object, per 100, from the artifact."""
+    entry = next(s for s in payload["scenarios"] if s["scenario"]["name"] == scenario)
+    return {
+        method: round(100 * entry["aggregate"][method]["precision"])
+        for method in ("range_only", "fused")
+    }
+
+
 def build_plan(payload: dict[str, Any]) -> dict[str, Any]:
-    """Beats, captions and the numbers to print, all read from the development artifact."""
-    manifest = make_hero.build_manifest(payload)
+    """Beats, captions and the two figures to print, all read from the development artifact."""
     seeds = payload["protocol"]["seeds"]
-    stills = manifest["stills"]
+    scenario = make_hero.choose_hurt_scenario(payload)
     beats: list[dict[str, Any]] = [
         {
-            "id": "opener",
-            "duration_s": 6.5,
-            "label": ILLUSTRATION_LABEL,
-            "text": [
-                "A person leaves the room.",
-                "One witness crosses them off the list.",
-                "The other keeps saying: still here.",
-            ],
+            "id": "question",
+            "duration_s": 7.0,
+            "text": ["Does adding a second sensor", "make tracking better?"],
+            "note": "A computer simulation: one object, two ways to follow it.",
         },
         {
-            "id": "bridge",
-            "duration_s": 2.5,
-            "text": ["In my simulation, the extra camera kept ghost tracks alive."],
+            "id": "one_sensor",
+            "duration_s": 10.0,
+            "text": [
+                "One sensor follows the object.",
+                "Each line is something the tracker thinks is there.",
+            ],
+            "note": "There is really only one object: the dashed path.",
+        },
+        {
+            "id": "two_sensors",
+            "duration_s": 11.0,
+            "text": ["Now add a camera.", "Same object. Many more lines."],
+            "note": "Most of the new lines are ghosts.",
+        },
+        {
+            "id": "numbers",
+            "duration_s": 9.0,
+            "text": ["Of everything the tracker reported,", "how much was the real object?"],
+            "real_of_100": _real_share(payload, scenario),
+            "columns": ["one sensor", "plus camera"],
+        },
+        {
+            "id": "close",
+            "duration_s": 7.0,
+            "text": ["In this simulation,", "the second sensor added ghost tracks."],
+            "note": "Details and limits: telschow.github.io/mosaic-perception",
         },
     ]
-    captions = {
-        "hurts": ["In my simulation,", "adding a camera made tracking worse."],
-        "recovers": ["Estimate the camera's bias,", "and part of the loss comes back."],
-    }
-    durations = {"hurts": 10.0, "recovers": 10.0}
-    for beat_id in ("hurts", "recovers"):
-        still = stills[beat_id]
-        beats.append(
-            {
-                "id": beat_id,
-                "duration_s": durations[beat_id],
-                "text": captions[beat_id],
-                "scenario": still["scenario"],
-                "seed": still["seed"],
-                "comparison": still["comparison"],
-                "precision": still["precision"],
-            }
-        )
     return {
         "label": LABEL,
         "commit": payload["code"]["git_commit"],
         "seed_label": f"development seeds {seeds[0]}-{seeds[-1]}",
         "n_seeds": len(seeds),
+        "scenario": scenario,
+        "seed": min(seeds),
         "size": list(SIZE),
         "total_s": sum(b["duration_s"] for b in beats),
         "beats": beats,
