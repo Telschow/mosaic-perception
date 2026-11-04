@@ -1,22 +1,24 @@
-# Coding standards (review checklist)
+# Review standards
 
-Project rules live in CLAUDE.md and CONSTRAINTS.md. They load on their own. This file only lists what to check in a diff.
+Judgement calls only. Anything a tool can check lives in the tool: `make check` (format, lint, types, tests, provenance, golden benchmark) and `tests/unit/test_repo_guardrails.py`.
+
+## Evidence
+
+- Held-out seeds 25-49 are never run, read for tuning, or regenerated. `artifacts/held-out/` is frozen (see its `FROZEN` and `HELD_OUT.md`).
+- A public number comes from a generated artifact, never typed by hand. A claim states what it rests on: this tracker, these scenarios, these seeds.
+- Say what a result does not show. Overclaims (real-world accuracy, "fusion is worse in general") fail review.
+
+## Public assets
+
+- Every public image, clip or caption carries the synthetic-world label and the source commit.
+- Commit regenerated assets only when a manifest changes (see `docs/demos.md`).
 
 ## Code
 
-- NumPy only. No new runtime dependency.
-- Quaternions are (w, x, y, z). Poses are T_wb. Covariance update is Joseph form.
-- No third-party data is vendored.
-- Every behaviour change has a test. A fix keeps the overconfident single-anchor control row.
+- Reuse the shared helpers (`scripts/_draw.py`, `scripts/make_assets.py`, `evaluation/statistics.py`). A second copy of a helper fails review.
+- A behaviour change has a test at a public seam. The test does not recompute the expected value the way the code does.
+- A change to `src/` that alters numbers regenerates the artifacts in the same PR.
 
 ## Writing
 
-- No em dashes. Short sentences.
-- No invented teams or owners.
-- No hand-typed measured number or count on README.md, docs/index.md, docs/getting-started.md, docs/results.md or docs/status.md. Use the generated tables and markers.
-
-## Decisions and safety
-
-- `vision_enabled` stays False. A passing gate does not change it.
-- An ADR gets created for a decision, but the decision section is left for the maintainer.
-- No force-push, history rewrite, release tag, or deletion of a doc that other pages link to.
+- Plain words, short sentences, no em dashes.
