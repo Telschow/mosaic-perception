@@ -1,0 +1,70 @@
+{
+ "label": "SYNTHETIC WORLD",
+ "commit": "40fee7915f588360db05e83fcc2716460e3ccc21",
+ "seed_label": "development seeds 0-24",
+ "n_seeds": 25,
+ "size": [
+  1080,
+  1350
+ ],
+ "total_s": 29.0,
+ "beats": [
+  {
+   "id": "opener",
+   "duration_s": 6.5,
+   "label": "ILLUSTRATION, NOT DATA",
+   "text": [
+    "A person leaves the room.",
+    "One witness crosses them off the list.",
+    "The other keeps saying: still here."
+   ]
+  },
+  {
+   "id": "bridge",
+   "duration_s": 2.5,
+   "text": [
+    "In my simulation, the extra camera kept ghost tracks alive."
+   ]
+  },
+  {
+   "id": "hurts",
+   "duration_s": 10.0,
+   "text": [
+    "In my simulation,",
+    "adding a camera made tracking worse."
+   ],
+   "scenario": "dense_clutter",
+   "seed": 0,
+   "comparison": "fused_vs_range_only",
+   "precision": {
+    "mean": -0.478,
+    "ci95_low": -0.499,
+    "ci95_high": -0.457
+   }
+  },
+  {
+   "id": "recovers",
+   "duration_s": 10.0,
+   "text": [
+    "Estimate the camera's bias,",
+    "and part of the loss comes back."
+   ],
+   "scenario": "sensor_disagreement_within_gate_high",
+   "seed": 0,
+   "comparison": "bias_estimated_vs_fused",
+   "precision": {
+    "mean": 0.131,
+    "ci95_low": 0.1,
+    "ci95_high": 0.162
+   }
+  }
+ ],
+ "sources": [
+  "artifacts/benchmark/benchmark.json",
+  "artifacts/ablation/vision_refresh.md",
+  "docs-site/src/assets/generated/hero.json",
+  "scripts/make_video.py",
+  "scripts/video_scene.py"
+ ],
+ "output": "hook_video_4x5.mp4"
+}

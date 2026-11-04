@@ -185,7 +185,7 @@ def simulate(name: str, seed: int) -> dict[str, Any]:
     }
 
 
-def _ellipse(
+def ellipse(
     center: tuple[float, float], cov: list[list[float]], scale: float
 ) -> list[tuple[float, float]]:
     a, b, c = cov[0][0], cov[0][1], cov[1][1]
@@ -270,7 +270,7 @@ def render_still(data: dict[str, Any], still: dict[str, Any]) -> Any:
             draw.line(track_px, fill=COLORS[method], width=4)
         if track:
             draw.polygon(
-                _ellipse(track_px[-1], track[-1][1], scale), outline=COLORS[method], width=3
+                ellipse(track_px[-1], track[-1][1], scale), outline=COLORS[method], width=3
             )
     draw.text(
         (30, height - FOOTER_H + 6),
