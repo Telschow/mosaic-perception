@@ -1,4 +1,4 @@
-"""Hook video plan: honest framing, numbers from the artifact, optional Manim."""
+"""Hook video plan: one idea, plain words, numbers from the artifact, optional Manim."""
 
 from __future__ import annotations
 
@@ -24,43 +24,46 @@ def _payload(mv):
     return json.loads(mv.make_assets.BENCHMARK.read_text())
 
 
-def test_the_opener_is_labelled_an_illustration_and_shows_no_numbers():
+def test_one_idea_in_five_beats():
     mv = _load()
     plan = mv.build_plan(_payload(mv))
-    opener = plan["beats"][0]
-    assert opener["id"] == "opener"
-    assert "illustration, not data" in opener["label"].lower()
-    for line in opener["text"]:
-        assert not re.search(r"\d", line), line
+    assert [b["id"] for b in plan["beats"]] == [
+        "question",
+        "one_sensor",
+        "two_sensors",
+        "numbers",
+        "close",
+    ]
 
 
-def test_beats_run_opener_then_bridge_then_the_real_runs():
+def test_only_the_numbers_beat_carries_figures_and_captions_have_no_digits():
     mv = _load()
-    plan = mv.build_plan(_payload(mv))
-    assert [b["id"] for b in plan["beats"]] == ["opener", "bridge", "hurts", "recovers"]
+    for beat in mv.build_plan(_payload(mv))["beats"]:
+        for line in [*beat["text"], beat.get("note", "")]:
+            assert not re.search(r"\d", line), (beat["id"], line)
+        assert ("real_of_100" in beat) == (beat["id"] == "numbers")
 
 
 def test_the_framing_is_about_this_simulation_not_fusion_in_general():
     mv = _load()
     plan = mv.build_plan(_payload(mv))
-    text = " ".join(" ".join(b["text"]) for b in plan["beats"]).lower()
-    assert "in my simulation" in text
-    assert "i added a sensor" not in text
-    assert "fusion is" not in text
+    text = " ".join(" ".join([*b["text"], b.get("note", "")]) for b in plan["beats"]).lower()
+    assert "simulation" in text
+    assert "fusion is" not in text and "always" not in text
 
 
-def test_real_run_numbers_are_the_artifacts_paired_values():
+def test_the_two_figures_are_the_artifacts_scenario_means():
     mv = _load()
     payload = _payload(mv)
     plan = mv.build_plan(payload)
-    stills = mv.make_hero.build_manifest(payload)["stills"]
-    by_id = {b["id"]: b for b in plan["beats"]}
-    for beat_id in ("hurts", "recovers"):
-        beat, still = by_id[beat_id], stills[beat_id]
-        assert beat["scenario"] == still["scenario"]
-        assert beat["seed"] == still["seed"]
-        assert beat["precision"] == still["precision"]
-    assert plan["n_seeds"] == len(payload["protocol"]["seeds"])
+    entry = next(s for s in payload["scenarios"] if s["scenario"]["name"] == plan["scenario"])
+    shown = next(b for b in plan["beats"] if b["id"] == "numbers")["real_of_100"]
+    assert shown == {
+        "range_only": round(100 * entry["aggregate"]["range_only"]["precision"]),
+        "fused": round(100 * entry["aggregate"]["fused"]["precision"]),
+    }
+    assert shown["fused"] < shown["range_only"]
+    assert plan["scenario"] == mv.make_hero.choose_hurt_scenario(payload)
 
 
 def test_label_seed_group_and_commit_are_carried():
@@ -70,11 +73,19 @@ def test_label_seed_group_and_commit_are_carried():
     assert plan["label"] == "SYNTHETIC WORLD"
     assert plan["seed_label"] == "development seeds 0-24"
     assert plan["commit"] == payload["code"]["git_commit"]
+    assert plan["seed"] == 0
+
+
+def test_every_caption_is_held_long_enough_to_read():
+    mv = _load()
+    for beat in mv.build_plan(_payload(mv))["beats"]:
+        words = sum(len(line.split()) for line in [*beat["text"], beat.get("note", "")])
+        assert beat["duration_s"] >= 4.0 and beat["duration_s"] >= words * 0.35, beat["id"]
 
 
 def test_length_is_a_feed_length():
     mv = _load()
-    assert 15 <= mv.build_plan(_payload(mv))["total_s"] <= 30
+    assert 35 <= mv.build_plan(_payload(mv))["total_s"] <= 45
 
 
 def test_format_is_four_by_five():
