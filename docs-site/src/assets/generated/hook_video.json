@@ -1,6 +1,7 @@
 {
  "label": "SYNTHETIC WORLD",
  "commit": "40fee7915f588360db05e83fcc2716460e3ccc21",
+ "poster_s": 23.3,
  "seed_label": "development seeds 0-24",
  "n_seeds": 25,
  "scenario": "dense_clutter",
@@ -71,5 +72,6 @@
   "scripts/make_video.py",
   "scripts/video_scene.py"
  ],
- "output": "hook_video_4x5.mp4"
+ "output": "hook_video_4x5.mp4",
+ "poster": "hook_video_poster.png"
 }

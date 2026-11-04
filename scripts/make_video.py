@@ -30,6 +30,7 @@ import make_hero  # noqa: E402
 OUTPUT_DIR = Path("docs-site/src/assets/generated")
 MANIFEST = OUTPUT_DIR / "hook_video.json"
 VIDEO = OUTPUT_DIR / "hook_video_4x5.mp4"
+POSTER = OUTPUT_DIR / "hook_video_poster.png"
 SCENE = Path(__file__).resolve().parent / "video_scene.py"
 SIZE = (1080, 1350)
 LABEL = make_hero.LABEL
@@ -96,9 +97,17 @@ def build_plan(payload: dict[str, Any]) -> dict[str, Any]:
             "note": "Details and limits: telschow.github.io/mosaic-perception",
         },
     ]
+    start = 0.0
+    poster_s = 0.0
+    for beat in beats:
+        if beat["id"] == "two_sensors":
+            # The end of the draw-on: the ghosts are all on screen, the caption has landed.
+            poster_s = start + 0.8 + beat["duration_s"] * 0.5
+        start += beat["duration_s"]
     return {
         "label": LABEL,
         "commit": payload["code"]["git_commit"],
+        "poster_s": poster_s,
         "seed_label": f"development seeds {seeds[0]}-{seeds[-1]}",
         "n_seeds": len(seeds),
         "scenario": scenario,
@@ -109,8 +118,25 @@ def build_plan(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def poster_command(video: Path, poster: Path, at_s: float) -> list[str]:
+    """One frame of the finished video, used as the thumbnail on the README and the site."""
+    return [
+        "ffmpeg",
+        "-y",
+        "-loglevel",
+        "error",
+        "-ss",
+        f"{at_s:.2f}",
+        "-i",
+        str(video),
+        "-frames:v",
+        "1",
+        str(poster),
+    ]
+
+
 def build_manifest(plan: dict[str, Any]) -> dict[str, Any]:
-    return {**plan, "sources": SOURCES, "output": VIDEO.name}
+    return {**plan, "sources": SOURCES, "output": VIDEO.name, "poster": POSTER.name}
 
 
 def main(render: bool = False) -> int:
@@ -140,7 +166,8 @@ def main(render: bool = False) -> int:
             check=True,
         )
         shutil.copy(next(Path(tmp).rglob("Hook.mp4")), VIDEO)
-    print(f"wrote {VIDEO}")
+    subprocess.run(poster_command(VIDEO, POSTER, plan["poster_s"]), check=True)
+    print(f"wrote {VIDEO} and {POSTER}")
     return 0
 
 

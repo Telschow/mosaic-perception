@@ -74,3 +74,13 @@ def test_readme_hero_and_landing_page_use_the_generated_alt_text():
     assert f'alt="{alts["summary_clip"]}"' in landing
     first_screen = readme.split("### Status")[0]
     assert "hero_recovers.png" in first_screen
+
+
+def test_readme_and_landing_page_show_the_hook_video_with_its_alt_text():
+    alts = _committed()
+    readme = (ROOT / "README.md").read_text()
+    assert f'alt="{alts["hook_video_poster"]}"' in readme
+    assert "hook_video_poster.png" in readme.split("### Status")[0]
+    landing = (ROOT / "docs-site" / "src" / "content" / "docs" / "index.mdx").read_text()
+    assert f'aria-label="{alts["hook_video_poster"]}"' in landing
+    assert "hook_video_4x5.mp4" in landing and "controls" in landing

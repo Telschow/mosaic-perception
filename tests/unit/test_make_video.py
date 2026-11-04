@@ -113,3 +113,20 @@ def test_without_manim_it_stops_with_a_clear_message_and_renders_nothing(capsys)
         assert mv.main(render=True) == 1
     run.assert_not_called()
     assert "manim" in capsys.readouterr().err.lower()
+
+
+def test_poster_is_taken_where_the_ghosts_are_on_screen():
+    mv = _load()
+    plan = mv.build_plan(_payload(mv))
+    start = 0.0
+    for beat in plan["beats"]:
+        if beat["id"] == "two_sensors":
+            assert start < plan["poster_s"] < start + beat["duration_s"]
+        start += beat["duration_s"]
+
+
+def test_poster_command_extracts_one_frame_at_that_time():
+    mv = _load()
+    command = mv.poster_command(Path("v.mp4"), Path("p.png"), 23.3)
+    assert command[0] == "ffmpeg" and "-frames:v" in command
+    assert command[command.index("-ss") + 1] == "23.30" and command[-1] == "p.png"

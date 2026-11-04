@@ -3,6 +3,12 @@
 **A reproducible workbench for multi-sensor perception, object tracking and uncertainty.**
 
 <p align="center">
+  <a href="https://telschow.github.io/mosaic-perception/#watch-the-explainer"><img src="docs-site/src/assets/generated/hook_video_poster.png" alt="Frame from a 44-second explainer video of a synthetic world (dense_clutter, development seeds 0-24): one real object follows a dashed path, and with a camera added the tracker draws many extra ghost lines away from it. Of every 100 tracks reported, 82 were the real object with one sensor and 34 with the camera added." width="340"></a>
+</p>
+
+<p align="center"><em>Watch the 44-second explainer on the <a href="https://telschow.github.io/mosaic-perception/#watch-the-explainer">project site</a>. Synthetic world, one drawn run; the two figures are the benchmark means over the 25 development seeds.</em></p>
+
+<p align="center">
   <img src="docs-site/src/assets/generated/hero_recovers.png" alt="Three panels of one simulated target in the sensor_disagreement_within_gate_high scenario of a synthetic world: range sensor only (baseline), camera added: worse here, and bias corrected: partly recovered. Ground truth is dashed; each panel marks the 95% position uncertainty at the end of the track. Paired precision difference, bias-estimated against fused: +0.131, 95% interval [+0.100, +0.162]." width="620">
 </p>
 
