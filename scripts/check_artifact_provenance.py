@@ -132,7 +132,9 @@ def check_directory(directory: Path) -> DirectoryResult:
         failures += check_frozen_declaration(declared, commit)
         result.frozen_at = declared
         declared_hash = read_frozen_sha256(directory)
-        if declared_hash is not None:
+        if declared_hash is None:
+            failures.append(f"{FROZEN_FILE} has no `sha256 <hex>` line for benchmark.json")
+        else:
             failures += check_frozen_hash(declared_hash, artifact_path)
 
     if _git("cat-file", "-e", f"{commit}^{{commit}}").returncode != 0:

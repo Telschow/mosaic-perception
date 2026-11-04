@@ -101,3 +101,11 @@ def test_held_out_benchmark_hash_is_declared_and_matches() -> None:
     declared = provenance.read_frozen_sha256(directory)
     assert declared is not None
     assert provenance.check_frozen_hash(declared, directory / "benchmark.json") == []
+
+
+def test_frozen_directory_without_a_benchmark_hash_fails(tmp_path: Path) -> None:
+    payload = {"code": {"git_commit": COMMIT, "package_version": "0.1.0"}}
+    (tmp_path / "benchmark.json").write_text(json.dumps(payload))
+    (tmp_path / "FROZEN").write_text(f"{COMMIT}\n")
+    result = provenance.check_directory(tmp_path)
+    assert any("sha256" in failure for failure in result.failures)

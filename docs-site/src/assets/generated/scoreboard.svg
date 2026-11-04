@@ -16,7 +16,7 @@
   </rdf:RDF>
  </metadata>
  <title>Scoreboard: scenarios where the treatment is better or worse</title>
- <desc>{"commit": "2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d", "rows": [{"better": 0, "comparison": "fused_vs_range_only", "inconclusive": 1, "metric": "precision", "worse": 14}, {"better": 0, "comparison": "fused_vs_range_only", "inconclusive": 2, "metric": "mota", "worse": 14}, {"better": 3, "comparison": "bias_estimated_vs_fused", "inconclusive": 11, "metric": "precision", "worse": 1}, {"better": 3, "comparison": "bias_estimated_vs_fused", "inconclusive": 12, "metric": "mota", "worse": 1}]}</desc>
+ <desc>{"commit": "a126a7066bb1d6df932caf8c83b4959768092de7", "rows": [{"better": 0, "comparison": "fused_vs_range_only", "inconclusive": 1, "metric": "precision", "worse": 14}, {"better": 0, "comparison": "fused_vs_range_only", "inconclusive": 2, "metric": "mota", "worse": 14}, {"better": 3, "comparison": "bias_estimated_vs_fused", "inconclusive": 11, "metric": "precision", "worse": 1}, {"better": 3, "comparison": "bias_estimated_vs_fused", "inconclusive": 12, "metric": "mota", "worse": 1}]}</desc>
  <defs>
   <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
  </defs>
@@ -385,7 +385,7 @@ z
    </g>
   </g>
   <g id="text_29">
-   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="257.904" transform="rotate(-0 570.24 257.904)">artifact commit 2d560be933f2</text>
+   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="257.904" transform="rotate(-0 570.24 257.904)">artifact commit a126a7066bb1</text>
   </g>
  </g>
  <defs>

@@ -16,7 +16,7 @@
   </rdf:RDF>
  </metadata>
  <title>Bias recovery scenario: precision and MOTA by method</title>
- <desc>{"commit": "2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d", "metrics": {"mota": {"fused": 0.09174917491749175, "fused_bias_estimated": 0.4504290429042904, "paired": {"ci95_high": 0.43620564035464887, "ci95_low": 0.2811540956189484, "mean": 0.35867986798679863}, "range_only": 0.7457425742574257, "recovered_share": 0.5484457004440856}, "precision": {"fused": 0.5350437443633459, "fused_bias_estimated": 0.6659957838138391, "paired": {"ci95_high": 0.16173861099364562, "ci95_low": 0.10016546790734077, "mean": 0.1309520394504932}, "range_only": 0.8258558705608234, "recovered_share": 0.45029772713662386}}, "scenario": "sensor_disagreement_within_gate_high"}</desc>
+ <desc>{"commit": "a126a7066bb1d6df932caf8c83b4959768092de7", "metrics": {"mota": {"fused": 0.09174917491749175, "fused_bias_estimated": 0.4504290429042904, "paired": {"ci95_high": 0.43620564035464887, "ci95_low": 0.2811540956189484, "mean": 0.35867986798679863}, "range_only": 0.7457425742574257, "recovered_share": 0.5484457004440856}, "precision": {"fused": 0.5350437443633459, "fused_bias_estimated": 0.6659957838138391, "paired": {"ci95_high": 0.16173861099364562, "ci95_low": 0.10016546790734077, "mean": 0.1309520394504932}, "range_only": 0.8258558705608234, "recovered_share": 0.45029772713662386}}, "scenario": "sensor_disagreement_within_gate_high"}</desc>
  <defs>
   <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
  </defs>
@@ -370,7 +370,7 @@ L 565.2 116.949207
    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(183.811719 26.074148)">Synthetic world, development seeds 0-24</text>
   </g>
   <g id="text_28">
-   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="272.232" transform="rotate(-0 570.24 272.232)">artifact commit 2d560be933f2</text>
+   <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: end" x="570.24" y="272.232" transform="rotate(-0 570.24 272.232)">artifact commit a126a7066bb1</text>
   </g>
  </g>
  <defs>
