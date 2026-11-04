@@ -1,6 +1,6 @@
 {
  "label": "SYNTHETIC WORLD",
- "commit": "2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d",
+ "commit": "a126a7066bb1d6df932caf8c83b4959768092de7",
  "stills": {
   "hurts": {
    "file": "hero_hurts.png",
@@ -19,7 +19,7 @@
     "fused": "camera added: worse here",
     "fused_bias_estimated": "bias estimated: no clear change"
    },
-   "source_commit": "2d560be933f2",
+   "source_commit": "a126a7066bb1",
    "alt": "Three panels of one simulated target in the dense_clutter scenario of a synthetic world: range sensor only (baseline), camera added: worse here, and bias estimated: no clear change. Ground truth is dashed; each panel marks the 95% position uncertainty at the end of the track. Paired precision difference, fused against range-only: -0.478, 95% interval [-0.499, -0.457]."
   },
   "recovers": {
@@ -39,7 +39,7 @@
     "fused": "camera added: worse here",
     "fused_bias_estimated": "bias corrected: partly recovered"
    },
-   "source_commit": "2d560be933f2",
+   "source_commit": "a126a7066bb1",
    "alt": "Three panels of one simulated target in the sensor_disagreement_within_gate_high scenario of a synthetic world: range sensor only (baseline), camera added: worse here, and bias corrected: partly recovered. Ground truth is dashed; each panel marks the 95% position uncertainty at the end of the track. Paired precision difference, bias-estimated against fused: +0.131, 95% interval [+0.100, +0.162]."
   }
  }

@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `2d560be933f2dbfa483f4c76bedf4cbbb4e6be1d`
+- Git commit: `a126a7066bb1d6df932caf8c83b4959768092de7`
 - Seeds: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 - Seed group: development
 - Duration: 10.0 s at dt=0.1 s
@@ -1083,7 +1083,8 @@ observations behind each mean age of information.
 ## Findings
 
 - Position RMSE: the paired interval excludes zero in favour of fusion in 1 scenario(s) and against fusion in 6 scenario(s); it includes zero (or has fewer than two seeds) in 8 scenario(s).
-- The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in 7 scenario(s), against fusion in 3, and includes zero in 5.
+- The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in 7 scenario(s), against fusion in 3, and includes zero in 5. The sign of the net tally differs between the two matchers, so the direction depends on the matcher and position accuracy is not established either way.
+- Bonferroni-adjusted over the scenarios scored for each metric (family-wise 95%), fusion against range-only: precision better in 0, worse in 14; MOTA better in 0, worse in 14; GOSPA better in 0, worse in 14.
 - MOTA, IDF1 and GOSPA (interval excludes zero): fusion better in 0, 3 and 0 scenario(s) and worse in 14, 5 and 14, respectively.
 - fused-bias-estimated against fused (interval excludes zero): position RMSE: better in 3, worse in 0, inconclusive in 12; precision: better in 3, worse in 1, inconclusive in 11; MOTA: better in 3, worse in 1, inconclusive in 12; GOSPA: better in 3, worse in 1, inconclusive in 12.
 - Fused precision is lower (interval excludes zero) in 14 scenario(s) and higher in 0; fused 95% coverage is lower in 12 and higher in 1. Accuracy alone does not establish that fusion improved association or calibration.
@@ -1122,8 +1123,11 @@ observations behind each mean age of information.
 - Fixed text: tallies count scenarios, not independent trials. A scenario with
   `n == 0` for a metric is skipped in that metric's tally, so better, worse and
   inconclusive counts can sum to fewer than the number of scenarios. Scored in 15 of 16 scenario(s) for position RMSE.
-- No multiplicity correction is applied across scenarios, metrics or comparisons;
-  with this many 95% intervals some will exclude zero by chance.
+- The intervals in the tables are unadjusted 95% intervals; across this many
+  scenarios, metrics and comparisons some will exclude zero by chance. The
+  Findings give a Bonferroni-adjusted tally for the primary metrics.
+- 11 distinct `range_only` baseline(s) across 16 scenario(s) with runs.
+- 6 scenarios share a bit-identical `range_only` baseline: nominal, sensor_disagreement_large_bias, sensor_disagreement_within_gate, sensor_disagreement_within_gate_high, sensor_disagreement_within_gate_low, vision_dropout. Their paired tallies reuse that baseline and are not independent.
 - 4 zero-width interval(s) are not counted as findings: identical paired differences give no spread estimate, so they are tallied as inconclusive and marked `(degenerate)` in the paired table.
 
 ## Limitations

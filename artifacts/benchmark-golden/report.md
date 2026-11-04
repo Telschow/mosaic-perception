@@ -7,7 +7,7 @@ same seeds and commit are byte-identical.
 ## Code and protocol
 
 - Package version: `0.1.0`
-- Git commit: `b44a8908be407cf822d4e036fd7be2ba9a2e42b3`
+- Git commit: `a126a7066bb1d6df932caf8c83b4959768092de7`
 - Seeds: 0, 1
 - Seed group: development
 - Duration: 2.0 s at dt=0.1 s
@@ -212,6 +212,7 @@ observations behind each mean age of information.
 
 - Position RMSE: the paired interval excludes zero in favour of fusion in 0 scenario(s) and against fusion in 0 scenario(s); it includes zero (or has fewer than two seeds) in 2 scenario(s).
 - The RMSE tally depends on the matcher: with a distance-only matcher the interval excludes zero in favour of fusion in 0 scenario(s), against fusion in 0, and includes zero in 2.
+- Bonferroni-adjusted over the scenarios scored for each metric (family-wise 95%), fusion against range-only: precision better in 0, worse in 0; MOTA better in 0, worse in 0; GOSPA better in 0, worse in 0.
 - MOTA, IDF1 and GOSPA (interval excludes zero): fusion better in 0, 0 and 0 scenario(s) and worse in 1, 0 and 1, respectively.
 - fused-bias-estimated against fused (interval excludes zero): position RMSE: better in 0, worse in 0, inconclusive in 2; precision: better in 0, worse in 0, inconclusive in 2; MOTA: better in 0, worse in 0, inconclusive in 2; GOSPA: better in 0, worse in 0, inconclusive in 2.
 - Fused precision is lower (interval excludes zero) in 0 scenario(s) and higher in 0; fused 95% coverage is lower in 1 and higher in 0. Accuracy alone does not establish that fusion improved association or calibration.
@@ -250,8 +251,11 @@ observations behind each mean age of information.
 - Fixed text: tallies count scenarios, not independent trials. A scenario with
   `n == 0` for a metric is skipped in that metric's tally, so better, worse and
   inconclusive counts can sum to fewer than the number of scenarios. Scored in 2 of 2 scenario(s) for position RMSE.
-- No multiplicity correction is applied across scenarios, metrics or comparisons;
-  with this many 95% intervals some will exclude zero by chance.
+- The intervals in the tables are unadjusted 95% intervals; across this many
+  scenarios, metrics and comparisons some will exclude zero by chance. The
+  Findings give a Bonferroni-adjusted tally for the primary metrics.
+- 1 distinct `range_only` baseline(s) across 2 scenario(s) with runs.
+- 2 scenarios share a bit-identical `range_only` baseline: nominal, sensor_disagreement_within_gate. Their paired tallies reuse that baseline and are not independent.
 
 ## Limitations
 
