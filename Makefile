@@ -1,4 +1,4 @@
-.PHONY: install check test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets mp4 ablation docs-preview
+.PHONY: install check test lint format format-check typecheck clean run compare evaluate benchmark app trackeval-reference benchmark-golden benchmark-golden-check provenance-check assets mp4 video ablation docs-preview
 
 install:
 	uv sync --locked --all-extras
@@ -50,6 +50,9 @@ benchmark-golden:
 benchmark-golden-check:
 	uv run python scripts/check_benchmark_golden.py
 
+video:
+	uv run --with manim python scripts/make_video.py
+
 ablation:
 	uv run python scripts/ablate_vision_refresh.py
 
@@ -61,6 +64,7 @@ assets:
 	uv run python scripts/make_clips.py
 	uv run python scripts/make_summary_clip.py
 	uv run python scripts/make_hero.py
+	uv run python scripts/make_video.py --manifest-only
 	uv run python scripts/make_alt_text.py
 
 mp4:
