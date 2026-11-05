@@ -2,6 +2,8 @@
 
 This directory is the single held-out run of the reserved seeds 25-49.
 
+> Frozen historical result at `8baa778`. It predates later tracker and metric changes (for example the age-of-information definition), so it is not a result for the current code, not directly comparable to the development benchmark, and not a generalization claim.
+
 - Code: commit `8baa778e86826ddbdcb4b27ef07d7ca9b993e354`, tagged `held-out-freeze`.
   The code was merged and frozen before the run. No change was made in response to the results.
 - Command: `mosaic benchmark --scenario all --seeds 25-49 --duration 10.0 --output artifacts/held-out`
