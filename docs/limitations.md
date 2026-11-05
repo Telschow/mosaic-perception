@@ -178,10 +178,12 @@
 - Tallies in the report's Findings and in the README count scenarios as if they
   were independent, but they are not: `range_only` is bit-identical across six
   scenarios (`nominal`, the four `sensor_disagreement_*` and `vision_dropout`), so the
-  same baseline is counted repeatedly, no multiplicity correction is applied across
-  16 scenarios and many metrics of 95% intervals, and scenarios with no matched
-  samples (`stale_rejection`) are left out of every count. Read the tallies as
-  descriptive counts, not as tests.
+  same baseline is counted repeatedly, and scenarios with no matched
+  samples (`stale_rejection`) are left out of every count. Only the report's
+  Bonferroni-adjusted tally for precision, MOTA and GOSPA corrects for 16 scenarios;
+  the other tallies (position RMSE, NEES, the extra comparisons) and the 95% intervals
+  in the tables are unadjusted. Read the unadjusted tallies as descriptive counts, not
+  as tests, and the adjusted one as conditional on the dependence above.
 - Coverage is empirical and only defined over matched samples. It is not a
   detection or association calibration metric.
 - Reported covariance can be badly miscalibrated. In the checked-in
