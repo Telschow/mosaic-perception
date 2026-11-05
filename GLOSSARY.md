@@ -90,8 +90,20 @@ A constant offset in the vision sensor's reported bearing; the scenarios inject 
 Seeds 0–24, usable for debugging and the checked-in benchmark.
 
 **Held-out seeds**:
-Seeds 25–49, reserved and not run for any checked-in result.
+Seeds 25–49, reserved; run once, at a frozen commit.
 _Avoid_: Test seeds
+
+**Frozen run**:
+A result kept as run at an earlier commit and not regenerated, so it describes that version and not the current one.
+_Avoid_: Validation of the current code
+
+**Track-sample purity**:
+Of all confirmed or coasting track samples, the share matched to a real object. The benchmark artifacts key it `precision`.
+_Avoid_: Precision, detection precision
+
+**Exploratory selection**:
+Choosing the example to show by looking at the results, so its interval is not adjusted for the choice.
+_Avoid_: Confirmed result
 
 ## Sensor disagreement
 
