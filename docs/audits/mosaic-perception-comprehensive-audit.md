@@ -82,7 +82,8 @@ These were executed or recomputed, not only read.
     over 2000 random states is 1.0e-8 (range-bearing) and 9.8e-10 (bearing).
   - Mean NIS over 4000 draws is 2.98 (expected 3).
   - Joseph form: asymmetry 0.0 and minimum eigenvalue 3.4e-3 after 3000
-    predict-update cycles. Near-singular R (1e-12) and a 1e6-variance prior stay PSD.
+    predict-update cycles (a one-off check then; now covered by
+    `test_long_run_predict_update_cycles_stay_finite_symmetric_and_psd`). Near-singular R (1e-12) and a 1e6-variance prior stay PSD.
   - Innovation wraps the residual, so the bearing discontinuity at the cut does
     not reach the update. Coincident geometry raises `ValueError`.
   - 22 tests (`test_ekf`, `test_sensors`, `test_observer_pose`) and 13 bias tests
