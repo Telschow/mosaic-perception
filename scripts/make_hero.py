@@ -154,7 +154,7 @@ def _alt(scenario: str, labels: dict[str, str], interval: dict[str, float], comp
         f"Three panels of one simulated target in the {scenario} scenario of a synthetic world: "
         f"range sensor only ({labels['range_only']}), {labels['fused']}, and {labels['fused_bias_estimated']}. "
         f"Ground truth is dashed; each panel marks the 95% position uncertainty at the end of the track. "
-        f"Paired precision difference, {what}: {interval['mean']:+.3f}, "
+        f"Paired track-sample purity difference, {what}: {interval['mean']:+.3f}, "
         f"95% interval [{interval['ci95_low']:+.3f}, {interval['ci95_high']:+.3f}]."
     )
 
@@ -224,7 +224,12 @@ def render_still(data: dict[str, Any], still: dict[str, Any]) -> Any:
     )
     draw.text(
         (30, 128),
-        f"Over {still['n_seeds']} seeds: {SHORT[still['comparison']]} precision "
+        f"Over {still['n_seeds']} seeds, {SHORT[still['comparison']]} track-sample purity:",
+        fill=COLORS["text"],
+        font=body,
+    )
+    draw.text(
+        (30, 158),
         f"{p['mean']:+.3f} [{p['ci95_low']:+.3f}, {p['ci95_high']:+.3f}]",
         fill=COLORS["text"],
         font=body,
