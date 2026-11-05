@@ -153,6 +153,47 @@ def test_update_symmetry_and_positive_semidefinite_covariance():
     assert np.all(np.isfinite(state))
 
 
+def test_long_run_predict_update_cycles_stay_finite_symmetric_and_psd():
+    ekf = ExtendedKalmanFilter(dt=0.1)
+    rng = np.random.default_rng(0)
+    truth = np.array([30.0, 5.0, 1.0, -0.5])
+    state = truth + np.array([1.0, -1.0, 0.2, 0.2])
+    covariance = np.diag([4.0, 4.0, 1.0, 1.0])
+    observer = pose(0.0, 0.0, 0.3)
+    range_noise = np.diag([0.25, 1e-4, 0.01])
+    vision_noise = np.array([[2.5e-5]])
+
+    for _ in range(3000):
+        truth = ekf.transition @ truth
+        state, covariance = ekf.predict(state, covariance)
+        measured = ekf.measurement_range_bearing(truth, observer) + rng.multivariate_normal(
+            np.zeros(3), range_noise
+        )
+        state, covariance = ekf.update(
+            state,
+            covariance,
+            measured,
+            ekf.jacobian_range_bearing(state, observer),
+            range_noise,
+            ekf.measurement_range_bearing(state, observer),
+            angle_indices=(1,),
+        )
+        measured = ekf.measurement_bearing(truth, observer) + rng.normal(0.0, 5e-3)
+        state, covariance = ekf.update(
+            state,
+            covariance,
+            measured,
+            ekf.jacobian_bearing(state, observer),
+            vision_noise,
+            ekf.measurement_bearing(state, observer),
+            angle_indices=(0,),
+        )
+
+    assert np.all(np.isfinite(state)) and np.all(np.isfinite(covariance))
+    assert np.allclose(covariance, covariance.T)
+    assert np.all(np.linalg.eigvalsh(covariance) >= -1e-10)
+
+
 def test_update_rejects_indefinite_measurement_covariance():
     ekf = ExtendedKalmanFilter(dt=0.1)
     state = np.array([10.0, 0.0, 0.0, 0.0])
