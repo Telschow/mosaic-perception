@@ -59,8 +59,8 @@ def build_alt_text() -> dict[str, str]:
         ),
         "bias_recovery": (
             f"Two bar charts for the {recovery['scenario']} scenario of a synthetic world: "
-            f"precision and MOTA for range-only, fused and bias-estimated tracking. Bias estimation "
-            f"{verdict} {share:.0%} of the precision fused tracking lost."
+            f"track-sample purity and MOTA for range-only, fused and bias-estimated tracking. Bias estimation "
+            f"{verdict} {share:.0%} of the track-sample purity fused tracking lost."
         ),
         "scenario_clip": (
             f"Animation of one target in the {clip['scenario']} scenario of a synthetic world "
@@ -70,7 +70,7 @@ def build_alt_text() -> dict[str, str]:
         "summary_clip": (
             "Animated summary of a simulated, synthetic world, in five beats. One: a moving target "
             "is tracked by a range sensor alone. Two: a camera is added and the track looks better. "
-            "Three: a scoreboard shows the fused tracker is worse than range-only on precision and "
+            "Three: a scoreboard shows the fused tracker is worse than range-only on track-sample purity and "
             f"MOTA in most scenarios. Four: in the {recovery['scenario']} scenario, where the camera "
             f"has a small bearing bias, estimating the bias {verdict} part of fusion's loss. Five: "
             "an end card reading Synthetic world, full results and limits, with this site's address."
