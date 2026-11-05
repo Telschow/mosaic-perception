@@ -12,13 +12,13 @@
   <img src="docs-site/src/assets/generated/hero_recovers.png" alt="Three panels of one simulated target in the sensor_disagreement_within_gate_high scenario of a synthetic world: range sensor only (baseline), camera added: worse here, and bias corrected: partly recovered. Ground truth is dashed; each panel marks the 95% position uncertainty at the end of the track. Paired precision difference, bias-estimated against fused: +0.131, 95% interval [+0.100, +0.162]." width="620">
 </p>
 
-<p align="center"><em>Synthetic world, one drawn run. The figures are paired results over the 25 development seeds. Chosen by a rule from the benchmark artifact, not by hand; see <a href="docs/demos.md">docs/demos.md</a>.</em></p>
+<p align="center"><em>Synthetic world, one drawn run. The figures are paired results over the 25 development seeds. Exploratory best case: a rule picked the scenario with the largest paired precision gain of bias estimation over fusion whose interval excludes zero, which is 3 of the 16 scenarios, and the interval is not adjusted for that selection. Bias estimation here corrects a vision bearing bias that passes the gate, against an unbiased range-bearing anchor. The full per-scenario table is in <a href="artifacts/benchmark/report.md">the report</a>; see <a href="docs/demos.md">docs/demos.md</a>.</em></p>
 
 Mosaic is a deterministic synthetic workbench for investigating a narrow but important question: *when does combining noisy, asynchronous sensor observations improve an estimate of a moving object's state, and when can fusion make the result worse?*
 
 It compares a **range-bearing-sensor-only baseline** (method identifier `range_only`, no vision at all) with a **fused** method that adds vision-like bearing observations, and a third method, **fused_bias_estimated**, that also estimates a constant vision bearing bias and removes it before gating and updating. All methods run on the same worlds and the same sensor random streams, so the comparisons are paired rather than comparisons of unrelated runs.
 
-**All results in this repository are synthetic.** The development benchmark uses seeds 0–24. The reserved seeds 25–49 were run once at `8baa778`. The numbers are in [the held-out report](artifacts/held-out/report.md), not repeated here.
+**All results in this repository are synthetic.** The development benchmark uses seeds 0–24. The reserved seeds 25–49 were run once at `8baa778`, before the later tracker and metric changes (including the age-of-information definition), so that run is a frozen historical result: not a result for the current code, not directly comparable to the development numbers, and not a generalization claim. The numbers are in [the held-out report](artifacts/held-out/report.md), not repeated here; see [its note](artifacts/held-out/HELD_OUT.md).
 
 ### Status
 
