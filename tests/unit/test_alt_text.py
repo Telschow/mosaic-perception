@@ -84,3 +84,10 @@ def test_readme_and_landing_page_show_the_hook_video_with_its_alt_text():
     landing = (ROOT / "docs-site" / "src" / "content" / "docs" / "index.mdx").read_text()
     assert f'aria-label="{alts["hook_video_poster"]}"' in landing
     assert "hook_video_4x5.mp4" in landing and "controls" in landing
+
+
+def test_poster_alt_text_describes_purity_as_a_share_of_track_samples():
+    # Track-sample purity counts confirmed track samples, not tracks (GLOSSARY.md).
+    alt = _load().build_alt_text()["hook_video_poster"]
+    assert "tracks reported" not in alt
+    assert "reported track positions" in alt
