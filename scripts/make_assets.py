@@ -106,17 +106,32 @@ def load_scoreboard_data(benchmark: Path) -> dict[str, Any]:
     return {"commit": payload["code"]["git_commit"], "rows": rows}
 
 
+def recovery_qualifies(scenario: dict[str, Any]) -> bool:
+    """True when bias estimation recovers a real loss: fusion reliably lost precision against
+    range-only, bias estimation reliably beat fused, and the recovered share is positive."""
+    paired = scenario["paired_differences"]
+    lost = paired["fused_vs_range_only"]["precision"]["ci95_high"]
+    gained = paired["bias_estimated_vs_fused"]["precision"]["ci95_low"]
+    if lost is None or lost >= 0 or gained is None or gained <= 0:
+        return False
+    values = scenario["aggregate"]
+    loss = values["range_only"]["precision"] - values["fused"]["precision"]
+    recovered = values["fused_bias_estimated"]["precision"] - values["fused"]["precision"]
+    return bool(loss > 0 and recovered > 0)
+
+
 def choose_recovery_scenario(payload: dict[str, Any]) -> str:
-    """The scenario where bias estimation helps most: the largest paired precision gain
-    of ``bias_estimated_vs_fused`` whose 95% interval excludes zero."""
+    """The qualifying scenario (see ``recovery_qualifies``) with the largest paired precision
+    gain of ``bias_estimated_vs_fused``. Exploratory: chosen from all scenarios, interval unadjusted."""
     best: tuple[float, str] | None = None
     for scenario in payload["scenarios"]:
-        paired = scenario["paired_differences"]["bias_estimated_vs_fused"]["precision"]
-        low = paired["ci95_low"]
-        if low is not None and low > 0 and (best is None or paired["mean"] > best[0]):
-            best = (paired["mean"], scenario["scenario"]["name"])
+        if not recovery_qualifies(scenario):
+            continue
+        mean = scenario["paired_differences"]["bias_estimated_vs_fused"]["precision"]["mean"]
+        if best is None or mean > best[0]:
+            best = (mean, scenario["scenario"]["name"])
     if best is None:
-        raise ValueError("no scenario where bias estimation reliably improves precision")
+        raise ValueError("no scenario where bias estimation recovers a reliable fusion loss")
     return best[1]
 
 
