@@ -154,9 +154,9 @@
     the replay clamps the interval to zero. The update is applied at the start of the stored
     epoch rather than at the true capture time.
   - Measured on the benchmark (`delivery_delay` against `delivery_delay_retrodiction`,
-    same delays): retrodiction improves range-only headline RMSE (0.320 to 0.277 m) but not fused
-    (0.315 to 0.328 m, worse), and improves distance-only RMSE (0.294 to 0.249 and
-    0.261 to 0.247) and position NEES per DOF (5.24 to 1.90 and 11.79 to 2.93) but worsens identity switches (7.7 to 9.9
+    same delays): retrodiction improves range-only headline RMSE (0.320 to 0.277 m) and
+    distance-only RMSE (0.294 to 0.249) with no clear change for fused (0.315 to 0.328 m and
+    0.261 to 0.247; each seed-paired 95% interval from `per_seed.csv` includes zero) and position NEES per DOF (5.24 to 1.90 and 11.79 to 2.93) but worsens identity switches (7.7 to 9.9
     range-only, 4.6 to 11.2 fused) and MOTA (0.713 to 0.630 and 0.505 to 0.360). The
     cause has not been diagnosed; gating delayed observations against the delivery-time
     state is one candidate, and nothing here shows retrodiction is better overall.
@@ -208,7 +208,8 @@
   were independent, but they are not: `range_only` is bit-identical across six
   scenarios (`nominal`, the four `sensor_disagreement_*` and `vision_dropout`), so the
   same baseline is counted repeatedly, and scenarios with no matched
-  samples (`stale_rejection`) are left out of every count. Only the report's
+  samples (`stale_rejection`) are left out of the RMSE, precision and coverage counts
+  (MOTA and GOSPA are defined there, degenerately, and it counts as inconclusive). Only the report's
   Bonferroni-adjusted tally for precision, MOTA and GOSPA corrects for the scenarios
   scored for each metric (15 for precision, 16 for MOTA and GOSPA);
   the other tallies (position RMSE, NEES, the extra comparisons) and the 95% intervals
