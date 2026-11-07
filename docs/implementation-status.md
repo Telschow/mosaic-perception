@@ -32,9 +32,8 @@ below exists in the suite (`make test`), every artifact path is committed.
 Deterministic 2-D synthetic worlds with known ground truth, optional moving
 observer, scenario presets with preregistered parameters.
 
-- Evidence: `test_world.py` (12 tests, including `test_world_deterministic`),
-  `test_scenarios.py` (11 tests, including
-  `test_within_gate_bias_sweep_uses_only_the_preregistered_values`), integration
+- Evidence: `test_world.py` (including `test_world_deterministic`),
+  `test_scenarios.py` (including `test_within_gate_bias_sweep_uses_only_the_preregistered_values`), integration
   `test_paired_run_is_deterministic_and_uses_same_world`.
 - Limitations: [docs/limitations.md](limitations.md) — Scope; synthetic worlds
   only, no real sensor data.
@@ -51,12 +50,10 @@ frame rates, observer pose at capture time.
   innovations anchored by range-bearing states, subtracted from vision bearings
   before gating and updating. Off by default; requested via
   `run_pair(..., include_bias_estimation=True)`.
-- Evidence: `test_sensors.py` (6 tests, including
-  `test_sensor_bias_is_applied_in_sensor_units` and
+- Evidence: `test_sensors.py` (including `test_sensor_bias_is_applied_in_sensor_units` and
   `test_false_alarms_are_emitted_and_use_sensor_frame_metadata`),
-  `test_observer_pose.py` (3 tests), vision/range gating and bias-estimation
-  tests in `test_fusion.py` (35 tests, including
-  `test_large_vision_bias_is_gate_rejected_without_touching_track`,
+  `test_observer_pose.py`, vision/range gating and bias-estimation
+  tests in `test_fusion.py` (including `test_large_vision_bias_is_gate_rejected_without_touching_track`,
   `test_bias_estimation_is_off_by_default` and
   `test_bias_estimate_converges_to_a_gate_passing_bias_using_the_range_bearing_anchor`),
   integration `test_bias_estimated_method_runs_and_reports_its_estimate`,
@@ -79,14 +76,12 @@ policy, deterministic track lifecycle.
   the tracker stores the pre-prediction posterior and replays the epoch in
   capture-time order before predicting to the processing time, for
   observations at most one epoch old.
-- Evidence: `test_ekf.py` (13 tests, including
-  `test_range_bearing_jacobian_matches_finite_differences`),
-  `test_timing.py` (18 tests, including
-  `test_observation_older_than_one_epoch_is_rejected_and_counted`,
+- Evidence: `test_ekf.py` (including `test_range_bearing_jacobian_matches_finite_differences`),
+  `test_timing.py` (including `test_observation_older_than_one_epoch_is_rejected_and_counted`,
   `test_delayed_observation_is_applied_to_delivery_time_state_not_rewound` and
   `test_retrodiction_equals_the_time_ordered_replay_of_the_delayed_observation`),
-  `test_fusion.py` (35 tests), `test_tracking.py`,
-  `test_ground_truth_isolation.py` (3 tests proving ground truth cannot reach
+  `test_fusion.py`, `test_tracking.py`,
+  `test_ground_truth_isolation.py` (proving ground truth cannot reach
   the estimator).
 - Limitations: [docs/limitations.md](limitations.md) — Timing and delivery;
   observations older than one epoch are rejected, not replayed, in the default
@@ -101,9 +96,7 @@ Snapshot-based per-frame matching with a continuity-preferring headline
 matcher, CLEAR-MOT accuracy, ID metrics, GOSPA, coverage, NEES/NIS,
 class accuracy, paired statistics across seeds.
 
-- Evidence: `test_evaluation.py` (33 tests), `test_frame_metrics.py` (24
-  tests), `test_registry.py` (9 tests, including
-  `test_every_declared_metric_is_documented`), `test_paired.py` (7 tests),
+- Evidence: `test_evaluation.py`, `test_frame_metrics.py`, `test_registry.py` (including `test_every_declared_metric_is_documented`), `test_paired.py`,
   and the TrackEval cross-check: `test_trackeval_crosscheck.py` compares MOTA,
   IDF1/IDP/IDR and the CLEAR counts against TrackEval's reference
   implementation on four fixed sequences (one comparison per sequence, plus a
@@ -123,8 +116,7 @@ class accuracy, paired statistics across seeds.
 Markdown/CSV/JSON reports from one metric registry, `mosaic run / compare /
 evaluate / benchmark` commands, canonical artifacts regenerated from code.
 
-- Evidence: `test_report.py` (12 tests, including
-  `test_render_report_is_deterministic`), integration tests
+- Evidence: `test_report.py` (including `test_render_report_is_deterministic`), integration tests
   `test_evaluate_cli_is_reproducible` and `test_cli_rejects_unknown_scenario`,
   the committed benchmark artifacts `artifacts/benchmark/` verified in CI by
   `scripts/check_artifact_provenance.py`, and the golden small benchmark
@@ -167,7 +159,7 @@ Interactive workbench over the shared experiment runner: metrics table
 every view, links to known limitations. Renders every method the experiment
 runner exposes: `range_only`, `fused` and `fused_bias_estimated`.
 
-- Evidence: `test_app_data_prep.py` (5 tests over the browser-free data
+- Evidence: `test_app_data_prep.py` (over the browser-free data
   preparation on a short scenario), `test_app_smoke.py` (renders and runs the
   app in-process without a browser).
 - Limitations: the app is a view over synthetic results, not an analysis tool;
