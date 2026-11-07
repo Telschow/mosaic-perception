@@ -2,6 +2,22 @@
 
 **A reproducible workbench for multi-sensor perception, object tracking and uncertainty.**
 
+## In 60 seconds
+
+**Question.** Does adding a second sensor make object tracking better? Here a camera-like bearing
+sensor is added to a range-bearing sensor, in synthetic worlds with known ground truth.
+
+**Finding.** Mostly not, for this tracker. Adding the camera made precision, MOTA and GOSPA worse in
+14 of 16 scenarios (25 paired seeds, still after correcting for multiple comparisons). Position error
+was inconclusive. The reported position uncertainty was too confident in 28 of 30 scenario-method pairs.
+
+**Why.** An ablation points at one design choice: the camera may refresh tracks the range sensor
+missed. Barring that leaves no clear precision or MOTA loss in three of the four scenarios tested, so
+the loss is a property of this tracker design, not of sensor fusion in general.
+
+**Limits.** Synthetic 2-D worlds only, no real sensors or hardware. Every number is read from
+[the benchmark report](artifacts/benchmark/report.md); the details and caveats are below.
+
 <p align="center">
   <a href="https://telschow.github.io/mosaic-perception/#watch-the-explainer"><img src="docs-site/src/assets/generated/hook_video_poster.png" alt="Frame from a 44-second explainer video of a synthetic world (dense_clutter, development seeds 0-24): one real object follows a dashed path, and with a camera added the tracker draws many extra ghost lines away from it. Of every 100 reported track positions, 82 were on the real object with one sensor and 34 with the camera added." width="340"></a>
 </p>
