@@ -103,7 +103,9 @@ def panel_labels(hurts_fused: dict[str, float], bias_vs_fused: dict[str, float])
     bias = {
         -1: "bias estimated: made it worse",
         0: "bias estimated: no clear change",
-        1: "bias corrected: partly recovered",
+        1: "bias corrected: partly recovered"
+        if _verdict(hurts_fused) < 0
+        else "bias estimated: better",
     }[_verdict(bias_vs_fused)]
     return {
         "range_only": "baseline",

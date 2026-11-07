@@ -121,3 +121,58 @@ def test_committed_manifest_matches_the_artifact():
     assert mh.build_manifest(json.loads(mh.make_assets.BENCHMARK.read_text())) == committed
     for still in committed["stills"].values():
         assert (ROOT / "docs-site/src/assets/generated" / still["file"]).exists()
+
+
+def _recovery_payload(name, fused_vs_range, bias_vs_fused, precision):
+    """precision: (range_only, fused, fused_bias_estimated) aggregate means."""
+    keys = ("mean", "ci95_low", "ci95_high")
+    return {
+        "scenario": {"name": name},
+        "paired_differences": {
+            "fused_vs_range_only": {"precision": dict(zip(keys, fused_vs_range, strict=True))},
+            "bias_estimated_vs_fused": {"precision": dict(zip(keys, bias_vs_fused, strict=True))},
+        },
+        "aggregate": {
+            m: {"precision": v}
+            for m, v in zip(("range_only", "fused", "fused_bias_estimated"), precision, strict=True)
+        },
+    }
+
+
+def test_recovery_requires_a_reliable_fusion_loss_first():
+    mh = _load()
+    gain_only = _recovery_payload("gain_only", (0.0, -0.1, 0.1), (0.2, 0.1, 0.3), (0.8, 0.8, 0.9))
+    real = _recovery_payload("real", (-0.3, -0.4, -0.2), (0.1, 0.05, 0.15), (0.9, 0.6, 0.7))
+    payload = {"scenarios": [gain_only, real]}
+    assert mh.make_assets.choose_recovery_scenario(payload) == "real"
+
+
+def test_recovery_rule_refuses_when_nothing_recovers_a_loss():
+    mh = _load()
+    payload = {
+        "scenarios": [
+            _recovery_payload("gain_only", (0.0, -0.1, 0.1), (0.2, 0.1, 0.3), (0.8, 0.8, 0.9)),
+            _recovery_payload(
+                "worse_after", (-0.3, -0.4, -0.2), (0.1, 0.05, 0.15), (0.9, 0.6, 0.55)
+            ),
+        ]
+    }
+    try:
+        mh.make_assets.choose_recovery_scenario(payload)
+    except ValueError:
+        return
+    raise AssertionError("expected ValueError")
+
+
+def test_recovered_label_needs_a_prior_loss():
+    mh = _load()
+    no_loss = mh.panel_labels(
+        {"mean": 0.0, "ci95_low": -0.1, "ci95_high": 0.1},
+        {"mean": 0.1, "ci95_low": 0.05, "ci95_high": 0.15},
+    )
+    lost = mh.panel_labels(
+        {"mean": -0.3, "ci95_low": -0.4, "ci95_high": -0.2},
+        {"mean": 0.1, "ci95_low": 0.05, "ci95_high": 0.15},
+    )
+    assert "recover" not in no_loss["fused_bias_estimated"]
+    assert "recover" in lost["fused_bias_estimated"]
