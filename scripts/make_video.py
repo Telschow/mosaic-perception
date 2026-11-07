@@ -3,7 +3,7 @@
 
 One idea for a non-expert: one real object followed with one sensor, then with a camera added.
 Both are drawn from one real development run (the lines are the tracker's actual tracks), then
-a 100-dot pictogram of the share of reported tracks that were the real object, read from the
+a 100-dot pictogram of the share of reported track positions that were on the real object, read from the
 benchmark artifact. The framing is about this simulated tracker, not fusion in general: the
 vision-refresh ablation (``artifacts/ablation/``) shows most of the loss goes away when vision
 cannot refresh tracks the range sensor missed. ``build_plan`` is pure and tested; the Manim
@@ -49,7 +49,7 @@ MISSING_MANIM = (
 
 
 def _real_share(payload: dict[str, Any], scenario: str) -> dict[str, int]:
-    """Share of reported tracks that were the real object, per 100, from the artifact."""
+    """Share of reported track positions on the real object, per 100, from the artifact."""
     entry = next(s for s in payload["scenarios"] if s["scenario"]["name"] == scenario)
     return {
         method: round(100 * entry["aggregate"][method]["precision"])

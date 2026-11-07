@@ -79,8 +79,8 @@ def build_alt_text() -> dict[str, str]:
             f"Frame from a {video['total_s']:.0f}-second explainer video of a synthetic world "
             f"({video['scenario']}, {video['seed_label']}): one real object follows a dashed path, "
             "and with a camera added the tracker draws many extra ghost lines away from it. Of "
-            f"every 100 tracks reported, {shown['range_only']} were the real object with one sensor "
-            f"and {shown['fused']} with the camera added."
+            f"every 100 reported track positions, {shown['range_only']} were on the real object "
+            f"with one sensor and {shown['fused']} with the camera added."
         ),
         **{f"hero_{key}": still["alt"] for key, still in hero["stills"].items()},
     }
