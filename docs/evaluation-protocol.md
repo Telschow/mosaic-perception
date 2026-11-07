@@ -118,18 +118,30 @@ refresh the goldens with the one-command step `make benchmark-golden` and
 commit the result.
 
 **Artifact provenance** (`scripts/check_artifact_provenance.py`, `make
-provenance-check`). Reads `artifacts/benchmark/benchmark.json` and verifies
+provenance-check`). Checks every `artifacts/*/benchmark.json` (the development
+benchmark, the golden copy and the held-out run) and the vision-refresh ablation
+(`artifacts/ablation/vision_refresh.json`). For each benchmark directory it verifies
 that the recorded source commit exists and is an ancestor of `HEAD`, that no
 artifact-producing source has changed since that commit, and that the recorded
-package version still matches `pyproject.toml`. It also checks that
-`artifacts/benchmark/report.md` records the same commit as `benchmark.json` and
-is byte-identical to `render_report(benchmark.json)` (the render is a pure
-function), so a stale report fails. `per_seed.csv` records no commit and is not
-checked. The artifact-producing source
-set is `src/` — the package that generates the numbers. Tests, documentation,
-workflows and dependency manifests are excluded because they cannot change
-generated values; a dependency change that does change values is caught by the
-golden benchmark check.
+package version still matches `pyproject.toml`. It also checks that `report.md`
+records the same commit as `benchmark.json` and is byte-identical to
+`render_report(benchmark.json)` (the render is a pure function), so a stale report
+fails. `per_seed.csv` records no commit and is not checked. The artifact-producing
+source set is `src/`, the package that generates the numbers; for the ablation it is
+`src/` plus `scripts/ablate_vision_refresh.py`. Tests, documentation, workflows and
+dependency manifests are excluded.
+
+A directory with a `FROZEN` file (the held-out run) declares its commit and the
+`sha256` of its `benchmark.json`. The check requires both to match and the commit to
+exist and be an ancestor of `HEAD`, prints the `src/` delta since the freeze instead
+of failing on it, and skips the version and re-render checks.
+
+What these checks do not establish: they compare commits and paths, not numbers. A
+dependency change that changes values is caught only where the golden configuration
+(two scenarios, seeds 0-1, 2 s) exercises it; the other 14 scenarios and the full
+10 s / 25-seed configuration rest on "`src/` unchanged" plus determinism. The recorded
+commit carries no dirty-tree flag, and in a frozen directory only `benchmark.json` is
+hashed, not `report.md`.
 
 Either check failing means the committed benchmark artifact no longer
 describes this tree: regenerate with `make benchmark` and commit the refreshed
