@@ -70,9 +70,14 @@ SHORT = {"fused_vs_range_only": "fused vs range-only", "bias_estimated_vs_fused"
 LIVE = {TrackStatus.CONFIRMED, TrackStatus.COASTING}
 
 
-def _interval(scenario: dict[str, Any], comparison: str) -> dict[str, float]:
+def _interval(
+    scenario: dict[str, Any], comparison: str, digits: int | None = 3
+) -> dict[str, float]:
     paired = scenario["paired_differences"][comparison]["precision"]
-    return {k: round(paired[k], 3) for k in ("mean", "ci95_low", "ci95_high")}
+    return {
+        k: paired[k] if digits is None else round(paired[k], digits)
+        for k in ("mean", "ci95_low", "ci95_high")
+    }
 
 
 def choose_hurt_scenario(payload: dict[str, Any]) -> str:
@@ -97,15 +102,18 @@ def _verdict(interval: dict[str, float]) -> int:
     return 0
 
 
-def panel_labels(hurts_fused: dict[str, float], bias_vs_fused: dict[str, float]) -> dict[str, str]:
-    """Plain-language panel labels, each decided by the sign of a paired interval."""
+def panel_labels(
+    hurts_fused: dict[str, float], bias_vs_fused: dict[str, float], recovered: bool
+) -> dict[str, str]:
+    """Plain-language panel labels, each decided by the sign of an unrounded paired interval.
+
+    "Partly recovered" needs ``recovered``, the shared rule ``make_assets.recovery_holds``.
+    """
     camera = {-1: "worse here", 0: "no clear change here", 1: "better here"}[_verdict(hurts_fused)]
     bias = {
         -1: "bias estimated: made it worse",
         0: "bias estimated: no clear change",
-        1: "bias corrected: partly recovered"
-        if _verdict(hurts_fused) < 0
-        else "bias estimated: better",
+        1: "bias corrected: partly recovered" if recovered else "bias estimated: better",
     }[_verdict(bias_vs_fused)]
     return {
         "range_only": "baseline",
@@ -128,8 +136,9 @@ def build_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         scenario = next(s for s in payload["scenarios"] if s["scenario"]["name"] == names[key])
         interval = _interval(scenario, spec["comparison"])
         labels = panel_labels(
-            _interval(scenario, "fused_vs_range_only"),
-            _interval(scenario, "bias_estimated_vs_fused"),
+            _interval(scenario, "fused_vs_range_only", digits=None),
+            _interval(scenario, "bias_estimated_vs_fused", digits=None),
+            recovered=make_assets.recovery_holds(scenario, "precision"),
         )
         stills[key] = {
             "file": spec["file"],

@@ -151,3 +151,13 @@ def test_footer_and_captions_fit_inside_both_frames():
         ):
             font = mm._draw.font(mm.LABEL_PX, bold=True)
             assert draw.textlength(line, font=font) <= size[0] - 80, (size, line)
+
+
+def test_recovery_caption_does_not_claim_recovery_the_rule_rejects(monkeypatch):
+    mm = _load()
+    real = mm.make_assets.load_recovery_data(mm.make_assets.BENCHMARK)
+    rejected = json.loads(json.dumps(real))
+    rejected["metrics"]["precision"]["verdict"] = "does not recover"
+    monkeypatch.setattr(mm.make_assets, "load_recovery_data", lambda *_a, **_k: rejected)
+    facts = mm._facts("recovery")
+    assert not any("recovers" in line for line in facts)

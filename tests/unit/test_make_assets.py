@@ -208,19 +208,75 @@ def test_recovery_scenario_is_chosen_by_rule_not_by_hand():
         for s in payload["scenarios"]
     }
     assert gains[name]["ci95_low"] > 0
-    assert all(g["mean"] <= gains[name]["mean"] for g in gains.values() if (g["ci95_low"] or 0) > 0)
+    qualifying = [s for s in payload["scenarios"] if ma.recovery_holds(s, "precision")]
+    assert all(gains[s["scenario"]["name"]]["mean"] <= gains[name]["mean"] for s in qualifying)
 
 
-def test_caption_says_recovers_only_with_positive_share_and_interval_above_zero():
+def test_panel_verdict_is_the_shared_recovery_rule_for_every_scenario_and_metric():
     ma = _load()
-    for scenario in ("measurement_bias", ma.load_recovery_data(ma.BENCHMARK)["scenario"]):
-        data = ma.load_recovery_data(ma.BENCHMARK, scenario)
-        for values in data["metrics"].values():
-            says = ma.recovery_verdict(values) == "recovers"
-            earned = values["recovered_share"] > 0 and values["paired"]["ci95_low"] > 0
-            assert says == earned
-    # the chosen scenario's panel may say "recovers"; measurement_bias's must not
+    payload = json.loads(ma.BENCHMARK.read_text())
+    for scenario in payload["scenarios"]:
+        name = scenario["scenario"]["name"]
+        data = ma.load_recovery_data(ma.BENCHMARK, name)
+        for metric, values in data["metrics"].items():
+            expected = "recovers" if ma.recovery_holds(scenario, metric) else "does not recover"
+            assert ma.recovery_verdict(values) == expected, (name, metric)
+    # the chosen scenario's panel says "recovers"; measurement_bias's must not
     chosen = ma.load_recovery_data(ma.BENCHMARK)["metrics"]["precision"]
     assert ma.recovery_verdict(chosen) == "recovers"
     biased = ma.load_recovery_data(ma.BENCHMARK, "measurement_bias")["metrics"]["precision"]
     assert ma.recovery_verdict(biased) == "does not recover"
+
+
+def _rule_scenario(name, fused_vs_range, bias_vs_fused, means, metric="precision"):
+    """Intervals are (mean, ci95_low, ci95_high); means are range_only, fused, bias-estimated."""
+    keys = ("mean", "ci95_low", "ci95_high")
+    return {
+        "scenario": {"name": name},
+        "paired_differences": {
+            "fused_vs_range_only": {metric: dict(zip(keys, fused_vs_range, strict=True))},
+            "bias_estimated_vs_fused": {metric: dict(zip(keys, bias_vs_fused, strict=True))},
+        },
+        "aggregate": {
+            m: {metric: v}
+            for m, v in zip(("range_only", "fused", "fused_bias_estimated"), means, strict=True)
+        },
+    }
+
+
+LOSS = (-0.3, -0.4, -0.2)
+GAIN = (0.1, 0.05, 0.15)
+
+
+@pytest.mark.parametrize(
+    ("case", "fused_vs_range", "bias_vs_fused", "means", "holds"),
+    [
+        ("gain without a prior loss", (0.0, -0.1, 0.1), GAIN, (0.8, 0.8, 0.9), False),
+        ("gain after a fusion gain", (0.1, 0.05, 0.15), GAIN, (0.7, 0.8, 0.9), False),
+        ("loss and gain", LOSS, GAIN, (0.9, 0.6, 0.7), True),
+        ("zero recovered share", LOSS, GAIN, (0.9, 0.6, 0.6), False),
+        ("negative recovered share", LOSS, GAIN, (0.9, 0.6, 0.55), False),
+        ("gain interval spans zero", LOSS, (0.05, -0.01, 0.11), (0.9, 0.6, 0.65), False),
+        ("loss interval spans zero", (-0.05, -0.1, 0.01), GAIN, (0.9, 0.85, 0.9), False),
+        ("undefined interval", (None, None, None), GAIN, (0.9, 0.6, 0.7), False),
+    ],
+)
+def test_recovery_rule(case, fused_vs_range, bias_vs_fused, means, holds):
+    ma = _load()
+    for metric in ("precision", "mota"):
+        scenario = _rule_scenario(case, fused_vs_range, bias_vs_fused, means, metric)
+        assert ma.recovery_holds(scenario, metric) is holds, (case, metric)
+
+
+def test_exploratory_choice_ignores_a_larger_gain_that_recovers_no_loss():
+    ma = _load()
+    payload = {
+        "scenarios": [
+            _rule_scenario(
+                "bigger_gain_no_loss", (0.0, -0.1, 0.1), (0.5, 0.4, 0.6), (0.8, 0.8, 1.0)
+            ),
+            _rule_scenario("small", LOSS, (0.05, 0.01, 0.09), (0.9, 0.6, 0.65)),
+            _rule_scenario("large", LOSS, GAIN, (0.9, 0.6, 0.7)),
+        ]
+    }
+    assert ma.choose_recovery_scenario(payload) == "large"
