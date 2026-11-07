@@ -155,3 +155,67 @@ def test_ablation_directory_is_discovered(tmp_path: Path) -> None:
 def test_ablation_with_invalid_commit_fails(tmp_path: Path) -> None:
     (tmp_path / "vision_refresh.json").write_text(json.dumps(_ablation_payload("short")))
     assert provenance.check_ablation_directory(tmp_path).failures
+
+
+_FREEZE = "8baa778e86826ddbdcb4b27ef07d7ca9b993e354"
+_ABLATION_SCRIPT = "scripts/ablate_vision_refresh.py"
+
+
+def test_source_changed_since_an_older_commit_is_listed() -> None:
+    failures, changed = provenance.check_recorded_commit(_FREEZE)
+    assert failures == []
+    assert changed and all(path.startswith("src/") for path in changed)
+
+
+def test_recorded_commit_diff_honours_the_given_source_paths() -> None:
+    # The ablation script was added in 4a49ca1, so it differs from that commit's parent.
+    parent = provenance._git("rev-parse", "4a49ca1^").stdout.strip()
+    _, changed = provenance.check_recorded_commit(parent, (_ABLATION_SCRIPT,))
+    assert changed == [_ABLATION_SCRIPT]
+
+
+def test_ablation_check_watches_its_generating_script(tmp_path: Path, monkeypatch) -> None:
+    seen: list[tuple[str, ...]] = []
+
+    def fake(_commit: str, source_paths: tuple[str, ...] = provenance.SOURCE_PATHS):
+        seen.append(tuple(source_paths))
+        return [], [_ABLATION_SCRIPT]
+
+    monkeypatch.setattr(provenance, "check_recorded_commit", fake)
+    (tmp_path / "vision_refresh.json").write_text(json.dumps(_ablation_payload()))
+    result = provenance.check_ablation_directory(tmp_path)
+    assert seen and _ABLATION_SCRIPT in seen[0] and "src/" in seen[0]
+    assert any("make ablation" in failure for failure in result.failures)
+
+
+def test_non_frozen_benchmark_with_changed_source_fails(tmp_path: Path) -> None:
+    payload = {"code": {"git_commit": _FREEZE, "package_version": "0.1.0"}}
+    (tmp_path / "benchmark.json").write_text(json.dumps(payload))
+    (tmp_path / "report.md").write_text(f"- Git commit: `{_FREEZE}`\n")
+    failures = provenance.check_directory(tmp_path).failures
+    assert any("source changed since the recorded commit" in f for f in failures)
+
+
+def test_benchmark_without_a_report_fails(tmp_path: Path) -> None:
+    head = provenance._git("rev-parse", "HEAD").stdout.strip()
+    payload = {"code": {"git_commit": head, "package_version": "0.1.0"}}
+    (tmp_path / "benchmark.json").write_text(json.dumps(payload))
+    failures = provenance.check_directory(tmp_path).failures
+    assert any("missing" in f and "report.md" in f for f in failures)
+
+
+def test_benchmark_without_a_commit_fails(tmp_path: Path) -> None:
+    (tmp_path / "benchmark.json").write_text(json.dumps({"code": {}}))
+    assert provenance.check_directory(tmp_path).failures
+
+
+def test_frozen_directory_with_unknown_commit_fails(tmp_path: Path) -> None:
+    import hashlib
+
+    payload = json.dumps({"code": {"git_commit": COMMIT, "package_version": "0.1.0"}})
+    (tmp_path / "benchmark.json").write_text(payload)
+    (tmp_path / "report.md").write_text(f"- Git commit: `{COMMIT}`\n")
+    digest = hashlib.sha256(payload.encode()).hexdigest()
+    (tmp_path / "FROZEN").write_text(f"{COMMIT}\nsha256 {digest}\n")
+    failures = provenance.check_directory(tmp_path).failures
+    assert any("does not exist" in f for f in failures)
