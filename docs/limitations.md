@@ -124,6 +124,19 @@
     acceleration. It still gates the observation against the delivery-time state
     (association is not retrodicted), it is off by default, and it covers only the
     one-epoch lag, so it is not general out-of-sequence measurement fusion.
+  - **Process noise under a split replay.** The noise model is discrete white-noise
+    acceleration, `Q(t) = q·[[t⁴/4, t³/2], [t³/2, t²]]` per axis, evaluated independently
+    for each sub-interval. This amounts to a fresh, independent acceleration draw in every
+    sub-interval. Splitting one epoch at an observation's capture time therefore injects
+    less process noise than the single nominal step: for `dt = 0.1 s` split at `0.05 s`,
+    the replayed covariance carries 62.5% of the nominal step's added position variance and
+    50% of its velocity variance (at `0.02 s` / `0.08 s`: 54% and 68%). The retrodiction
+    path is thus somewhat overconfident relative to the nominal path, and the amount
+    depends on when observations arrive. A continuous-time model with a fixed spectral
+    density would compose exactly instead. This is pinned by
+    `test_split_replay_process_noise_is_the_independent_per_interval_model`; changing the
+    model would move the `delivery_delay_retrodiction` numbers and needs its own decision.
+    It affects only the opt-in retrodiction path.
   - Measured on the benchmark (`delivery_delay` against `delivery_delay_retrodiction`,
     same delays): retrodiction improves range-only headline RMSE (0.308 to 0.283 m) but not fused
     (0.329 to 0.335 m, slightly worse), and improves distance-only RMSE (0.285 to 0.252 and

@@ -257,3 +257,23 @@ def test_predict_over_zero_interval_is_the_identity_and_negative_is_rejected():
     np.testing.assert_allclose(p, covariance)
     with pytest.raises(ValueError):
         ekf.predict_over(state, covariance, -0.1)
+
+
+def test_split_replay_process_noise_is_the_independent_per_interval_model():
+    """Splitting a step adds less process noise than the nominal step (documented limit).
+
+    Each sub-interval is an independent discrete white-noise-acceleration draw, so the
+    composition does not equal Q(a + b). At the midpoint of dt = 0.1 s the replayed
+    covariance carries 62.5% of the position and 50% of the velocity process noise.
+    """
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    ekf = ExtendedKalmanFilter(dt=0.1, accel_noise_std=0.5)
+    state, zero = np.zeros(4), np.zeros((4, 4))
+    full = ekf.predict_over(state, zero, 0.1)[1]
+    for first, position_ratio, velocity_ratio in ((0.05, 0.625, 0.5), (0.02, 0.5392, 0.68)):
+        _, partial = ekf.predict_over(state, zero, first)
+        _, split = ekf.predict_over(state, partial, 0.1 - first)
+        assert split[0, 0] / full[0, 0] == pytest.approx(position_ratio, abs=1e-4)
+        assert split[2, 2] / full[2, 2] == pytest.approx(velocity_ratio, abs=1e-4)
+        assert np.all(np.diag(split) < np.diag(full))
