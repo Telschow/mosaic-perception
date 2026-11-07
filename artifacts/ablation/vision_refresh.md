@@ -4,7 +4,7 @@ Fused minus range-only, paired over development seeds 0-24 (95% t interval).
 `all` is the benchmark default; `range_supported` lets vision update only tracks a
 range observation updated in the same epoch. Claims are limited to this tracker and
 these gates.
-Commit: `07e0ad3370839c59911a58abc0833af78b5bd1b5`
+Commit: `591276d56d7e002ffd10b5abf38866aab088dc00`
 
 | Scenario | Policy | Metric | Mean difference | 95% interval |
 |---|---|---|---|---|
