@@ -82,7 +82,7 @@ Contents:
 - Provenance and reproducibility: `make provenance-check`, `make benchmark-golden-check`, and how the golden check tolerates float drift.
 - The held-out run: frozen code, tag `held-out-freeze`, seeds 25-49, run once, never rerun.
 - The audit: [audits/mosaic-perception-comprehensive-audit.md](audits/mosaic-perception-comprehensive-audit.md) and what was fixed or left documented.
-- [limitations.md](limitations.md), including the open sensor-model edge cases left documented on purpose.
+- [limitations.md](limitations.md); the sensor-model edge cases left documented on purpose (range floor, schedule quantisation) are in [measurement-models.md](measurement-models.md).
 
 Must not claim: that the held-out result confirms the method, or any result outside the synthetic world.
 Acceptance: every claim links to a file, command or test; a reader can run the two checks above and get a pass.
