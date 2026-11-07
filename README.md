@@ -319,6 +319,10 @@ A static site is built from `docs/` with Astro Starlight (`docs-site/`). Preview
 
 This project was built with AI coding assistants (Claude Code, plus a Docker-based agent loop, `.sandcastle/`). Commits made with an assistant carry a `Co-Authored-By` trailer, and the full history is public. The maintainer chose the research question, the scenarios, the evaluation protocol (including the single frozen held-out run) and the wording of every claim; the assistants implemented and reviewed changes against tickets in the issue tracker. Nothing here rests on trust in either: results are regenerated from seeds, checked against committed manifests (`make check`), and the held-out run is documented in `artifacts/held-out/`.
 
+## Acknowledgements
+
+MOTA, IDF1, the CLEAR counts and identity switches are cross-checked against [TrackEval](https://github.com/JonathonLuiten/TrackEval) on fixed hand-built sequences. It is used as a pinned development dependency for tests only and not redistributed here; see [docs/metrics.md](docs/metrics.md).
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
