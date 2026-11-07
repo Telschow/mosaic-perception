@@ -164,15 +164,29 @@ def test_recovery_rule_refuses_when_nothing_recovers_a_loss():
     raise AssertionError("expected ValueError")
 
 
-def test_recovered_label_needs_a_prior_loss():
+def test_recovered_label_follows_the_shared_recovery_rule():
     mh = _load()
-    no_loss = mh.panel_labels(
-        {"mean": 0.0, "ci95_low": -0.1, "ci95_high": 0.1},
-        {"mean": 0.1, "ci95_low": 0.05, "ci95_high": 0.15},
-    )
-    lost = mh.panel_labels(
-        {"mean": -0.3, "ci95_low": -0.4, "ci95_high": -0.2},
-        {"mean": 0.1, "ci95_low": 0.05, "ci95_high": 0.15},
-    )
-    assert "recover" not in no_loss["fused_bias_estimated"]
-    assert "recover" in lost["fused_bias_estimated"]
+    gain = {"mean": 0.1, "ci95_low": 0.05, "ci95_high": 0.15}
+    loss = {"mean": -0.3, "ci95_low": -0.4, "ci95_high": -0.2}
+    no_loss = {"mean": 0.0, "ci95_low": -0.1, "ci95_high": 0.1}
+    assert "recover" in mh.panel_labels(loss, gain, recovered=True)["fused_bias_estimated"]
+    # Same intervals, but the rule says no (for example a non-positive recovered share).
+    assert "recover" not in mh.panel_labels(loss, gain, recovered=False)["fused_bias_estimated"]
+    assert "recover" not in mh.panel_labels(no_loss, gain, recovered=False)["fused_bias_estimated"]
+
+
+def test_hero_labels_use_unrounded_intervals():
+    mh = _load()
+    tiny_gain = {"mean": 0.001, "ci95_low": 0.0004, "ci95_high": 0.0016}
+    loss = {"mean": -0.3, "ci95_low": -0.4, "ci95_high": -0.2}
+    label = mh.panel_labels(loss, tiny_gain, recovered=True)["fused_bias_estimated"]
+    assert "no clear change" not in label
+
+
+def test_hero_recovers_label_matches_the_rule_on_the_artifact():
+    mh = _load()
+    payload = json.loads(mh.make_assets.BENCHMARK.read_text())
+    still = mh.build_manifest(payload)["stills"]["recovers"]
+    scenario = next(s for s in payload["scenarios"] if s["scenario"]["name"] == still["scenario"])
+    assert mh.make_assets.recovery_holds(scenario, "precision")
+    assert "recover" in still["panel_labels"]["fused_bias_estimated"]

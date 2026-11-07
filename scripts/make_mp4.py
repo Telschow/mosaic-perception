@@ -83,10 +83,15 @@ def _facts(beat_id: str) -> list[str]:
         ]
     if beat_id == "recovery":
         data = make_assets.load_recovery_data(make_assets.BENCHMARK)
-        share = data["metrics"]["precision"]["recovered_share"]
+        precision = data["metrics"]["precision"]
+        if make_assets.recovery_verdict(precision) != "recovers":
+            return [
+                f"Scenario: {data['scenario']}",
+                "Bias estimation does not recover fused's precision loss.",
+            ]
         return [
             f"Scenario: {data['scenario']}",
-            f"Bias estimation recovers {share:.0%} of fused's precision loss.",
+            f"Bias estimation recovers {precision['recovered_share']:.0%} of fused's precision loss.",
         ]
     return []
 

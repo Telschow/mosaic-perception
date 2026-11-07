@@ -106,18 +106,31 @@ def load_scoreboard_data(benchmark: Path) -> dict[str, Any]:
     return {"commit": payload["code"]["git_commit"], "rows": rows}
 
 
-def recovery_qualifies(scenario: dict[str, Any]) -> bool:
-    """True when bias estimation recovers a real loss: fusion reliably lost precision against
-    range-only, bias estimation reliably beat fused, and the recovered share is positive."""
+def recovery_holds(scenario: dict[str, Any], metric: str) -> bool:
+    """The one rule for saying bias estimation "recovers" ``metric`` (higher is better).
+
+    All three must hold: fusion reliably lost ``metric`` against range-only (paired 95%
+    interval of ``fused_vs_range_only`` below zero), bias estimation reliably beat fused
+    (interval of ``bias_estimated_vs_fused`` above zero), and the recovered share of the mean
+    loss is positive. Without a prior loss there is nothing to recover. The intervals are
+    unadjusted, so on a scenario picked for its gain this is exploratory, not confirmatory.
+    The selection, the panel and alt-text verdict, the hero label and the clip caption all
+    use this rule.
+    """
     paired = scenario["paired_differences"]
-    lost = paired["fused_vs_range_only"]["precision"]["ci95_high"]
-    gained = paired["bias_estimated_vs_fused"]["precision"]["ci95_low"]
+    lost = paired["fused_vs_range_only"][metric]["ci95_high"]
+    gained = paired["bias_estimated_vs_fused"][metric]["ci95_low"]
     if lost is None or lost >= 0 or gained is None or gained <= 0:
         return False
     values = scenario["aggregate"]
-    loss = values["range_only"]["precision"] - values["fused"]["precision"]
-    recovered = values["fused_bias_estimated"]["precision"] - values["fused"]["precision"]
+    loss = values["range_only"][metric] - values["fused"][metric]
+    recovered = values["fused_bias_estimated"][metric] - values["fused"][metric]
     return bool(loss > 0 and recovered > 0)
+
+
+def recovery_qualifies(scenario: dict[str, Any]) -> bool:
+    """``recovery_holds`` for precision, the metric the recovery scenario is chosen on."""
+    return recovery_holds(scenario, "precision")
 
 
 def choose_recovery_scenario(payload: dict[str, Any]) -> str:
@@ -136,14 +149,8 @@ def choose_recovery_scenario(payload: dict[str, Any]) -> str:
 
 
 def recovery_verdict(values: dict[str, Any]) -> str:
-    """'recovers' only if the recovered share is positive and the paired interval excludes zero."""
-    share = values["recovered_share"]
-    low = values["paired"]["ci95_low"]
-    return (
-        "recovers"
-        if share is not None and share > 0 and low is not None and low > 0
-        else "does not recover"
-    )
+    """The panel's verdict for one metric, decided by ``recovery_holds`` when the data loads."""
+    return str(values["verdict"])
 
 
 def load_recovery_data(benchmark: Path, scenario_name: str | None = None) -> dict[str, Any]:
@@ -153,11 +160,15 @@ def load_recovery_data(benchmark: Path, scenario_name: str | None = None) -> dic
     metrics: dict[str, Any] = {}
     for metric in RECOVERY_METRICS:
         values = {m: scenario["aggregate"][m][metric] for m in payload["protocol"]["methods"]}
-        loss = values["range_only"] - values["fused"]
-        recovered = values["fused_bias_estimated"] - values["fused"]
-        values["recovered_share"] = recovered / loss if loss else None
+        if any(values[m] is None for m in ("range_only", "fused", "fused_bias_estimated")):
+            values["recovered_share"] = None  # metric undefined for some method
+        else:
+            loss = values["range_only"] - values["fused"]
+            recovered = values["fused_bias_estimated"] - values["fused"]
+            values["recovered_share"] = recovered / loss if loss else None
         paired = scenario["paired_differences"]["bias_estimated_vs_fused"][metric]
         values["paired"] = {k: paired[k] for k in ("mean", "ci95_low", "ci95_high")}
+        values["verdict"] = "recovers" if recovery_holds(scenario, metric) else "does not recover"
         metrics[metric] = values
     return {
         "commit": payload["code"]["git_commit"],
