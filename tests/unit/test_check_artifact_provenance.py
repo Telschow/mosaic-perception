@@ -109,3 +109,49 @@ def test_frozen_directory_without_a_benchmark_hash_fails(tmp_path: Path) -> None
     (tmp_path / "FROZEN").write_text(f"{COMMIT}\n")
     result = provenance.check_directory(tmp_path)
     assert any("sha256" in failure for failure in result.failures)
+
+
+def _ablation_payload(commit: str = COMMIT) -> dict:
+    return {"code": {"git_commit": commit}, "rows": []}
+
+
+def test_ablation_report_with_matching_commit_and_render_passes() -> None:
+    report = f"Commit: `{COMMIT}`\n"
+    assert provenance.check_ablation_report(report, _ablation_payload(), report) == []
+
+
+def test_ablation_report_with_mismatched_commit_fails() -> None:
+    report = f"Commit: `{OTHER}`\n"
+    failures = provenance.check_ablation_report(report, _ablation_payload(), report)
+    assert failures and "vision_refresh.md" in failures[0]
+
+
+def test_ablation_report_without_commit_fails() -> None:
+    assert provenance.check_ablation_report("nothing\n", _ablation_payload(), "nothing\n") != []
+
+
+def test_ablation_report_differing_from_render_fails() -> None:
+    report = f"Commit: `{COMMIT}`\n"
+    assert provenance.check_ablation_report(report, _ablation_payload(), report + "x") != []
+
+
+def test_missing_recorded_commit_cannot_be_diffed() -> None:
+    failures, changed = provenance.check_recorded_commit(COMMIT)
+    assert failures and changed is None
+
+
+def test_head_is_its_own_ancestor_with_no_source_change() -> None:
+    head = provenance._git("rev-parse", "HEAD").stdout.strip()
+    assert provenance.check_recorded_commit(head) == ([], [])
+
+
+def test_ablation_directory_is_discovered(tmp_path: Path) -> None:
+    (tmp_path / "ablation").mkdir()
+    (tmp_path / "ablation" / "vision_refresh.json").write_text("{}")
+    (tmp_path / "other").mkdir()
+    assert provenance.ablation_directories(tmp_path) == [tmp_path / "ablation"]
+
+
+def test_ablation_with_invalid_commit_fails(tmp_path: Path) -> None:
+    (tmp_path / "vision_refresh.json").write_text(json.dumps(_ablation_payload("short")))
+    assert provenance.check_ablation_directory(tmp_path).failures
