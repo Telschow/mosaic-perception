@@ -401,6 +401,33 @@ def test_cross_modal_observation_not_forced_onto_wrong_track():
     assert tracker.tracks["near_off"].hits == 0
 
 
+def test_assignment_maximises_gated_pairs_before_minimising_total_cost():
+    from mosaic_perception.tracking.association import GatedHungarianAssociator
+    from mosaic_perception.tracking.ekf import ExtendedKalmanFilter
+
+    def at_bearing(track_id: str, bearing: float):
+        position = (10.0 * float(np.cos(bearing)), 10.0 * float(np.sin(bearing)))
+        return _confirmed_track(track_id, position, 1e-6)
+
+    # Squared Mahalanobis distances (vision variance 2.5e-5, gate 3.84):
+    # a-v1 0.04, a-v2 3.24, b-v1 1.44, b-v2 10.24 (outside the gate).
+    # Lowest total cost alone would be {a: v1} (0.04); the assignment instead keeps
+    # both gated pairs {a: v2, b: v1} (4.68).
+    tracks = [at_bearing("a", 0.0), at_bearing("b", -0.007)]
+    observations = [
+        vision_observation("v1", bearing=-0.001),
+        vision_observation("v2", bearing=0.009),
+    ]
+    result = GatedHungarianAssociator().associate(
+        tracks, observations, ExtendedKalmanFilter(dt=0.1)
+    )
+    assert {track_id: obs.observation_id for track_id, obs in result.matches.items()} == {
+        "a": "v2",
+        "b": "v1",
+    }
+    assert result.unmatched == []
+
+
 def test_gate_lookup_has_no_dimensionless_fallback():
     import pytest
 
