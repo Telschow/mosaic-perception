@@ -24,7 +24,8 @@ in ``benchmark.json`` and ``report.md``. For every other directory:
    report is detectable). ``per_seed.csv`` records no commit and is not checked.
 
 The ablation is a reproducible artifact like the benchmark, not a frozen record: its recorded
-commit must exist, be an ancestor of ``HEAD``, and ``src/`` must be unchanged since; its
+commit must exist, be an ancestor of ``HEAD``, and ``src/`` and
+``scripts/ablate_vision_refresh.py`` must be unchanged since; its
 ``.md`` must record the same commit and equal ``render(vision_refresh.json)``.
 
 Exit code 0 when everything holds, 1 otherwise. Runs in CI on every push and
@@ -46,6 +47,8 @@ from typing import Any
 
 ARTIFACTS = Path("artifacts")
 SOURCE_PATHS = ("src/",)
+# The ablation's numbers also depend on its generating script (seeds, duration, metrics).
+ABLATION_SOURCE_PATHS = (*SOURCE_PATHS, "scripts/ablate_vision_refresh.py")
 FROZEN_FILE = "FROZEN"
 
 
@@ -75,7 +78,11 @@ def check_report_commit(report: str, commit: str) -> list[str]:
 def check_report_render(report: str, payload: dict[str, Any]) -> list[str]:
     from mosaic_perception.reporting import render_report
 
-    if report != render_report(payload):
+    try:
+        rendered = render_report(payload)
+    except (KeyError, TypeError, ValueError) as exc:
+        return [f"benchmark.json cannot be rendered ({type(exc).__name__}: {exc})"]
+    if report != rendered:
         return ["report.md differs from render_report(benchmark.json); regenerate the report"]
     return []
 
@@ -129,8 +136,10 @@ def stale_source_message(changed: list[str], command: str) -> str:
     )
 
 
-def check_recorded_commit(commit: str) -> tuple[list[str], list[str] | None]:
-    """Failures for a recorded source commit, and the ``src/`` files changed since it.
+def check_recorded_commit(
+    commit: str, source_paths: tuple[str, ...] = SOURCE_PATHS
+) -> tuple[list[str], list[str] | None]:
+    """Failures for a recorded source commit, and the ``source_paths`` files changed since it.
 
     The changed list is ``None`` when the commit does not exist, so it cannot be diffed."""
     if _git("cat-file", "-e", f"{commit}^{{commit}}").returncode != 0:
@@ -141,7 +150,7 @@ def check_recorded_commit(commit: str) -> tuple[list[str], list[str] | None]:
             f"recorded commit {commit[:12]} is not an ancestor of HEAD "
             "(artifact generated outside this branch's history)"
         )
-    changed = _git("diff", "--name-only", commit, "HEAD", "--", *SOURCE_PATHS).stdout.split()
+    changed = _git("diff", "--name-only", commit, "HEAD", "--", *source_paths).stdout.split()
     return failures, changed
 
 
@@ -229,7 +238,7 @@ def check_ablation_directory(directory: Path) -> DirectoryResult:
     if not commit or not re.fullmatch(r"[0-9a-f]{40}", commit):
         failures.append(f"ablation records no valid source commit: {commit!r}")
         return result
-    commit_failures, changed = check_recorded_commit(commit)
+    commit_failures, changed = check_recorded_commit(commit, ABLATION_SOURCE_PATHS)
     failures += commit_failures
     if changed:
         failures.append(stale_source_message(changed, "make ablation"))
