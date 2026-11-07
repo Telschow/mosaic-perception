@@ -93,7 +93,7 @@ From `artifacts/benchmark/report.md` (all 16 scenarios, development seeds 0–24
   the other scenarios the difference is inconclusive, and for the 0.12 rad bias the gate
   leaves about 1.3 updates per seed so nothing is learned.
 - One-step-lag retrodiction (`delivery_delay_retrodiction`): better range-only position accuracy
-  (RMSE 0.320 to 0.277 m; fused gets worse, 0.315 to 0.328 m) and better consistency than
+  (RMSE 0.320 to 0.277 m; no clear change for fused, 0.315 to 0.328 m, seed-paired 95% interval from `per_seed.csv` includes zero) and better consistency than
   `delivery_delay` (position NEES per DOF 5.24 to 1.90 range-only, 11.79 to 2.93 fused) but
   worse identity switches (7.7 to 9.9 and 4.6 to 11.2) and MOTA (0.713 to 0.630 and 0.505
   to 0.360). The cause is not diagnosed; association still
