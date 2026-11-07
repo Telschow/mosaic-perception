@@ -3,9 +3,10 @@
 **Q: Why can fusion make the result worse?**
 A: Poor association, miscalibrated uncertainty, dropouts, disagreement between
 sensors, timing effects, false alarms or bad initialization can corrupt fused
-estimates. In the current development benchmark, fused accuracy is often
-slightly better, but fused precision is lower in every scenario with defined
-precision; accuracy alone does not prove that fusion improved the tracker.
+estimates. In the current development benchmark, fused position RMSE is better
+in 1 scenario and worse in 6 (inconclusive in the rest, and the tally depends on the
+matcher), while fused track-sample purity is lower in 14 of the 15 scenarios where it is
+defined; accuracy alone would not show whether fusion improved the tracker.
 
 **Q: What is the range-only baseline?**
 A: The method identifier is `range_only`, but it now means "range-bearing sensor

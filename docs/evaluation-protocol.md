@@ -32,8 +32,8 @@ quality or uncertainty calibration, and when it does not.
 
 Development results include choices made while repairing the code. They are
 useful for debugging and regression detection, not for a confirmatory claim.
-A future release should run the reserved seeds once, after the code and
-protocol are frozen, and report them separately.
+The reserved seeds were run once, after the code and protocol were frozen, and
+are reported separately in `artifacts/held-out/`.
 
 ## Paired design
 

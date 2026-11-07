@@ -127,21 +127,37 @@
   - **Process noise under a split replay.** The noise model is discrete white-noise
     acceleration, `Q(t) = q·[[t⁴/4, t³/2], [t³/2, t²]]` per axis, evaluated independently
     for each sub-interval. This amounts to a fresh, independent acceleration draw in every
-    sub-interval. Splitting one epoch at an observation's capture time therefore injects
-    less process noise than the single nominal step: for `dt = 0.1 s` split at `0.05 s`,
+    sub-interval. Splitting one epoch at an observation's capture time therefore adds less
+    process variance than the single nominal step: for `dt = 0.1 s` split at `0.05 s`,
     the replayed covariance carries 62.5% of the nominal step's added position variance and
-    50% of its velocity variance (at `0.02 s` / `0.08 s`: 54% and 68%). The retrodiction
-    path is thus somewhat overconfident relative to the nominal path, and the amount
-    depends on when observations arrive. A continuous-time model with a fixed spectral
-    density would compose exactly instead. This is pinned by
-    `test_split_replay_process_noise_is_the_independent_per_interval_model`; changing the
-    model would move the `delivery_delay_retrodiction` numbers and needs its own decision.
-    It affects only the opt-in retrodiction path.
+    50% of its velocity variance (at `0.02 s` / `0.08 s`: 54% and 68%). Per axis the
+    shortfall is `Q(a+b) − [F(b)Q(a)F(b)ᵀ + Q(b)] = q·ab·[[b(a+2b)/2, (a+3b)/2], [(a+3b)/2, 2]]`.
+    That matrix is indefinite (determinant `−q²a²b²(a+b)²/4`), so the split covariance is
+    smaller on the diagonal but not smaller in every direction. It is not uniformly
+    overconfident. The size of the effect depends on where in the epoch the capture time
+    falls. A continuous-time model with a fixed spectral density would compose exactly.
+    Holding one acceleration draw over the whole epoch would also compose exactly. This is
+    pinned by `test_split_replay_process_noise_is_the_independent_per_interval_model`.
+    **The benchmark never splits an epoch.** Every simulated sensor stamps its capture time
+    on the epoch grid, so a delayed observation's capture time equals the start of the
+    stored epoch. The replay then predicts over `0` and `dt`, which is the nominal `Q(dt)`.
+    The published `delivery_delay_retrodiction` numbers therefore do not exercise the split.
+    Only off-grid captures, so far only in unit tests, are affected. Switching to the
+    continuous model would still move every scenario's numbers, through `Q(dt)` itself, and
+    needs its own decision.
+  - **Retrodiction is exact only within the stored epoch.** Staleness is judged on latency
+    (delivery − capture ≤ `dt` + 1e-6 s), not on processing time. An admitted observation
+    can therefore be processed two epochs after capture. This happens when an off-grid
+    capture is delivered after the next tick, or, on the benchmark grid, when a delay falls
+    in the 1e-6 s tolerance above `dt` (about one observation in 10⁶ under the
+    `0.05 ± 0.02 s` delays). Its capture time is then earlier than the stored posterior, and
+    the replay clamps the interval to zero. The update is applied at the start of the stored
+    epoch rather than at the true capture time.
   - Measured on the benchmark (`delivery_delay` against `delivery_delay_retrodiction`,
-    same delays): retrodiction improves range-only headline RMSE (0.308 to 0.283 m) but not fused
-    (0.329 to 0.335 m, slightly worse), and improves distance-only RMSE (0.285 to 0.252 and
-    0.268 to 0.251) and position NEES per DOF (4.9 to 1.9 and 11.3 to 3.3) but worsens identity switches (6.9 to 11.1
-    range-only, 5.1 to 13.0 fused) and MOTA (0.708 to 0.636 and 0.437 to 0.349). The
+    same delays): retrodiction improves range-only headline RMSE (0.320 to 0.277 m) but not fused
+    (0.315 to 0.328 m, worse), and improves distance-only RMSE (0.294 to 0.249 and
+    0.261 to 0.247) and position NEES per DOF (5.24 to 1.90 and 11.79 to 2.93) but worsens identity switches (7.7 to 9.9
+    range-only, 4.6 to 11.2 fused) and MOTA (0.713 to 0.630 and 0.505 to 0.360). The
     cause has not been diagnosed; gating delayed observations against the delivery-time
     state is one candidate, and nothing here shows retrodiction is better overall.
 - Processing occurs on the discrete tracker epoch grid. Mean age of information
@@ -193,7 +209,8 @@
   scenarios (`nominal`, the four `sensor_disagreement_*` and `vision_dropout`), so the
   same baseline is counted repeatedly, and scenarios with no matched
   samples (`stale_rejection`) are left out of every count. Only the report's
-  Bonferroni-adjusted tally for precision, MOTA and GOSPA corrects for 16 scenarios;
+  Bonferroni-adjusted tally for precision, MOTA and GOSPA corrects for the scenarios
+  scored for each metric (15 for precision, 16 for MOTA and GOSPA);
   the other tallies (position RMSE, NEES, the extra comparisons) and the 95% intervals
   in the tables are unadjusted. Read the unadjusted tallies as descriptive counts, not
   as tests, and the adjusted one as conditional on the dependence above.

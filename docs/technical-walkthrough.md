@@ -92,10 +92,11 @@ From `artifacts/benchmark/report.md` (all 16 scenarios, development seeds 0–24
   Association quality stays below range-only (precision about 0.67 against 0.826); in
   the other scenarios the difference is inconclusive, and for the 0.12 rad bias the gate
   leaves about 1.3 updates per seed so nothing is learned.
-- One-step-lag retrodiction (`delivery_delay_retrodiction`): better position accuracy and
-  consistency than `delivery_delay` (position NEES per DOF 4.9 to 1.9 range-only, 11.3
-  to 3.3 fused) but worse identity switches (6.9 to 11.1 and 5.1 to 13.0) and MOTA
-  (0.708 to 0.636 and 0.437 to 0.349). The cause is not diagnosed; association still
+- One-step-lag retrodiction (`delivery_delay_retrodiction`): better range-only position accuracy
+  (RMSE 0.320 to 0.277 m; fused gets worse, 0.315 to 0.328 m) and better consistency than
+  `delivery_delay` (position NEES per DOF 5.24 to 1.90 range-only, 11.79 to 2.93 fused) but
+  worse identity switches (7.7 to 9.9 and 4.6 to 11.2) and MOTA (0.713 to 0.630 and 0.505
+  to 0.360). The cause is not diagnosed; association still
   gates delayed observations against the delivery-time state.
 - **Large bias, rejected by the gate vs. smaller bias, fused.**
   `sensor_disagreement_large_bias` (0.12 rad) shows the gate working: ~265 of

@@ -3,7 +3,7 @@
 **A reproducible workbench for multi-sensor perception, object tracking and uncertainty.**
 
 <p align="center">
-  <a href="https://telschow.github.io/mosaic-perception/#watch-the-explainer"><img src="docs-site/src/assets/generated/hook_video_poster.png" alt="Frame from a 44-second explainer video of a synthetic world (dense_clutter, development seeds 0-24): one real object follows a dashed path, and with a camera added the tracker draws many extra ghost lines away from it. Of every 100 tracks reported, 82 were the real object with one sensor and 34 with the camera added." width="340"></a>
+  <a href="https://telschow.github.io/mosaic-perception/#watch-the-explainer"><img src="docs-site/src/assets/generated/hook_video_poster.png" alt="Frame from a 44-second explainer video of a synthetic world (dense_clutter, development seeds 0-24): one real object follows a dashed path, and with a camera added the tracker draws many extra ghost lines away from it. Of every 100 reported track positions, 82 were on the real object with one sensor and 34 with the camera added." width="340"></a>
 </p>
 
 <p align="center"><em>Watch the 44-second explainer on the <a href="https://telschow.github.io/mosaic-perception/#watch-the-explainer">project site</a>. Synthetic world, one drawn run; the two figures are the benchmark means over the 25 development seeds.</em></p>
@@ -36,7 +36,7 @@ CI runs the locked sync and test suite on every push to `main` and every pull re
 
 ### What the evidence shows, and what it does not
 
-- **Shows, on these synthetic worlds only, for this tracker and its fixed gates:** fused precision, MOTA and GOSPA are worse than range-only in 14 of 16 scenarios in the paired 25-seed comparison (also after a Bonferroni correction across scenarios, applied per metric; the 16 scenarios contain only 11 distinct range-only baselines, so they are not 16 independent results). Position RMSE is inconclusive: under the headline matcher fusion helps in 1 of 15 scenarios and hurts in 6, under a distance-only matcher it helps in 7 and hurts in 3. Position NEES is above its expected value in 28 of 30 scenario-method pairs (seed-level 95% interval excludes the expected 2; overconfident). The bias-estimated method recovers part of fusion's loss in the within-gate bias scenarios but stays below range-only on precision and MOTA. The precision, MOTA and GOSPA losses largely vanish when vision is barred from refreshing tracks the range sensor missed (see [the ablation](artifacts/ablation/vision_refresh.md)): they are a property of this tracker design, not of fusion in general. Every figure is in [artifacts/benchmark/report.md](artifacts/benchmark/report.md).
+- **Shows, on these synthetic worlds only, for this tracker and its fixed gates:** fused precision, MOTA and GOSPA are worse than range-only in 14 of 16 scenarios in the paired 25-seed comparison (also after a Bonferroni correction across scenarios, applied per metric; the 16 scenarios contain only 11 distinct range-only baselines, so they are not 16 independent results). Position RMSE is inconclusive: under the headline matcher fusion helps in 1 of 15 scenarios and hurts in 6, under a distance-only matcher it helps in 7 and hurts in 3. Position NEES is above its expected value in 28 of 30 scenario-method pairs (seed-level 95% interval excludes the expected 2; overconfident). The bias-estimated method recovers part of fusion's loss in the within-gate bias scenarios but stays below range-only on precision and MOTA. In the four scenarios ablated, barring vision from refreshing tracks the range sensor missed leaves no clear precision or MOTA loss in three (`nominal`, `dense_clutter`, `vision_dropout`; intervals include zero) and shrinks it in `sensor_disagreement_within_gate` (see [the ablation](artifacts/ablation/vision_refresh.md)): in this tracker they come mostly from that design choice, not from fusion as such. Every figure is in [artifacts/benchmark/report.md](artifacts/benchmark/report.md).
 - **Does not show:** real-world or hardware performance. A held-out run exists (seeds 25-49, run once at `8baa778`); no claim is made beyond its [report](artifacts/held-out/report.md), and it was produced by an earlier tracker version than the development benchmark.
 
 ## What is implemented
@@ -225,11 +225,11 @@ Headline observations from the current development benchmark:
   gate leaves about 1.3 updates per seed, so nothing is learned. The estimator
   assumes a constant bias and an unbiased range-bearing sensor.
 - **One-step-lag retrodiction** (`delivery_delay_retrodiction`, same delays as
-  `delivery_delay`): it improves range-only position accuracy (RMSE 0.308
-  to 0.283 m) but not fused (0.329 to 0.335 m, slightly worse), and improves distance-only RMSE (0.285 to
-  0.252 and 0.268 to 0.251) and consistency (position NEES per DOF 4.9 to 1.9 and 11.3 to 3.3)
-  but makes identity switches and MOTA worse (switches 6.9 to 11.1 range-only
-  and 5.1 to 13.0 fused; MOTA 0.708 to 0.636 and 0.437 to 0.349). The cause has not
+  `delivery_delay`): it improves range-only position accuracy (RMSE 0.320
+  to 0.277 m) but not fused (0.315 to 0.328 m, worse), and improves distance-only RMSE (0.294 to
+  0.249 and 0.261 to 0.247) and consistency (position NEES per DOF 5.24 to 1.90 and 11.79 to 2.93)
+  but makes identity switches and MOTA worse (switches 7.7 to 9.9 range-only
+  and 4.6 to 11.2 fused; MOTA 0.713 to 0.630 and 0.505 to 0.360). The cause has not
   been diagnosed; association still gates delayed observations against the
   delivery-time state, which is one candidate.
 - `crossing_targets` (one crossing of three targets) and `dense_clutter` are
